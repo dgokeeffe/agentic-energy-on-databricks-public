@@ -88,9 +88,25 @@ independent jobs. Three rules keep that true:
    run IDs are workspace-unique, so concurrent runs from different identities
    cannot overwrite each other's evidence.
 
-Each deploying identity needs `WRITE VOLUME` on the landing Volume. Grant it to
-a group containing the developers (or their service principals) rather than
-per-identity.
+Each deploying identity needs `WRITE_VOLUME` on the landing Volume:
+
+```bash
+scripts/grant-workshop-access.sh <principal> [<principal> ...]   # deployers
+scripts/grant-workshop-access.sh --readers <participant-group>    # read-only
+```
+
+The script grants the whole `USE_CATALOG` → `USE_SCHEMA` → `READ/WRITE_VOLUME`
+chain and verifies it, because a missing *parent* grant surfaces at run time as a
+permission error on the Volume path and reads like a Volume-grant problem.
+
+Two traps when granting to a fleet:
+
+- **Service principals are not members of `account users`.** A catalog grant to
+  `account users` does not cover app or job service principals; name them
+  explicitly or put them in an account-level group.
+- **Unity Catalog cannot grant to a workspace-local group.** Creating one
+  through the workspace SCIM API succeeds, and then every grant fails with
+  `Could not find principal with name <group>`. Use an account-level group.
 
 The per-developer jobs are disposable. The durable evidence of a run is the
 immutable manifest under the Volume, not the job or its run history.
