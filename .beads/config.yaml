@@ -1,0 +1,5 @@
+# Public participant Beads configuration.
+# The local Dolt database is created by scripts/bootstrap-participant-beads.sh.
+# Do not commit the generated embedded database; use the configured public
+# Beads remote for team synchronization.
+issue-prefix: agentic-energy

@@ -1,0 +1,6 @@
+{"region":"NSW1","interval_datetime":"2024-04-07T10:00:00","demand_mw":8200,"price_per_mwh":72.5,"ingestion_sequence":1}
+{"region":"NSW1","interval_datetime":"2024-04-07T10:00:00","demand_mw":8250,"price_per_mwh":70.0,"ingestion_sequence":2}
+{"region":"VIC1","interval_datetime":"2024-04-07T10:30:00","demand_mw":5100,"price_per_mwh":65.0,"ingestion_sequence":1}
+{"region":"QLD1","interval_datetime":"2024-04-07T11:00:00","demand_mw":-1,"price_per_mwh":80.0,"ingestion_sequence":1}
+{"region":"NSW1","interval_datetime":"2024-04-07T11:30:00","demand_mw":8300,"price_per_mwh":null,"ingestion_sequence":1}
+{"region":"NSW1","interval_datetime":"2024-01-15T10:00:00","demand_mw":8100,"price_per_mwh":68.0,"ingestion_sequence":1}

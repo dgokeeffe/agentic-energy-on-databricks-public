@@ -1,0 +1,39 @@
+
+# Beads / Dolt files (added by bd init)
+.dolt/
+*.db
+.beads-credential-key
+.beads/proxieddb/
+
+# Python/local pipeline artifacts
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+output/
+dist/
+build/
+uv.lock
+
+# Local agent/session artifacts and environment secrets
+.pi-subagents/
+.beads/*
+!.beads/README.md
+!.beads/config.yaml
+!.beads/formulas/
+!.beads/formulas/*
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+.DS_Store
+
+# Local agent/tooling configuration is not part of the public participant repo
+.agents/
+.claude/
+.codex/
+.pi-subagents/
