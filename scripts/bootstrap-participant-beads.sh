@@ -24,6 +24,14 @@ if [ -n "${BEADS_DOLT_REMOTE:-}" ]; then
 fi
 bd init "${init_args[@]}"
 
+# A public Dolt remote may already contain the participant graph. Do not seed
+# duplicate issues when a participant clones the repository later.
+if bd list --all --limit=1 --flat --no-pager | grep -q '^agentic-energy-'; then
+  echo "Participant Beads loaded from the configured remote."
+  bd ready
+  exit 0
+fi
+
 create_issue() {
   local title="$1"
   local issue_type="$2"
