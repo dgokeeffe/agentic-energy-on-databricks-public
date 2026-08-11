@@ -3,8 +3,11 @@ resources:
     agentic_energy_etl:
       name: "[${bundle.target}] Agentic Energy ETL"
       max_concurrent_runs: 1
-      run_as:
-        service_principal_name: ${var.runtime_service_principal}
+      # run_as is set per target, not here. Pinning one service principal made the
+      # job undeployable by anyone else: binding an SP into run_as requires the
+      # servicePrincipal.user role on it, so every developer except that SP got
+      # 403 PERMISSION_DENIED from jobs/create. dev deploys run as whoever
+      # deploys them; only the shared workshop target pins the ETL SP.
       permissions:
         - level: CAN_MANAGE_RUN
           group_name: ${var.participant_group}

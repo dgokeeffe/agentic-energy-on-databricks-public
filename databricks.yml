@@ -21,7 +21,11 @@ variables:
   landing_volume:
     description: Pre-created Unity Catalog Volume name for immutable run outputs
   runtime_service_principal:
-    description: Service principal that owns ETL job execution and Volume writes
+    description: >-
+      Service principal that owns ETL job execution and Volume writes in the
+      shared workshop target. Unused by dev, which runs as the deploying
+      identity, so it is optional there.
+    default: ""
   participant_group:
     description: Group allowed to view and run the workshop job
   facilitator_group:
@@ -31,10 +35,22 @@ variables:
 # variables or --var. No workspace, catalog, schema, or principal is committed.
 # DATABRICKS_HOST is intentionally supplied by the authenticated CLI/CI
 # environment because bundle interpolation is not supported for auth fields.
+# Concurrency model: `dev` is per-developer, not shared. mode: development
+# already namespaces everything by the deploying identity — the job is named
+# "[dev <identity>] …" and bundle files land in
+# /Workspace/Users/<identity>/.bundle/agentic-energy/dev — so N developers
+# deploying at once get N independent jobs and cannot overwrite each other.
+# Combined with run_as defaulting to the deployer, no developer needs rights
+# over anyone else's identity. Run outputs are keyed by the globally unique
+# {{job.run_id}}, so the shared landing Volume needs no per-developer path.
 targets:
   dev:
     default: true
     mode: development
+    # No run_as: the job runs as whoever deploys it. This is what makes the
+    # target safe for many developers at once.
 
   workshop:
     mode: production
+    run_as:
+      service_principal_name: ${var.runtime_service_principal}

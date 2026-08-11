@@ -36,9 +36,11 @@ export DATABRICKS_HOST="https://<workspace-host>"
 export BUNDLE_VAR_catalog="<catalog>"
 export BUNDLE_VAR_schema="<schema>"
 export BUNDLE_VAR_landing_volume="agentic_energy_landing"
-export BUNDLE_VAR_runtime_service_principal="<etl-service-principal-application-id>"
 export BUNDLE_VAR_participant_group="<participant-group>"
 export BUNDLE_VAR_facilitator_group="<facilitator-group>"
+
+# workshop target only — dev runs as the deploying identity
+export BUNDLE_VAR_runtime_service_principal="<etl-service-principal-application-id>"
 ```
 
 `.env.example` documents the names but is intentionally not loaded
@@ -55,6 +57,43 @@ rm -rf dist && uv build --wheel --out-dir dist
 
 The local default is deterministic fixture mode and does not require a
 workspace, network, or credentials.
+
+## Many developers at once
+
+`dev` is a per-developer target, not a shared one. `mode: development` namespaces
+every deployment by the deploying identity:
+
+- the job is named `[dev <identity>] [dev] Agentic Energy ETL`
+- bundle files and deployment state live under
+  `/Workspace/Users/<identity>/.bundle/agentic-energy/dev`
+
+So N developers can run `./scripts/deploy.sh dev` simultaneously and get N
+independent jobs. Three rules keep that true:
+
+1. **`dev` must not pin `run_as`.** Binding a service principal into `run_as`
+   requires the `servicePrincipal.user` role on it, so a pinned SP makes the
+   target deployable by exactly one identity — everyone else gets
+   `Cannot bind the service principal provided in 'run_as' field ... (403
+   PERMISSION_DENIED)` from `jobs/create`. Only the shared `workshop` target
+   pins the ETL SP, and only a facilitator deploys that.
+2. **Never share a working directory between identities.** The CLI caches
+   deployment state (bundle lineage and created resource IDs) in local
+   `.databricks/`. Two identities deploying from the *same* directory makes the
+   second one adopt and rename the first one's job instead of creating its own,
+   and the first then loses `CAN_MANAGE` on it. One clone per developer; if a
+   directory is ever copied between people, delete `.databricks/` first. The
+   directory self-ignores (`.databricks/.gitignore` contains `*`), so it is
+   never committed or synced.
+3. **Outputs are keyed by `{{job.run_id}}`.** The landing Volume is shared, and
+   run IDs are workspace-unique, so concurrent runs from different identities
+   cannot overwrite each other's evidence.
+
+Each deploying identity needs `WRITE VOLUME` on the landing Volume. Grant it to
+a group containing the developers (or their service principals) rather than
+per-identity.
+
+The per-developer jobs are disposable. The durable evidence of a run is the
+immutable manifest under the Volume, not the job or its run history.
 
 ## Deploy to development
 

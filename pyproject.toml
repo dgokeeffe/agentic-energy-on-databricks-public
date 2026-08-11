@@ -11,7 +11,10 @@ requires-python = ">=3.10"
 dependencies = ["tzdata; sys_platform == 'win32'"]
 
 [project.optional-dependencies]
-test = ["pytest>=8.0"]
+# pyyaml is test-only: the bundle contract tests parse databricks.yml so that a
+# change which breaks concurrent deploys fails offline instead of in a
+# workspace. It is not a runtime dependency of the wheel.
+test = ["pytest>=8.0", "pyyaml>=6.0"]
 
 [project.scripts]
 agentic-energy = "agentic_energy.cli:main"

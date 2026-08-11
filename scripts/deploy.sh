@@ -18,9 +18,15 @@ esac
 : "${BUNDLE_VAR_catalog:?Set BUNDLE_VAR_catalog}"
 : "${BUNDLE_VAR_schema:?Set BUNDLE_VAR_schema}"
 : "${BUNDLE_VAR_landing_volume:?Set BUNDLE_VAR_landing_volume}"
-: "${BUNDLE_VAR_runtime_service_principal:?Set BUNDLE_VAR_runtime_service_principal}"
 : "${BUNDLE_VAR_participant_group:?Set BUNDLE_VAR_participant_group}"
 : "${BUNDLE_VAR_facilitator_group:?Set BUNDLE_VAR_facilitator_group}"
+
+# Only the shared workshop target pins run_as to the ETL service principal. dev
+# runs as the deploying identity so any number of developers can deploy their
+# own copy without holding the servicePrincipal.user role on a shared SP.
+if [ "$TARGET" = "workshop" ]; then
+  : "${BUNDLE_VAR_runtime_service_principal:?Set BUNDLE_VAR_runtime_service_principal for the workshop target}"
+fi
 
 # The bundle declares engine: direct. Keep validation and deployment together so
 # participants do not need to understand Terraform state or workspace uploads.
