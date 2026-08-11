@@ -279,3 +279,52 @@ def test_live_metadata_path_uses_generic_pipeline(monkeypatch, tmp_path):
     assert gold[0]["price_per_mwh"] == 123.45
     assert gold[0]["temperature_c"] == 24.5
     assert gold[0]["lineage"]["market"]["source_file"].endswith("PUBLIC_DISPATCHIS_test.zip")
+
+
+def test_fixture_mode_uses_declared_ingestion_timestamp(tmp_path):
+    """The scored baseline must stay reproducible, so no wall clock in fixture mode."""
+    out = tmp_path / "fixture"
+    run_pipeline(output_dir=out)
+    manifest = json.loads((out / "manifest.json").read_text())
+    assert manifest["pipeline_ingested_at"] == "2024-04-07T00:00:00Z"
+    bronze = lines(out / "bronze/aemo_dispatch_fixture.jsonl")
+    assert {row["_ingested_at"] for row in bronze} == {"2024-04-07T00:00:00Z"}
+
+
+def test_live_mode_stamps_the_real_ingestion_instant(monkeypatch, tmp_path):
+    """Live freshness must be real.
+
+    Reusing the contract's fixed timestamp made a live run claim it ingested data
+    on 2024-04-07 seconds after fetching it, silently invalidating every freshness
+    and lineage marker. Freshness is part of the acceptance gate, and
+    stale-by-construction freshness is worse than none because it looks
+    authoritative.
+
+    Uses the packaged fixture contract so no network access is needed: `--mode live`
+    permits fixture-backed sources, and the clock is what is under test.
+    """
+    from datetime import datetime, timezone
+
+    fixed = datetime(2026, 8, 12, 3, 4, 5, tzinfo=timezone.utc)
+
+    class _Clock(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return fixed
+
+    monkeypatch.setattr(pipeline_module, "datetime", _Clock)
+
+    out = tmp_path / "live"
+    run_pipeline(output_dir=out, mode="live")
+
+    manifest = json.loads((out / "manifest.json").read_text())
+    assert manifest["mode"] == "live"
+    assert manifest["pipeline_ingested_at"] == "2026-08-12T03:04:05Z"
+    assert manifest["pipeline_ingested_at"] != "2024-04-07T00:00:00Z"
+
+    bronze = lines(out / "bronze/aemo_dispatch_fixture.jsonl")
+    assert {row["_ingested_at"] for row in bronze} == {"2026-08-12T03:04:05Z"}
+    gold = lines(out / "gold/market_weather.jsonl")
+    assert {row["freshness"]["pipeline_ingested_at"] for row in gold} == {
+        "2026-08-12T03:04:05Z"
+    }

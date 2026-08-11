@@ -224,6 +224,25 @@ def run_pipeline(
     return counts
 
 
+def _ingestion_timestamp(metadata: dict, mode: str) -> str:
+    """Resolve the run's ingestion instant.
+
+    Fixture mode uses the timestamp declared in the metadata contract, because
+    the scored baseline must be byte-for-byte reproducible on replay — a wall
+    clock there would break determinism.
+
+    Live mode must use the real instant. Reusing the contract's fixed timestamp
+    made a live run report ``pipeline_ingested_at`` and ``_ingested_at`` of
+    2024-04-07 for data fetched seconds earlier, so every freshness marker and
+    piece of lineage evidence was wrong by years. Freshness is part of the
+    acceptance gate, and stale-by-construction freshness is worse than none: it
+    looks authoritative.
+    """
+    if mode == "live":
+        return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    return metadata["pipeline_ingestion_timestamp"]
+
+
 def _run_pipeline_in_place(
     metadata_path: Path,
     output_dir: Path,
@@ -261,7 +280,8 @@ def _run_pipeline_in_place(
     sources = {source["source_id"]: source for source in metadata["sources"]}
     bronze, quarantine, silver_by_source = [], [], {}
     source_reconciliation: dict[str, dict[str, int]] = {}
-    rejection_at = metadata["pipeline_ingestion_timestamp"]
+    ingested_at = _ingestion_timestamp(metadata, mode)
+    rejection_at = ingested_at
 
     for source in metadata["sources"]:
         source_id = source["source_id"]
@@ -272,7 +292,7 @@ def _run_pipeline_in_place(
         for row_number, raw_line, row, parse_error, source_file in _source_rows(source, root):
             raw_rows.append({"source_id": source_id, "source_file": source_file,
                              "source_row_number": row_number, "raw_line": raw_line,
-                             "raw_record": row, "_ingested_at": metadata["pipeline_ingestion_timestamp"]})
+                             "raw_record": row, "_ingested_at": ingested_at})
             reasons = [parse_error] if parse_error else []
             raw_record = row
             if not isinstance(row, dict):
@@ -369,7 +389,7 @@ def _run_pipeline_in_place(
         gold.append({"region": market["region"], "interval_utc": market["interval_utc"],
                      "demand_mw": market["demand_mw"], "price_per_mwh": market["price_per_mwh"],
                      "temperature_c": weather_row["temperature_c"] if weather_row else None,
-                     "freshness": {"pipeline_ingested_at": metadata["pipeline_ingestion_timestamp"],
+                     "freshness": {"pipeline_ingested_at": ingested_at,
                                    "latest_event_utc": market["interval_utc"]},
                      "lineage": {"market": market["lineage"],
                                  "weather": weather_row["lineage"] if weather_row else None,
@@ -380,7 +400,7 @@ def _run_pipeline_in_place(
                             "quarantine": len(quarantine), "gold": len(gold)},
                 "source_definitions": {"read": len(source_ids), "selected": len(metadata["sources"])},
                 "sources": {source_id: source_reconciliation[source_id] for source_id in sorted(source_reconciliation)},
-                "source_ids": sorted(sources), "pipeline_ingested_at": metadata["pipeline_ingestion_timestamp"],
+                "source_ids": sorted(sources), "pipeline_ingested_at": ingested_at,
                 "metadata_sha256": metadata_hash}
     if run_id is not None:
         manifest["run_id"] = run_id
