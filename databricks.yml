@@ -27,7 +27,7 @@ variables:
   facilitator_group:
     description: Group allowed to manage the workshop job
 
-# Values are intentionally supplied through DATABRICKS_BUNDLE_VAR_* environment
+# Values are intentionally supplied through BUNDLE_VAR_* environment
 # variables or --var. No workspace, catalog, schema, or principal is committed.
 # DATABRICKS_HOST is intentionally supplied by the authenticated CLI/CI
 # environment because bundle interpolation is not supported for auth fields.

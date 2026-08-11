@@ -27,16 +27,18 @@ Authenticate outside the repository. Do not put tokens in `.env` or Git:
 databricks auth login --host https://<workspace-host>
 ```
 
-Set the required bundle variables in the shell or CI secret store:
+Set the required bundle variables in the shell or CI secret store. The
+Databricks CLI reads bundle variables from `BUNDLE_VAR_<name>` — the
+`DATABRICKS_` prefix is **not** recognised and leaves every variable unassigned:
 
 ```bash
 export DATABRICKS_HOST="https://<workspace-host>"
-export DATABRICKS_BUNDLE_VAR_catalog="<catalog>"
-export DATABRICKS_BUNDLE_VAR_schema="<schema>"
-export DATABRICKS_BUNDLE_VAR_landing_volume="agentic_energy_landing"
-export DATABRICKS_BUNDLE_VAR_runtime_service_principal="<etl-service-principal-application-id>"
-export DATABRICKS_BUNDLE_VAR_participant_group="<participant-group>"
-export DATABRICKS_BUNDLE_VAR_facilitator_group="<facilitator-group>"
+export BUNDLE_VAR_catalog="<catalog>"
+export BUNDLE_VAR_schema="<schema>"
+export BUNDLE_VAR_landing_volume="agentic_energy_landing"
+export BUNDLE_VAR_runtime_service_principal="<etl-service-principal-application-id>"
+export BUNDLE_VAR_participant_group="<participant-group>"
+export BUNDLE_VAR_facilitator_group="<facilitator-group>"
 ```
 
 `.env.example` documents the names but is intentionally not loaded

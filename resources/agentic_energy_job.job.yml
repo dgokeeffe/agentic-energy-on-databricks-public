@@ -3,7 +3,6 @@ resources:
     agentic_energy_etl:
       name: "[${bundle.target}] Agentic Energy ETL"
       max_concurrent_runs: 1
-      max_retries: 0
       run_as:
         service_principal_name: ${var.runtime_service_principal}
       permissions:
@@ -19,6 +18,10 @@ resources:
       tasks:
         - task_key: metadata_etl
           environment_key: default
+          # Retries are a task-level setting in the Jobs API. Declaring
+          # max_retries on the job is an unknown field: the CLI drops it and
+          # `bundle validate --strict` fails on the resulting warning.
+          max_retries: 0
           python_wheel_task:
             package_name: agentic-energy-on-databricks
             entry_point: main
