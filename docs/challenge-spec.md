@@ -577,14 +577,14 @@ start until the relevant preflight decisions are verified.
 
 ## 16. Stop conditions
 
-### 15.1 Repository stops (this phase)
+### 15.1 Public repository stops
 
-- **Do not create the GitHub repository** if the authenticated principal cannot
-  create under `dgokeeffe`, or if the repository name already exists with
-  unexpected contents or ownership.
-- **Do not publish** if private visibility cannot be guaranteed.
+- **Do not publish** until the public evaluation license and copyright-holder
+  approval are recorded.
 - Stop and remediate if visibility changes, unexpected files appear, secrets
   are detected, the remote target is wrong, or the working tree is not clean.
+- Verify a clean clone can initialize the participant Beads graph and run
+  `bd ready` before sharing the repository.
 
 ### 15.2 Downstream implementation stops (scaffold phase)
 

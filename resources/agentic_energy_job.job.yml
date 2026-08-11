@@ -1,0 +1,52 @@
+resources:
+  jobs:
+    agentic_energy_etl:
+      name: "[${bundle.target}] Agentic Energy ETL"
+      max_concurrent_runs: 1
+      max_retries: 0
+      run_as:
+        service_principal_name: ${var.runtime_service_principal}
+      permissions:
+        - level: CAN_MANAGE_RUN
+          group_name: ${var.participant_group}
+        - level: CAN_MANAGE
+          group_name: ${var.facilitator_group}
+      parameters:
+        - name: metadata_path
+          default: ""
+        - name: metadata_snapshot_id
+          default: ""
+      tasks:
+        - task_key: metadata_etl
+          environment_key: default
+          python_wheel_task:
+            package_name: agentic-energy-on-databricks
+            entry_point: main
+            parameters:
+              - --metadata
+              - "{{job.parameters.metadata_path}}"
+              - --metadata-root
+              - /Volumes/${var.catalog}/${var.schema}/${var.landing_volume}
+              - --metadata-snapshot-id
+              - "{{job.parameters.metadata_snapshot_id}}"
+              - --output
+              - /Volumes/${var.catalog}/${var.schema}/${var.landing_volume}/${bundle.target}/runs/{{job.run_id}}
+              - --run-id
+              - "{{job.run_id}}"
+              # The initial workshop deployment is fixture-only. Live mode
+              # requires a reviewed bundle change and human deployment gate.
+              - --mode
+              - fixture
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "4"
+            dependencies:
+              - ../dist/*.whl
+
+      # Keep this disabled until the facilitator has approved source terms,
+      # identity, storage, and the target workspace preflight.
+      schedule:
+        pause_status: PAUSED
+        quartz_cron_expression: "0 0/30 * * * ?"
+        timezone_id: Australia/Sydney

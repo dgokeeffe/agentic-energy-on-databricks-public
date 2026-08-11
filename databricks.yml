@@ -1,0 +1,40 @@
+bundle:
+  name: agentic-energy
+  # Use the Databricks direct deployment engine. This avoids Terraform state and
+  # keeps participant deployments driven by the bundle itself.
+  engine: direct
+
+include:
+  - resources/*.yml
+
+artifacts:
+  default:
+    type: whl
+    path: .
+    build: rm -rf dist && uv build --wheel --out-dir dist
+
+variables:
+  catalog:
+    description: Unity Catalog catalog for this target
+  schema:
+    description: Unity Catalog schema for this target
+  landing_volume:
+    description: Pre-created Unity Catalog Volume name for immutable run outputs
+  runtime_service_principal:
+    description: Service principal that owns ETL job execution and Volume writes
+  participant_group:
+    description: Group allowed to view and run the workshop job
+  facilitator_group:
+    description: Group allowed to manage the workshop job
+
+# Values are intentionally supplied through DATABRICKS_BUNDLE_VAR_* environment
+# variables or --var. No workspace, catalog, schema, or principal is committed.
+# DATABRICKS_HOST is intentionally supplied by the authenticated CLI/CI
+# environment because bundle interpolation is not supported for auth fields.
+targets:
+  dev:
+    default: true
+    mode: development
+
+  workshop:
+    mode: production

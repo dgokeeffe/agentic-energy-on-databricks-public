@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agentic-energy-on-databricks"
+version = "0.1.0"
+description = "Reusable, metadata-driven energy data foundation for Databricks"
+license = {file = "LICENSE"}
+requires-python = ">=3.10"
+dependencies = ["tzdata; sys_platform == 'win32'"]
+
+[project.optional-dependencies]
+test = ["pytest>=8.0"]
+
+[project.scripts]
+agentic-energy = "agentic_energy.cli:main"
+main = "agentic_energy.cli:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.setuptools.packages.find]
+include = ["agentic_energy*"]
+
+[tool.setuptools.package-data]
+agentic_energy = ["resources/metadata/*.json", "resources/fixtures/*.jsonl"]
