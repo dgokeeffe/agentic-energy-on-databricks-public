@@ -12,8 +12,17 @@ if [ -d .beads/embeddeddolt ]; then
   exit 0
 fi
 
-bd init --init-if-missing --non-interactive --skip-agents --skip-hooks \
+init_args=(
+  --init-if-missing
+  --non-interactive
+  --skip-agents
+  --skip-hooks
   --prefix agentic-energy
+)
+if [ -n "${BEADS_DOLT_REMOTE:-}" ]; then
+  init_args+=(--remote "$BEADS_DOLT_REMOTE")
+fi
+bd init "${init_args[@]}"
 
 create_issue() {
   local title="$1"

@@ -49,7 +49,9 @@ bd ready
 
 The public participant graph contains workshop tasks and bounded seeded defects.
 Organizer-only solution notes, tenant preflight evidence, and private deployment
-records are intentionally not part of this repository.
+records are intentionally not part of this repository. The organizer can set
+`BEADS_DOLT_REMOTE` during bootstrap to seed and synchronize a shared public
+Dolt remote; otherwise the script uses the repository's configured origin.
 
 ## Databricks deployment
 
