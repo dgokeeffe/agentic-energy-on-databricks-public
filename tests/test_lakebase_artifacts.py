@@ -11,7 +11,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SQL = (REPO_ROOT / "resources" / "lakebase" / "control_plane.sql").read_text()
-MIGRATE = (REPO_ROOT / "scripts" / "lakebase_migrate.py").read_text()
+SCRIPT = (REPO_ROOT / "scripts" / "lakebase.py").read_text()
 
 SCHEMA = "agentic_energy"
 
@@ -25,7 +25,7 @@ def tables_in_sql():
 
 
 def tables_in_migrate():
-    block = MIGRATE.split("EXPECTED_TABLES = {", 1)[1].split("}", 1)[0]
+    block = SCRIPT.split("EXPECTED_TABLES = {", 1)[1].split("}", 1)[0]
     return set(re.findall(r'"(\w+)"', block))
 
 
@@ -48,6 +48,6 @@ def test_sql_is_idempotent():
 
 def test_migrate_script_is_self_contained():
     """PEP 723 header: `uv run` supplies psycopg, so it is not a repo dependency."""
-    assert "# /// script" in MIGRATE
-    assert "psycopg" in MIGRATE.split("# ///")[1]
+    assert "# /// script" in SCRIPT
+    assert "psycopg" in SCRIPT.split("# ///")[1]
     assert "psycopg" not in (REPO_ROOT / "pyproject.toml").read_text()
