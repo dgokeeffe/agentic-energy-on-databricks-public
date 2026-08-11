@@ -3,3 +3,5 @@
 # Do not commit the generated embedded database; use the configured public
 # Beads remote for team synchronization.
 issue-prefix: agentic-energy
+sync:
+    remote: "git+https://github.com/dgokeeffe/agentic-energy-on-databricks-public.git"
