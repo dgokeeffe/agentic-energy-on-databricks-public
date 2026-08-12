@@ -13,7 +13,7 @@ import hashlib
 import json
 from datetime import datetime, timezone
 from pathlib import Path
-from zoneinfo import ZoneInfo
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 import math
 import os
 import re
@@ -24,6 +24,18 @@ import uuid
 from .acquisition import acquire_live_dispatchis
 
 UTC = timezone.utc
+# Contract fields the generic worker reads unconditionally for every source, in
+# any extraction mode. They are validated up front so an incomplete contract is
+# rejected before side effects instead of raising KeyError mid-run.
+REQUIRED_SOURCE_FIELDS = (
+    "source_version",
+    "provider",
+    "dataset",
+    "source_timezone",
+    "deduplication_rule",
+    "licensing_provenance",
+)
+SUPPORTED_DEDUPLICATION_RULES = frozenset({"last_by_ingestion_sequence"})
 _PACKAGE_ROOT = Path(__file__).resolve().parent
 DEFAULT_METADATA = _PACKAGE_ROOT / "resources" / "metadata" / "sources.json"
 DEFAULT_LIVE_METADATA = _PACKAGE_ROOT / "resources" / "metadata" / "sources.live.json"
@@ -136,6 +148,16 @@ def _validate_source(source: dict, root: Path) -> Path | None:
     source_id = source.get("source_id")
     if not isinstance(source_id, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*", source_id):
         raise ValueError("INVALID_SOURCE_ID")
+    for field in REQUIRED_SOURCE_FIELDS:
+        value = source.get(field)
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError(f"MISSING_SOURCE_FIELD:{field}")
+    if source["deduplication_rule"] not in SUPPORTED_DEDUPLICATION_RULES:
+        raise ValueError("UNSUPPORTED_DEDUPLICATION_RULE")
+    try:
+        ZoneInfo(source["source_timezone"])
+    except (ZoneInfoNotFoundError, ValueError) as exc:
+        raise ValueError("INVALID_SOURCE_TIMEZONE") from exc
     natural_key = source.get("natural_key")
     if (not isinstance(natural_key, list) or not natural_key or
             any(not isinstance(field, str) or not field for field in natural_key)):
@@ -356,7 +378,10 @@ def _run_pipeline_in_place(
     for source_id in sorted(sources):
         rows = silver_by_source.get(source_id, [])
         source = sources[source_id]
-        if source["deduplication_rule"] != "last_by_ingestion_sequence":
+        # Defence in depth: _validate_source already rejected unsupported rules
+        # before any side effects, so this guards against a future caller that
+        # reaches the worker without validating.
+        if source["deduplication_rule"] not in SUPPORTED_DEDUPLICATION_RULES:
             raise ValueError(f"Unsupported deduplication_rule for {source_id}")
         deduped = {}
         for row in rows:
