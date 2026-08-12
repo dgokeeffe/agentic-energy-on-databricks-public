@@ -155,6 +155,59 @@ The output includes Bronze, Silver, Quarantine, Gold, and `manifest.json`.
 The manifest records the external job run ID when the job is launched by
 Databricks.
 
+## Unity Catalog publication
+
+The Volume run directory is the immutable evidence, but JSONL in a Volume cannot
+be queried or granted, so the job also publishes each run as governed Delta
+tables in the target catalog/schema:
+
+| Table | Grain |
+|---|---|
+| `bronze_records` | one row per acquired raw record, with retrieval lineage |
+| `silver_observations` | typed, timezone-normalized, deduplicated observations |
+| `quarantine_rejections` | rejected records with reason codes |
+| `gold_market_weather` | business-facing projection, one row per region/interval |
+| `run_manifest` | per-run counts, metadata hash, mode, and freshness |
+
+Four properties are deliberate and are covered by tests in
+`tests/test_publish.py`:
+
+1. **Publication never mutates run evidence.** It reads the promoted output
+   directory and only writes to Unity Catalog, so a publication failure cannot
+   corrupt the manifest a run is reconciled against.
+2. **Republishing is idempotent.** Every table carries `run_id`, and publication
+   deletes that run's rows before appending. A retried task does not
+   double-count.
+3. **Counts are reconciled before any write.** If the row count for a layer
+   disagrees with `manifest.json`, the run fails before touching a table rather
+   than publishing misleading numbers.
+4. **Schemas are declared, not inferred.** Tables are created with explicit DDL
+   so a nullable measure cannot land as the wrong type, and a later run cannot
+   silently widen a column under a downstream metric view.
+
+Because `run_manifest` is written last, a run that dies mid-publication is
+absent from `run_manifest` and must not be treated as published. Query current
+state by joining to the latest `run_id`, since the tables accumulate runs:
+
+```sql
+SELECT g.*
+FROM <catalog>.<schema>.gold_market_weather g
+JOIN (SELECT max(run_id) AS run_id FROM <catalog>.<schema>.run_manifest) latest
+  USING (run_id);
+```
+
+Sources stay data, not code: `silver_observations` is one table whose market and
+weather measures are nullable per source, rather than a table per source.
+
+Publication is opt-in at the CLI level (`--publish-catalog` / `--publish-schema`,
+which also require `--run-id`). Without them the local fixture run is unchanged
+and needs no workspace, Spark, or credentials.
+
+The publishing identity needs `USE CATALOG`, `USE SCHEMA`, and `CREATE TABLE` on
+the target schema in addition to the existing `WRITE VOLUME` grant. A missing
+`CREATE TABLE` surfaces at run time, after the Volume evidence has been written
+successfully — the run directory will exist while the tables do not.
+
 The job accepts a metadata contract as a job parameter. With no override it
 uses the fixture contract packaged in the wheel. To run an immutable contract
 snapshot staged in a Volume, pass its path and snapshot ID without rebuilding

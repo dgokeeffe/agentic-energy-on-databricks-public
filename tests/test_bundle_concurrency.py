@@ -83,3 +83,26 @@ def test_run_output_path_is_keyed_by_unique_run_id(job):
         "concurrent deployers share one Volume; only the unique run id keeps "
         "their outputs from colliding"
     )
+
+
+def test_job_publishes_to_the_target_unity_catalog_schema(job):
+    """The deployed run must land governed tables, not just Volume JSONL.
+
+    A Volume of JSONL cannot be queried or granted, so without these the
+    business has nothing to consume.
+    """
+    params = job["tasks"][0]["python_wheel_task"]["parameters"]
+    assert params[params.index("--publish-catalog") + 1] == "${var.catalog}"
+    assert params[params.index("--publish-schema") + 1] == "${var.schema}"
+
+
+def test_published_tables_are_keyed_by_the_same_run_id_as_the_volume(job):
+    """Publication idempotency depends on the run id the outputs are keyed by."""
+    params = job["tasks"][0]["python_wheel_task"]["parameters"]
+    assert params[params.index("--run-id") + 1] == "{{job.run_id}}"
+
+
+def test_deployed_job_stays_in_fixture_mode(job):
+    """Live NEMWEB requires PF-8 authorization and a human deployment gate."""
+    params = job["tasks"][0]["python_wheel_task"]["parameters"]
+    assert params[params.index("--mode") + 1] == "fixture"
