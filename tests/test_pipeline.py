@@ -430,9 +430,29 @@ def test_validation_change_preserves_the_fixture_baseline(tmp_path):
     assert counts == {"bronze": 11, "silver": 6, "quarantine": 3, "gold": 3}
     manifest = json.loads((output / "manifest.json").read_text())
     assert manifest["layers"] == {"bronze": 11, "silver": 6, "quarantine": 3, "gold": 3}
-    assert manifest["sources"]["aemo_dispatch_fixture"] == {
+
+    # This test guards *row accounting*, so it compares only the counting keys.
+    # Asserting equality against the whole per-source dict also froze the set of
+    # manifest keys, which made any added descriptive field (watermark, and the
+    # code/parser version docs/workshop-acceptance.md:166 still requires) fail a
+    # test about counts. Counts are pinned exactly; extra keys are checked below.
+    counting_keys = {"accepted", "bronze", "deduplicated", "quarantine", "silver"}
+
+    def counts_only(source: dict) -> dict:
+        return {k: v for k, v in source.items() if k in counting_keys}
+
+    aemo = manifest["sources"]["aemo_dispatch_fixture"]
+    weather = manifest["sources"]["weather_fixture"]
+    assert counts_only(aemo) == {
         "accepted": 4, "bronze": 6, "deduplicated": 1, "quarantine": 2, "silver": 3
     }
-    assert manifest["sources"]["weather_fixture"] == {
+    assert counts_only(weather) == {
         "accepted": 4, "bronze": 5, "deduplicated": 1, "quarantine": 1, "silver": 3
     }
+    # Every counting key must be present, so a renamed or dropped count still fails.
+    assert counting_keys <= aemo.keys()
+    assert counting_keys <= weather.keys()
+    # Non-counting keys are the declared watermark pair and nothing else, so an
+    # unreviewed manifest addition is still caught here rather than sliding in.
+    assert aemo.keys() - counting_keys == {"watermark", "watermark_field"}
+    assert weather.keys() - counting_keys == {"watermark", "watermark_field"}

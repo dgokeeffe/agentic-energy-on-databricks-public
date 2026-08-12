@@ -41,6 +41,96 @@ DEFAULT_METADATA = _PACKAGE_ROOT / "resources" / "metadata" / "sources.json"
 DEFAULT_LIVE_METADATA = _PACKAGE_ROOT / "resources" / "metadata" / "sources.live.json"
 
 
+# Registry of fields a declared quality check may constrain: field -> (reason code,
+# value kind). Keyed on field name only, so it applies uniformly to whichever source
+# declares the field -- it is deliberately not keyed on source_id or dataset, which
+# would reintroduce source-specific behaviour into the generic worker.
+#
+# The kind supplies a type floor. A declared check such as "temperature_c is not
+# null" only constrains nullness, but a non-numeric measure is still not a usable
+# measurement, so numeric fields must be finite numbers regardless of which check
+# form the contract chose.
+_QUALITY_CHECK_FIELDS = {
+    "demand_mw": ("INVALID_DEMAND", "numeric"),
+    "price_per_mwh": ("MISSING_PRICE", "numeric"),
+    "temperature_c": ("MISSING_TEMPERATURE", "numeric"),
+    "region": ("MISSING_REGION", "string"),
+}
+_QUALITY_CHECK_REASONS = {field: reason for field, (reason, _kind) in _QUALITY_CHECK_FIELDS.items()}
+_NOT_NULL_SUFFIX = " is not null"
+_AT_LEAST_OPERATOR = " >= "
+
+
+def _parse_quality_check(check: str) -> tuple[str, str, float | None]:
+    """Parse one declared quality check into ``(field, operator, bound)``.
+
+    Exactly two forms are supported, by design:
+
+    * ``"<field> is not null"``   -> ``(field, "not_null", None)``
+    * ``"<field> >= <number>"``   -> ``(field, "at_least", number)``
+
+    The contract is data, so it is parsed rather than evaluated: no ``eval``, no
+    boolean operators, no arithmetic. Anything else raises, because a check that
+    is silently ignored is more dangerous than no check at all.
+    """
+    if not isinstance(check, str) or not check.strip():
+        raise ValueError("UNSUPPORTED_QUALITY_CHECK")
+    expression = check.strip()
+    if expression.endswith(_NOT_NULL_SUFFIX):
+        field = expression[: -len(_NOT_NULL_SUFFIX)].strip()
+        operator, bound = "not_null", None
+    elif _AT_LEAST_OPERATOR in expression:
+        field, _, literal = expression.partition(_AT_LEAST_OPERATOR)
+        field = field.strip()
+        try:
+            bound = float(literal.strip())
+        except ValueError as exc:
+            raise ValueError("UNSUPPORTED_QUALITY_CHECK") from exc
+        if not math.isfinite(bound):
+            raise ValueError("UNSUPPORTED_QUALITY_CHECK")
+        operator = "at_least"
+    else:
+        raise ValueError("UNSUPPORTED_QUALITY_CHECK")
+    if field not in _QUALITY_CHECK_FIELDS:
+        raise ValueError("UNSUPPORTED_QUALITY_CHECK")
+    if operator == "at_least" and _QUALITY_CHECK_FIELDS[field][1] != "numeric":
+        raise ValueError("UNSUPPORTED_QUALITY_CHECK")
+    return field, operator, bound
+
+
+def _validate_quality_checks(source: dict) -> list[tuple[str, str, float | None]]:
+    """Parse every declared check for a source, failing fast on anything unsupported."""
+    checks = source.get("quality_checks", [])
+    if not isinstance(checks, list):
+        raise ValueError("UNSUPPORTED_QUALITY_CHECK")
+    return [_parse_quality_check(check) for check in checks]
+
+
+def _quality_check_reasons(row: dict, checks: list[tuple[str, str, float | None]]) -> list[str]:
+    """Reason codes for the declared checks this row violates, in declared order.
+
+    Each field is held to its registered type floor as well as the declared
+    predicate, so a declared nullness check cannot admit a non-numeric measure.
+    Codes are de-duplicated: a field constrained twice is reported once.
+    """
+    reasons = []
+    for field, operator, bound in checks:
+        reason, kind = _QUALITY_CHECK_FIELDS[field]
+        value = row.get(field)
+        if kind == "numeric":
+            failed = (not isinstance(value, (int, float)) or isinstance(value, bool)
+                      or not math.isfinite(value))
+            if not failed and operator == "at_least":
+                failed = value < bound
+        elif operator == "not_null":
+            failed = value is None
+        else:  # pragma: no cover - guarded by _parse_quality_check
+            failed = False
+        if failed and reason not in reasons:
+            reasons.append(reason)
+    return reasons
+
+
 def _reject_json_constant(value: str):
     raise json.JSONDecodeError(f"non-standard JSON constant: {value}", "", 0)
 
@@ -173,6 +263,14 @@ def _validate_source(source: dict, root: Path) -> Path | None:
         field not in allowed_key_fields and field != event_field for field in natural_key
     ):
         raise ValueError("INVALID_NATURAL_KEY")
+    _validate_quality_checks(source)
+    watermark_field = source.get("watermark_field")
+    if not isinstance(watermark_field, str) or not watermark_field:
+        raise ValueError("INVALID_WATERMARK_FIELD")
+    if watermark_field != event_field:
+        # Only the declared event timestamp is normalized to UTC, so it is the one
+        # field a comparable high-water mark can be derived from.
+        raise ValueError("UNSUPPORTED_WATERMARK_FIELD")
     mode = source.get("extraction_mode", "fixture")
     if mode == "live":
         if not isinstance(source.get("url_or_fixture_path"), str) or not source["url_or_fixture_path"].startswith(("http://", "https://")):
@@ -310,6 +408,7 @@ def _run_pipeline_in_place(
         raw_rows = []
         quarantine_before = len(quarantine)
         time_field = source["event_timestamp_field"]
+        declared_checks = _validate_quality_checks(source)
         is_market = source["dataset"] in {"DISPATCH_SCADA", "DISPATCHIS"}
         for row_number, raw_line, row, parse_error, source_file in _source_rows(source, root):
             raw_rows.append({"source_id": source_id, "source_file": source_file,
@@ -328,17 +427,9 @@ def _run_pipeline_in_place(
             sequence = row.get("ingestion_sequence", 0)
             if not isinstance(sequence, int) or isinstance(sequence, bool) or sequence < 0:
                 reasons.append("INVALID_INGESTION_SEQUENCE")
-            if is_market:
-                demand = row.get("demand_mw")
-                price = row.get("price_per_mwh")
-                if not isinstance(demand, (int, float)) or isinstance(demand, bool) or not math.isfinite(demand) or demand < 0:
-                    reasons.append("INVALID_DEMAND")
-                if not isinstance(price, (int, float)) or isinstance(price, bool) or not math.isfinite(price):
-                    reasons.append("MISSING_PRICE")
-            else:
-                temperature = row.get("temperature_c")
-                if not isinstance(temperature, (int, float)) or isinstance(temperature, bool) or not math.isfinite(temperature):
-                    reasons.append("MISSING_TEMPERATURE")
+            for reason in _quality_check_reasons(row, declared_checks):
+                if reason not in reasons:
+                    reasons.append(reason)
             if not row.get(time_field):
                 reasons.append("MISSING_EVENT_TIMESTAMP")
             if not reasons:
@@ -392,6 +483,14 @@ def _run_pipeline_in_place(
         silver_by_source[source_id] = sorted(deduped.values(), key=lambda r: (r["region"], r["interval_utc"]))
         row_counts = source_reconciliation[source_id]
         row_counts["silver"] = len(silver_by_source[source_id])
+        # High-water mark over the declared watermark_field, reported in its
+        # normalized UTC form so it is comparable across sources and runs. None
+        # when nothing survived to Silver, which is distinct from a zero timestamp.
+        row_counts["watermark"] = (
+            max(row["interval_utc"] for row in silver_by_source[source_id])
+            if silver_by_source[source_id] else None
+        )
+        row_counts["watermark_field"] = source["watermark_field"]
         row_counts["deduplicated"] = row_counts["accepted"] - row_counts["silver"]
         if row_counts["bronze"] != row_counts["accepted"] + row_counts["quarantine"]:
             raise RuntimeError(f"BRONZE_RECONCILIATION_FAILED:{source_id}")
