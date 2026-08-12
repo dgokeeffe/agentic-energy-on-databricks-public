@@ -328,3 +328,31 @@ def test_live_mode_stamps_the_real_ingestion_instant(monkeypatch, tmp_path):
     assert {row["freshness"]["pipeline_ingested_at"] for row in gold} == {
         "2026-08-12T03:04:05Z"
     }
+
+
+
+def test_evaluate_quality_check_function():
+    """Test the _evaluate_quality_check function directly."""
+    from agentic_energy.pipeline import _evaluate_quality_check
+    
+    # Test >= operator
+    assert _evaluate_quality_check("demand_mw >= 0", {"demand_mw": 100}) == True
+    assert _evaluate_quality_check("demand_mw >= 0", {"demand_mw": -1}) == False
+    assert _evaluate_quality_check("demand_mw >= 8000", {"demand_mw": 8250}) == True
+    assert _evaluate_quality_check("demand_mw >= 8000", {"demand_mw": 7999}) == False
+    
+    # Test is not null
+    assert _evaluate_quality_check("price_per_mwh is not null", {"price_per_mwh": 70.0}) == True
+    assert _evaluate_quality_check("price_per_mwh is not null", {"price_per_mwh": None}) == False
+    assert _evaluate_quality_check("price_per_mwh is not null", {}) == False
+    
+    # Test is null
+    assert _evaluate_quality_check("temperature_c is null", {"temperature_c": None}) == True
+    assert _evaluate_quality_check("temperature_c is null", {"temperature_c": 25.0}) == False
+    assert _evaluate_quality_check("temperature_c is null", {}) == True
+    
+    # Test other operators
+    assert _evaluate_quality_check("value <= 100", {"value": 50}) == True
+    assert _evaluate_quality_check("value <= 100", {"value": 150}) == False
+    assert _evaluate_quality_check("value > 0", {"value": 1}) == True
+    assert _evaluate_quality_check("value > 0", {"value": -1}) == False

@@ -44,6 +44,57 @@ def _read_jsonl(path: Path):
                 yield row_number, line.rstrip("\n"), None, f"INVALID_JSON:{exc.msg}"
 
 
+def _evaluate_quality_check(check: str, row: dict) -> bool:
+    """Evaluate a simple quality check expression against a row.
+    
+    Supports patterns like:
+      - "field >= 0"
+      - "field is not null"
+      - "field is null"
+    
+    Returns True if the check passes (row is acceptable).
+    """
+    check = check.strip()
+    
+    # Handle "field is not null" / "field is null"
+    if " is not null" in check:
+        field = check.replace(" is not null", "").strip()
+        return field in row and row[field] is not None
+    elif " is null" in check:
+        field = check.replace(" is null", "").strip()
+        return field not in row or row[field] is None
+    
+    # Handle "field op value" patterns (e.g., "demand_mw >= 0")
+    for op in ["<=", ">=", "<", ">", "==", "!="]:
+        if f" {op} " in check:
+            field, value_str = check.split(f" {op} ", 1)
+            field = field.strip()
+            value_str = value_str.strip()
+            if field not in row:
+                return False
+            val = row[field]
+            if val is None:
+                return False
+            try:
+                value = float(value_str)
+                if op == ">=":
+                    return val >= value
+                elif op == "<=":
+                    return val <= value
+                elif op == ">":
+                    return val > value
+                elif op == "<":
+                    return val < value
+                elif op == "==":
+                    return val == value
+                elif op == "!=":
+                    return val != value
+            except (ValueError, TypeError):
+                return False
+    
+    return True
+
+
 def _utc_timestamp(value: str, source_timezone: str) -> str:
     # Fixture timestamps are local wall-clock values. Reject DST gaps/folds
     # instead of silently assigning an arbitrary offset.
@@ -306,17 +357,19 @@ def _run_pipeline_in_place(
             sequence = row.get("ingestion_sequence", 0)
             if not isinstance(sequence, int) or isinstance(sequence, bool) or sequence < 0:
                 reasons.append("INVALID_INGESTION_SEQUENCE")
-            if is_market:
-                demand = row.get("demand_mw")
-                price = row.get("price_per_mwh")
-                if not isinstance(demand, (int, float)) or isinstance(demand, bool) or not math.isfinite(demand) or demand < 0:
-                    reasons.append("INVALID_DEMAND")
-                if not isinstance(price, (int, float)) or isinstance(price, bool) or not math.isfinite(price):
-                    reasons.append("MISSING_PRICE")
-            else:
-                temperature = row.get("temperature_c")
-                if not isinstance(temperature, (int, float)) or isinstance(temperature, bool) or not math.isfinite(temperature):
-                    reasons.append("MISSING_TEMPERATURE")
+            # Apply quality checks from metadata
+            for check in source.get("quality_checks", []):
+                if not _evaluate_quality_check(check, row):
+                    # Map check to a reason code
+                    if "demand_mw" in check and ">= 0" in check:
+                        reasons.append("INVALID_DEMAND")
+                    elif "price_per_mwh" in check and "is not null" in check:
+                        reasons.append("MISSING_PRICE")
+                    elif "temperature_c" in check and "is not null" in check:
+                        reasons.append("MISSING_TEMPERATURE")
+                    else:
+                        # Generic quality check failure
+                        reasons.append(f"QUALITY_CHECK_FAILED:{check}")
             if not row.get(time_field):
                 reasons.append("MISSING_EVENT_TIMESTAMP")
             if not reasons:
