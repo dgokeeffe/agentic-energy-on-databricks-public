@@ -385,6 +385,13 @@ Verified state at time of writing:
 | Foundation absent from `bd ready` | yes |
 | Contract suite | 24 passed |
 
+Verbatim console capture of all of this — test suite, closure checker with its
+negative control, raw work-graph state, and the replay hashes — is committed as a
+dated record:
+[`test-evidence/2026-08-12-foundation-fixture-run.md`](test-evidence/2026-08-12-foundation-fixture-run.md).
+The checker itself is
+[`test-evidence/verify_bead_closure.py`](test-evidence/verify_bead_closure.py).
+
 Reproduce the closure check:
 
 ```bash
@@ -424,3 +431,4 @@ evidence that those defects are absent.
 - [`serverless-architecture.md`](serverless-architecture.md) — dispatcher/worker design
 - [`deployment.md`](deployment.md) — bundle targets, UC grants, per-developer `dev` rules
 - [`challenge-spec.md`](challenge-spec.md) — seeded defect classes, including quarantine bypass
+- [`test-evidence/`](test-evidence/) — dated run records and the bead-closure checker
