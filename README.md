@@ -51,6 +51,14 @@ scripts/bootstrap-participant-beads.sh
 bd ready
 ```
 
+Optional stretch epics are seeded by their own idempotent scripts, each safe to
+re-run:
+
+```bash
+scripts/seed-price-spike-epic.sh          # price spike detector
+scripts/seed-demand-monitoring-epic.sh    # demand monitoring (2nd NEMWEB family)
+```
+
 The public participant graph contains workshop tasks and bounded seeded defects.
 Organizer-only solution notes, tenant preflight evidence, and private deployment
 records are intentionally not part of this repository. Each laptop initializes
