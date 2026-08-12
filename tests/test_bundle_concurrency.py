@@ -102,7 +102,15 @@ def test_published_tables_are_keyed_by_the_same_run_id_as_the_volume(job):
     assert params[params.index("--run-id") + 1] == "{{job.run_id}}"
 
 
-def test_deployed_job_stays_in_fixture_mode(job):
-    """Live NEMWEB requires PF-8 authorization and a human deployment gate."""
+def test_mode_is_a_run_parameter_defaulting_to_fixture(job):
+    """Live NEMWEB requires PF-8 authorization and facilitator approval.
+
+    Mode is a job parameter so enabling live acquisition is a deliberate,
+    audited per-run override rather than a code change, and so the next run
+    reverts to fixture unless someone opts in again. The default must stay
+    fixture: a deploy must never silently start pulling live source data.
+    """
     params = job["tasks"][0]["python_wheel_task"]["parameters"]
-    assert params[params.index("--mode") + 1] == "fixture"
+    assert params[params.index("--mode") + 1] == "{{job.parameters.mode}}"
+    defaults = {p["name"]: p["default"] for p in job["parameters"]}
+    assert defaults["mode"] == "fixture"

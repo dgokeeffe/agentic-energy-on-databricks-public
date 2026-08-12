@@ -231,6 +231,39 @@ databricks bundle run agentic_energy_etl -t dev --params \
   metadata_snapshot_id=snapshot-20260810
 ```
 
+## Live NEMWEB acquisition (facilitator only)
+
+Acquisition mode is a job parameter defaulting to `fixture`, so a deploy never
+starts pulling live source data on its own. Enabling live NEMWEB is a deliberate
+per-run override:
+
+```bash
+databricks bundle run agentic_energy_etl -t dev --params \
+  mode=live,\
+  metadata_path=/Volumes/<catalog>/<schema>/<volume>/metadata/sources.live.json,\
+  metadata_snapshot_id=<snapshot-id>
+```
+
+This is a parameter rather than a code change on purpose: the choice is recorded
+against the job run, stamped into the run manifest and the published
+`run_manifest` table, needs no wheel rebuild, and reverts to `fixture` on the
+next run unless someone opts in again.
+
+**Do not run this until all of the following hold.** These are governance
+preconditions, not setup steps:
+
+- **PF-8 is resolved**: AEMO data-use authorization for NEMWEB DISPATCHIS is
+  confirmed for this workspace and purpose. `docs/challenge-spec.md` makes this a
+  hard stop: *"Stop if AEMO data use is unauthorized."*
+- A facilitator has approved live acquisition for this specific target.
+- Egress to `nemweb.com.au` is permitted from the serverless compute (PF-6).
+
+The adapter is bounded by design — HTTPS only, host allowlisted from metadata,
+redirects refused, response and archive-member size capped — but those are
+technical controls, not authorization. A live run also makes freshness real:
+`pipeline_ingested_at` becomes the actual retrieval instant rather than the
+contract's fixed timestamp.
+
 The metadata file remains the input contract. For a Volume snapshot, stage it
 using the same contract-root layout as the wheel:
 
