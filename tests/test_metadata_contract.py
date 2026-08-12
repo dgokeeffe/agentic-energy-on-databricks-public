@@ -386,3 +386,103 @@ def test_unsupported_check_aborts_the_run_and_writes_no_output(tmp_path):
     with pytest.raises(ValueError, match="UNSUPPORTED_QUALITY_CHECK"):
         mutated_run(tmp_path, typo)
     assert not (tmp_path / "out").exists(), "failed validation must leave no partial output"
+
+
+# --------------------------------------------------------------------------- #
+# watermark_field: declared, validated, and reported in the run manifest.
+# --------------------------------------------------------------------------- #
+
+
+def test_contract_declares_a_watermark_field_for_every_source():
+    for source in contract()["sources"]:
+        assert source["watermark_field"], f"{source['source_id']} declares no watermark_field"
+
+
+def test_manifest_reports_the_declared_watermark_field_and_its_high_water_mark(tmp_path):
+    """Acceptance requires counts *and* a watermark in the run manifest."""
+    run_pipeline(SHIPPED_METADATA, tmp_path / "out")
+    manifest = json.loads((tmp_path / "out/manifest.json").read_text())
+    for source in contract()["sources"]:
+        reported = manifest["sources"][source["source_id"]]
+        assert reported["watermark_field"] == source["watermark_field"]
+        silver = lines(tmp_path / f"out/silver/{source['source_id']}.jsonl")
+        assert reported["watermark"] == max(row["interval_utc"] for row in silver)
+
+
+def test_watermark_is_reported_in_normalized_utc(tmp_path):
+    """The declared field holds local time; the watermark must be comparable.
+
+    A high-water mark expressed in mixed local time cannot drive an incremental
+    load, so the normalized UTC value is reported instead of the raw field.
+    """
+    run_pipeline(SHIPPED_METADATA, tmp_path / "out")
+    manifest = json.loads((tmp_path / "out/manifest.json").read_text())
+    for reported in manifest["sources"].values():
+        assert reported["watermark"].endswith("Z")
+        assert reported["watermark"] == "2024-04-07T00:30:00Z"
+
+
+def test_watermark_tracks_the_data_rather_than_a_constant(tmp_path):
+    """Dropping the latest interval must move the watermark back."""
+    (tmp_path / "metadata").mkdir()
+    (tmp_path / "fixtures").mkdir()
+    (tmp_path / "metadata/sources.json").write_text(json.dumps(contract()))
+    sources = sources_by_id()
+    market = sources["aemo_dispatch_fixture"]
+    (tmp_path / "fixtures/aemo_dispatch.jsonl").write_text(
+        json.dumps(valid_row(market, **{market["event_timestamp_field"]: "2024-04-07T10:00:00"})) + "\n"
+    )
+    weather = sources["weather_fixture"]
+    (tmp_path / "fixtures/weather.jsonl").write_text(
+        json.dumps(valid_row(weather, **{weather["event_timestamp_field"]: "2024-04-07T10:00:00"})) + "\n"
+    )
+    run_pipeline(tmp_path / "metadata/sources.json", tmp_path / "out")
+    manifest = json.loads((tmp_path / "out/manifest.json").read_text())
+    assert manifest["sources"]["aemo_dispatch_fixture"]["watermark"] == "2024-04-07T00:00:00Z"
+
+
+def test_watermark_is_null_when_no_row_reaches_silver(tmp_path):
+    """An empty Silver partition has no high-water mark, not a zero one.
+
+    Reporting an epoch or empty string here would make an incremental load
+    silently re-read from the beginning of time.
+    """
+
+    def tighten(metadata):
+        for source in metadata["sources"]:
+            if source["dataset"] == "DISPATCH_SCADA":
+                source["quality_checks"].append("demand_mw >= 999999")
+
+    counts, _ = mutated_run(tmp_path, tighten)
+    assert counts["silver"] == 3, "only the weather source should survive"
+    manifest = json.loads((tmp_path / "out/manifest.json").read_text())
+    market = manifest["sources"]["aemo_dispatch_fixture"]
+    assert market["silver"] == 0
+    assert market["watermark"] is None
+    assert market["watermark_field"] == "interval_datetime"
+    assert manifest["sources"]["weather_fixture"]["watermark"] == "2024-04-07T00:30:00Z"
+
+
+@pytest.mark.parametrize("value", [None, "", 42, ["interval_datetime"], "interval_utc", "region"])
+def test_undeclared_or_unsupported_watermark_field_is_rejected(tmp_path, value):
+    """The watermark must come from the normalized event timestamp, not any field."""
+    (tmp_path / "metadata").mkdir()
+    (tmp_path / "fixtures").mkdir()
+    metadata = contract()
+    metadata["sources"][0]["watermark_field"] = value
+    (tmp_path / "metadata/sources.json").write_text(json.dumps(metadata))
+    for name in ("aemo_dispatch", "weather"):
+        (tmp_path / f"fixtures/{name}.jsonl").write_text(
+            (REPOSITORY_ROOT / f"agentic_energy/resources/fixtures/{name}.jsonl").read_text()
+        )
+    with pytest.raises(ValueError, match="WATERMARK_FIELD"):
+        run_pipeline(tmp_path / "metadata/sources.json", tmp_path / "out")
+
+
+def test_row_accounting_still_reconciles_alongside_the_watermark(tmp_path):
+    """Adding a watermark must not disturb the existing per-source counters."""
+    run_pipeline(SHIPPED_METADATA, tmp_path / "out")
+    manifest = json.loads((tmp_path / "out/manifest.json").read_text())
+    for reported in manifest["sources"].values():
+        assert reported["bronze"] == reported["accepted"] + reported["quarantine"]
+        assert reported["accepted"] == reported["silver"] + reported["deduplicated"]

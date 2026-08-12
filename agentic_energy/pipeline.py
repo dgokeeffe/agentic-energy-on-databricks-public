@@ -242,6 +242,13 @@ def _validate_source(source: dict, root: Path) -> Path | None:
     ):
         raise ValueError("INVALID_NATURAL_KEY")
     _validate_quality_checks(source)
+    watermark_field = source.get("watermark_field")
+    if not isinstance(watermark_field, str) or not watermark_field:
+        raise ValueError("INVALID_WATERMARK_FIELD")
+    if watermark_field != event_field:
+        # Only the declared event timestamp is normalized to UTC, so it is the one
+        # field a comparable high-water mark can be derived from.
+        raise ValueError("UNSUPPORTED_WATERMARK_FIELD")
     mode = source.get("extraction_mode", "fixture")
     if mode == "live":
         if not isinstance(source.get("url_or_fixture_path"), str) or not source["url_or_fixture_path"].startswith(("http://", "https://")):
@@ -451,6 +458,14 @@ def _run_pipeline_in_place(
         silver_by_source[source_id] = sorted(deduped.values(), key=lambda r: (r["region"], r["interval_utc"]))
         row_counts = source_reconciliation[source_id]
         row_counts["silver"] = len(silver_by_source[source_id])
+        # High-water mark over the declared watermark_field, reported in its
+        # normalized UTC form so it is comparable across sources and runs. None
+        # when nothing survived to Silver, which is distinct from a zero timestamp.
+        row_counts["watermark"] = (
+            max(row["interval_utc"] for row in silver_by_source[source_id])
+            if silver_by_source[source_id] else None
+        )
+        row_counts["watermark_field"] = source["watermark_field"]
         row_counts["deduplicated"] = row_counts["accepted"] - row_counts["silver"]
         if row_counts["bronze"] != row_counts["accepted"] + row_counts["quarantine"]:
             raise RuntimeError(f"BRONZE_RECONCILIATION_FAILED:{source_id}")
