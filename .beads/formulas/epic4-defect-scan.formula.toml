@@ -1,0 +1,207 @@
+formula    = "epic4-defect-scan"
+description = """
+Half-day Lane B workshop: seeded defect scan, patch, and test for the
+agentic-energy pipeline.  Participants claim defect beads from bd ready,
+produce file/line evidence, propose a patch, and add or update tests.
+A human gate blocks merge; the agent cannot self-close it.
+
+Pour one molecule per team:
+  bd cook epic4-defect-scan
+  bd mol pour <proto-id> --var team=team01
+"""
+version    = 1
+type       = "workflow"
+
+[vars.team]
+  description = "Team identifier, e.g. team01"
+  required    = true
+  pattern     = "^[A-Za-z0-9_-]+$"
+
+# ─── Foundation ────────────────────────────────────────────────────────────────
+
+[[steps]]
+id          = "foundation"
+type        = "epic"
+title       = "[{{team}}] Foundation: verify the deterministic baseline"
+description = """
+Before touching defects, confirm the repo is healthy.
+
+  uv run --extra test python -m pytest          # all green
+  uv run python -m agentic_energy.cli --output output
+
+Check output/manifest.json for:
+  bronze = accepted + quarantine (per source)
+  silver = bronze - quarantine - deduplicated (per source)
+  gold rows present with freshness and lineage
+
+Pass when: pytest exits 0 and the manifest equations hold.
+"""
+labels      = ["workshop", "{{team}}", "foundation"]
+
+# ─── Defect beads (depend on foundation) ───────────────────────────────────────
+
+[[steps]]
+id          = "defect-timezone"
+type        = "bug"
+title       = "[{{team}}] Defect: NEM timestamps not converted from AEST/AEDT"
+description = """
+Symptom: Silver `interval_utc` values look like local wall-clock times rather
+than UTC-normalised timestamps, or the pipeline crashes on DST-boundary
+intervals.
+
+Investigate:
+  agentic_energy/pipeline.py  – _utc_timestamp()
+  agentic_energy/resources/fixtures/  – check AEST vs AEDT sample rows
+  tests/test_pipeline.py  – test_aest_and_aedt_are_normalized_using_source_timezone
+
+Deliverable:
+  1. File + line evidence in a comment on this bead.
+  2. A patch that fixes or confirms correct behaviour.
+  3. A test that would have caught the defect (or a note that one already exists).
+"""
+labels      = ["workshop", "{{team}}", "defect", "timezone"]
+depends_on  = ["foundation"]
+
+[[steps]]
+id          = "defect-quarantine"
+type        = "bug"
+title       = "[{{team}}] Defect: malformed rows silently dropped instead of quarantined"
+description = """
+Symptom: rows that fail validation disappear from counts without a reason code
+or source lineage entry in quarantine/rejected.jsonl.
+
+Investigate:
+  agentic_energy/pipeline.py  – Bronze → quarantine path, _run_pipeline_in_place
+  tests/test_pipeline.py  – test_malformed_rows_are_quarantined_without_aborting
+
+Check that every rejected row has:
+  source_id, source_file, source_row_number, reason_codes, rejected_at, raw_record
+
+Deliverable:
+  1. File + line evidence in a comment on this bead.
+  2. A patch (or confirmation the path is correct with evidence).
+  3. A test that covers the failure mode.
+"""
+labels      = ["workshop", "{{team}}", "defect", "quarantine"]
+depends_on  = ["foundation"]
+
+[[steps]]
+id          = "defect-freshness"
+type        = "bug"
+title       = "[{{team}}] Defect: live-mode freshness stamp uses fixture timestamp instead of real clock"
+description = """
+Symptom: a live-mode run reports `pipeline_ingested_at` of 2024-04-07 (the
+fixture contract value) for data fetched moments ago.  Every freshness marker
+and lineage entry is wrong by years.
+
+Investigate:
+  agentic_energy/pipeline.py  – _ingestion_timestamp(), _run_pipeline_in_place
+  tests/test_pipeline.py  – test_live_mode_stamps_the_real_ingestion_instant
+                           – test_fixture_mode_uses_declared_ingestion_timestamp
+
+The fix must leave fixture mode deterministic (scored baseline must be
+byte-for-byte reproducible) while live mode uses the real UTC instant.
+
+Deliverable:
+  1. File + line evidence.
+  2. Patch.
+  3. Test that pins the real clock in live mode and the contract timestamp in
+     fixture mode.
+"""
+labels      = ["workshop", "{{team}}", "defect", "freshness"]
+depends_on  = ["foundation"]
+
+[[steps]]
+id          = "defect-reconciliation"
+type        = "bug"
+title       = "[{{team}}] Defect: Bronze reconciliation equation not enforced"
+description = """
+Symptom: the manifest emits counts but does not raise if
+  bronze != accepted + quarantine
+or
+  accepted != silver + deduplicated
+
+A silent mismatch means the pipeline reports success while rows are lost.
+
+Investigate:
+  agentic_energy/pipeline.py  – reconciliation assertions in _run_pipeline_in_place
+  tests/test_pipeline.py  – test_manifest_reconciles_source_row_accounting
+
+Deliverable:
+  1. File + line evidence (is the assertion present? does it cover both equations?).
+  2. Patch that makes both equations hard failures.
+  3. Test that injects a count mismatch and asserts RuntimeError.
+"""
+labels      = ["workshop", "{{team}}", "defect", "reconciliation"]
+depends_on  = ["foundation"]
+
+# ─── Evidence collection (depends on all four defect beads) ────────────────────
+
+[[steps]]
+id          = "evidence-bundle"
+type        = "task"
+title       = "[{{team}}] Collect findings: evidence bundle for all defects"
+description = """
+Aggregate the findings from all four defect beads into a single comment on
+this bead.  For each defect:
+
+  Defect ID  : <bead hash>
+  File       : <path>
+  Line       : <number>
+  Root cause : one sentence
+  Fix status : patched | confirmed-correct | deferred
+  Test status: new test added | existing test sufficient | test missing
+
+Pass when all four defects have a finding (even if the verdict is
+"confirmed correct — no defect present").
+"""
+labels      = ["workshop", "{{team}}", "evidence"]
+depends_on  = [
+  "defect-timezone",
+  "defect-quarantine",
+  "defect-freshness",
+  "defect-reconciliation",
+]
+
+# ─── CI gate (blocks merge) ────────────────────────────────────────────────────
+
+[[steps]]
+id    = "ci-gate"
+title = "[{{team}}] Gate: CI passes on the patch branch"
+description = """
+Open a pull request with all patches applied.  This gate is resolved
+automatically when the PR's CI run passes (pytest exits 0, no linting errors).
+
+  gh pr create --title "[{{team}}] Epic 4 patches"
+
+bd will poll bd gate check to detect CI green.
+"""
+labels   = ["workshop", "{{team}}", "gate"]
+depends_on = ["evidence-bundle"]
+
+  [steps.gate]
+  type = "gh:pr"
+
+# ─── Human merge gate ──────────────────────────────────────────────────────────
+
+[[steps]]
+id    = "merge-gate"
+title = "[{{team}}] Gate: facilitator approves and merges"
+description = """
+A facilitator reviews the pull request against the scoring signals:
+
+  ✓ File/line evidence present for all four defects
+  ✓ Patches do not introduce new source-specific branches
+  ✓ Tests pass (CI gate already green)
+  ✓ No secrets committed; no production writes attempted
+  ✓ Reconciliation equations are hard failures, not soft warnings
+
+The agent cannot resolve this gate.  Only the facilitator may run:
+  bd gate resolve <gate-id>
+"""
+labels    = ["workshop", "{{team}}", "gate", "human-review"]
+depends_on = ["ci-gate"]
+
+  [steps.gate]
+  type    = "human"
+  timeout = "4h"
