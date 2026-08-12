@@ -11,7 +11,12 @@ scripts/bootstrap-participant-beads.sh
 bd ready
 ```
 
-The workshop organizer may configure a public Beads Dolt remote after seeding
-the graph. Participants should use `bd dolt pull` and `bd dolt push` only with
-the remote supplied by the organizer. Do not copy private organizer databases
-or solution notes into this repository.
+Each laptop owns an independent local Beads database. The bootstrap script uses
+stable public issue IDs so the same issue can be referenced consistently in
+branches and pull requests, but `bd update --claim` is only a local claim.
+Participants must follow the facilitator's team assignment to avoid duplicate
+work.
+
+A Dolt remote may be used by an organizer for backup or later reconciliation,
+but participants must not depend on network access to Beads. Do not copy private
+organizer databases or solution notes into this repository.

@@ -5,20 +5,16 @@ participant workflow and must be used for all implementation work.
 
 ## Start here
 
-From a fresh clone, initialize or pull the participant graph:
+From a fresh clone, initialize the local participant graph:
 
 ```bash
 scripts/bootstrap-participant-beads.sh
-bd dolt pull
 bd ready
 ```
 
-If the local Beads database already exists, pull before selecting work:
-
-```bash
-bd dolt pull
-bd ready
-```
+Each participant laptop has its own local Beads database. There is no shared
+Beads server in the workshop execution environment, so do not assume that a
+claim or status update is visible to another laptop.
 
 Read `.beads/README.md` for the participant Beads model.
 
@@ -36,15 +32,17 @@ Read `.beads/README.md` for the participant Beads model.
 7. Record evidence and the pull request URL in Beads:
    ```bash
    bd update <issue-id> --notes "Tests: <commands/results>. PR: <url>"
-   bd dolt push
    ```
 8. Do not close issues until the human review/merge gate is complete.
 
-Git and Beads are separate synchronization channels:
+Git and Beads are separate, and Beads is local in the workshop:
 
 - `git push` publishes code branches and pull requests.
-- `bd dolt push` publishes issue claims, dependencies, notes, and statuses.
-- Do not use `.beads/issues.jsonl` as the source of truth.
+- `bd update` records claims and evidence on the participant laptop only.
+- The stable Beads ID must be included in the Git branch and pull request.
+- The facilitator is the source of truth for team assignment and completion.
+- `bd dolt push/pull` is optional organizer maintenance only, not a participant
+  dependency.
 
 ### `git push` from a CoDA container
 

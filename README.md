@@ -49,9 +49,10 @@ bd ready
 
 The public participant graph contains workshop tasks and bounded seeded defects.
 Organizer-only solution notes, tenant preflight evidence, and private deployment
-records are intentionally not part of this repository. The organizer can set
-`BEADS_DOLT_REMOTE` during bootstrap to seed and synchronize a shared public
-Dolt remote; otherwise the script uses the repository's configured origin.
+records are intentionally not part of this repository. Each laptop initializes
+an independent local Beads database with stable issue IDs; claims and status
+updates are coordinated by the facilitator and referenced in Git branches and
+pull requests. Network access to a shared Beads database is not required.
 
 ## Databricks deployment
 
