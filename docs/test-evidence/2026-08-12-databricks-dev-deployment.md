@@ -129,6 +129,14 @@ gold/market_weather.jsonl                  MATCH  f56fe6473b47cf8f…
 `run_id`, which is orchestration-assigned and differs by construction. All other
 manifest fields match.
 
+> **Superseded for two artifacts.** Left unedited as the verbatim record of this
+> run. The `agentic-energy-yx8` / `agentic-energy-aln` fixes added keys to the
+> quarantine and Gold layers, so `quarantine/rejected.jsonl` and
+> `gold/market_weather.jsonl` now hash differently. The local-vs-serverless
+> equality demonstrated here still holds — both sides changed together. This
+> deployed run predates the fixes and has **not** been re-run against them.
+> Current baseline: `docs/test-evidence/2026-08-12-bugfix-quarantine-and-gold.md`.
+
 This is the strongest available evidence for the "same generic contract on both
 paths" invariant — not merely equal row counts, but identical bytes.
 

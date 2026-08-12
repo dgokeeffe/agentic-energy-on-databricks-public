@@ -436,3 +436,214 @@ def test_validation_change_preserves_the_fixture_baseline(tmp_path):
     assert manifest["sources"]["weather_fixture"] == {
         "accepted": 4, "bronze": 5, "deduplicated": 1, "quarantine": 1, "silver": 3
     }
+
+
+# --- agentic-energy-yx8: quarantine must be self-contained evidence -----------
+
+
+def test_quarantine_preserves_the_offending_raw_text(tmp_path):
+    """A parse failure must record what the line said, not just that it failed.
+
+    `raw_record` is the parsed object, so it is None precisely when the failure
+    is a parse error. Without `raw_line` the operator is told row 7 is malformed
+    and has no way to see the text, and recovering it from Bronze assumes Bronze
+    is still retained.
+    """
+    root, metadata_path, metadata = _external_contract(tmp_path)
+    broken = '{"region":"NSW1","interval_datetime":"2024-04-07T12:00:00",BROKEN'
+    fixture = root / "fixtures/aemo_dispatch.jsonl"
+    fixture.write_text(fixture.read_text() + broken + "\n")
+    metadata_path.write_text(json.dumps(metadata))
+
+    run_pipeline(metadata_path, tmp_path / "out", metadata_root=root,
+                 mode="fixture", metadata_snapshot_id="s1")
+
+    rejected = lines(tmp_path / "out/quarantine/rejected.jsonl")
+    parse_failures = [
+        row for row in rejected
+        if any(code.startswith("INVALID_JSON:") for code in row["reason_codes"])
+    ]
+    assert parse_failures, "the malformed line was not quarantined"
+    row = parse_failures[0]
+    assert row["raw_record"] is None
+    assert row["raw_line"] == broken, "the offending text was not preserved"
+
+
+def test_every_quarantine_row_carries_its_raw_line(tmp_path):
+    """Not only parse failures: any rejected row must be self-describing."""
+    run_pipeline(output_dir=tmp_path / "out")
+    rejected = lines(tmp_path / "out/quarantine/rejected.jsonl")
+    assert rejected
+    for row in rejected:
+        assert row["raw_line"], f"row {row['source_row_number']} lost its raw text"
+        assert isinstance(row["raw_line"], str)
+
+
+def test_pathological_raw_line_is_truncated_with_an_explicit_marker(tmp_path):
+    """One corrupt line must not be able to dominate the quarantine layer."""
+    root, metadata_path, metadata = _external_contract(tmp_path)
+    oversized = '{"region":"NSW1","junk":"' + "x" * 9000
+    fixture = root / "fixtures/aemo_dispatch.jsonl"
+    fixture.write_text(fixture.read_text() + oversized + "\n")
+    metadata_path.write_text(json.dumps(metadata))
+
+    run_pipeline(metadata_path, tmp_path / "out", metadata_root=root,
+                 mode="fixture", metadata_snapshot_id="s1")
+
+    rejected = lines(tmp_path / "out/quarantine/rejected.jsonl")
+    truncated = [row for row in rejected if "[truncated" in (row.get("raw_line") or "")]
+    assert truncated, "an oversized line was stored verbatim"
+    raw_line = truncated[0]["raw_line"]
+    assert len(raw_line) < len(oversized)
+    assert raw_line.startswith('{"region":"NSW1"')
+    assert f"[truncated {len(oversized)} chars]" in raw_line
+    assert len(raw_line) == pipeline_module.MAX_QUARANTINE_RAW_LINE + len(
+        f"...[truncated {len(oversized)} chars]"
+    )
+
+
+# --- agentic-energy-aln: Gold reconciliation must be observable ---------------
+
+
+def test_manifest_reports_gold_join_accounting(tmp_path):
+    """Gold row count alone cannot distinguish an enriched run from a broken join."""
+    run_pipeline(output_dir=tmp_path / "out")
+    gold = json.loads((tmp_path / "out/manifest.json").read_text())["gold"]
+    assert gold == {
+        "gold": 3,
+        "market_silver": 3,
+        "weather_silver": 3,
+        "weather_matched": 3,
+        "weather_unmatched": 0,
+        "weather_unused": 0,
+        "latest_event_utc": "2024-04-07T00:30:00Z",
+        "latest_market_event_utc": "2024-04-07T00:30:00Z",
+        "latest_weather_event_utc": "2024-04-07T00:30:00Z",
+        "market_source_timezone": "Australia/Sydney",
+        "weather_source_timezone": "Australia/Sydney",
+    }
+
+
+def test_a_totally_failed_weather_join_is_reported_not_silent(tmp_path):
+    """The defect: mismatched source timezones drop every enrichment silently.
+
+    sources.live.json ships market=Australia/Brisbane (no DST) against
+    weather=Australia/Sydney (DST), so in January the same local wall clock
+    normalizes an hour apart and no key ever matches. Gold row count is
+    unchanged, so only explicit match accounting reveals it.
+    """
+    root, metadata_path, metadata = _external_contract(tmp_path)
+    metadata["sources"][0]["source_timezone"] = "Australia/Brisbane"
+    metadata_path.write_text(json.dumps(metadata))
+    (root / "fixtures/aemo_dispatch.jsonl").write_text(
+        '{"region":"NSW1","interval_datetime":"2024-01-15T10:00:00","demand_mw":8100,'
+        '"price_per_mwh":68.0,"ingestion_sequence":1}\n'
+    )
+    (root / "fixtures/weather.jsonl").write_text(
+        '{"region":"NSW1","observed_at":"2024-01-15T10:00:00","temperature_c":29.0,'
+        '"ingestion_sequence":1}\n'
+    )
+
+    counts = run_pipeline(metadata_path, tmp_path / "out", metadata_root=root,
+                          mode="fixture", metadata_snapshot_id="s1")
+
+    assert counts["gold"] == 1, "row count is unchanged — that is why this was invisible"
+    gold = json.loads((tmp_path / "out/manifest.json").read_text())["gold"]
+    assert gold["weather_matched"] == 0
+    assert gold["weather_unmatched"] == 1
+    assert gold["weather_unused"] == 1
+    assert gold["market_source_timezone"] == "Australia/Brisbane"
+    assert gold["weather_source_timezone"] == "Australia/Sydney"
+    assert gold["latest_market_event_utc"] == "2024-01-15T00:00:00Z"
+    assert gold["latest_weather_event_utc"] == "2024-01-14T23:00:00Z"
+    row = lines(tmp_path / "out/gold/market_weather.jsonl")[0]
+    assert row["weather_matched"] is False
+    assert row["temperature_c"] is None
+
+
+def test_gold_freshness_describes_the_dataset_not_only_the_row(tmp_path):
+    """latest_event_utc used to equal the row's own interval_utc — a tautology."""
+    run_pipeline(output_dir=tmp_path / "out")
+    gold = lines(tmp_path / "out/gold/market_weather.jsonl")
+    assert len(gold) > 1
+    dataset_latest = max(row["interval_utc"] for row in gold)
+    for row in gold:
+        assert row["freshness"]["row_event_utc"] == row["interval_utc"]
+        assert row["freshness"]["latest_event_utc"] == dataset_latest
+    earliest = min(gold, key=lambda row: row["interval_utc"])
+    assert earliest["freshness"]["latest_event_utc"] != earliest["interval_utc"], (
+        "freshness still just echoes the row's own timestamp"
+    )
+
+
+def test_weather_matched_distinguishes_absent_join_from_null_temperature(tmp_path):
+    """A matched row may legitimately carry no temperature, so null is ambiguous."""
+    root, metadata_path, metadata = _external_contract(tmp_path)
+    metadata_path.write_text(json.dumps(metadata))
+    (root / "fixtures/aemo_dispatch.jsonl").write_text(
+        '{"region":"NSW1","interval_datetime":"2024-01-15T10:00:00","demand_mw":8100,'
+        '"price_per_mwh":68.0,"ingestion_sequence":1}\n'
+        '{"region":"VIC1","interval_datetime":"2024-01-15T11:00:00","demand_mw":5000,'
+        '"price_per_mwh":60.0,"ingestion_sequence":1}\n'
+    )
+    (root / "fixtures/weather.jsonl").write_text(
+        '{"region":"NSW1","observed_at":"2024-01-15T10:00:00","temperature_c":29.0,'
+        '"ingestion_sequence":1}\n'
+    )
+
+    run_pipeline(metadata_path, tmp_path / "out", metadata_root=root,
+                 mode="fixture", metadata_snapshot_id="s1")
+
+    gold = {row["region"]: row for row in lines(tmp_path / "out/gold/market_weather.jsonl")}
+    assert gold["NSW1"]["weather_matched"] is True
+    assert gold["VIC1"]["weather_matched"] is False
+    manifest_gold = json.loads((tmp_path / "out/manifest.json").read_text())["gold"]
+    assert manifest_gold["weather_matched"] == 1
+    assert manifest_gold["weather_unmatched"] == 1
+
+
+# --- agentic-energy-02f: DST correctness must be pinned, not just correct -----
+
+
+@pytest.mark.parametrize(
+    "local,expected",
+    [
+        ("2024-04-07T01:30:00", "2024-04-06T14:30:00Z"),  # AEDT, +11
+        ("2024-04-07T03:00:00", "2024-04-06T17:00:00Z"),  # AEST, +10
+        ("2024-10-06T01:59:59", "2024-10-05T15:59:59Z"),  # before gap, +10
+        ("2024-10-06T03:00:00", "2024-10-05T16:00:00Z"),  # after gap, +11
+        ("2024-01-15T10:00:00", "2024-01-14T23:00:00Z"),  # summer, +11
+        ("2024-04-07T10:00:00", "2024-04-07T00:00:00Z"),  # winter, +10
+    ],
+)
+def test_offsets_either_side_of_a_dst_transition(local, expected):
+    assert _utc_timestamp(local, "Australia/Sydney") == expected
+
+
+@pytest.mark.parametrize(
+    "local",
+    [
+        "2024-04-07T02:00:00",  # fold: occurs twice (AEDT then AEST)
+        "2024-04-07T02:30:00",
+        "2024-04-07T02:59:59",
+        "2024-10-06T02:00:00",  # gap: never occurs
+        "2024-10-06T02:30:00",
+        "2024-10-06T02:59:59",
+    ],
+)
+def test_ambiguous_and_nonexistent_local_times_are_rejected(local):
+    """Guards the fold/gap logic itself.
+
+    Replacing the fold/gap search with a naive `parsed.replace(tzinfo=zone)`
+    previously left the whole suite green, so the DST protection could be
+    deleted without any test noticing. These cases fail under that mutation.
+    """
+    with pytest.raises(ValueError, match="NONEXISTENT_OR_AMBIGUOUS_LOCAL_TIME"):
+        _utc_timestamp(local, "Australia/Sydney")
+
+
+def test_brisbane_has_no_daylight_saving_shift():
+    """The live contract's market timezone: constant +10 across both dates."""
+    assert _utc_timestamp("2024-01-15T10:00:00", "Australia/Brisbane") == "2024-01-15T00:00:00Z"
+    assert _utc_timestamp("2024-07-15T10:00:00", "Australia/Brisbane") == "2024-07-15T00:00:00Z"
+    assert _utc_timestamp("2024-04-07T02:30:00", "Australia/Brisbane") == "2024-04-06T16:30:00Z"

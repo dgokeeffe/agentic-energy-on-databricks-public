@@ -36,6 +36,10 @@ REQUIRED_SOURCE_FIELDS = (
     "licensing_provenance",
 )
 SUPPORTED_DEDUPLICATION_RULES = frozenset({"last_by_ingestion_sequence"})
+# Upper bound on the raw source text copied into a quarantine row. Large enough
+# for a realistic dispatch/weather record, small enough that one pathological
+# line cannot dominate the quarantine layer.
+MAX_QUARANTINE_RAW_LINE = 4096
 _PACKAGE_ROOT = Path(__file__).resolve().parent
 DEFAULT_METADATA = _PACKAGE_ROOT / "resources" / "metadata" / "sources.json"
 DEFAULT_LIVE_METADATA = _PACKAGE_ROOT / "resources" / "metadata" / "sources.live.json"
@@ -75,6 +79,19 @@ def _utc_timestamp(value: str, source_timezone: str) -> str:
     if not candidates or len(unique_offsets) != 1:
         raise ValueError("NONEXISTENT_OR_AMBIGUOUS_LOCAL_TIME")
     return candidates[0].astimezone(UTC).isoformat().replace("+00:00", "Z")
+
+
+def _truncate_raw_line(raw_line: str) -> str:
+    """Bound the raw text kept in a quarantine row.
+
+    A single corrupt line can be arbitrarily long, and quarantine is read by
+    operators rather than streamed, so an unbounded copy risks turning one bad
+    record into an unreadable artifact. The marker is explicit so a truncated
+    value is never mistaken for the complete line.
+    """
+    if len(raw_line) <= MAX_QUARANTINE_RAW_LINE:
+        return raw_line
+    return raw_line[:MAX_QUARANTINE_RAW_LINE] + f"...[truncated {len(raw_line)} chars]"
 
 
 def _strict_json_value(value):
@@ -348,9 +365,16 @@ def _run_pipeline_in_place(
                     code = str(exc)
                     reasons.append(code if code in {"OFFSET_NOT_ALLOWED", "NONEXISTENT_OR_AMBIGUOUS_LOCAL_TIME"} else "INVALID_EVENT_TIMESTAMP")
             if reasons:
+                # raw_line is preserved alongside raw_record because raw_record is
+                # None precisely when the failure is a parse error: the operator
+                # would otherwise be told a line is malformed with no way to see
+                # what it said. Quarantine has to be self-contained evidence, not a
+                # pointer into Bronze that a retention policy may already have aged
+                # out. Truncated so one pathological line cannot bloat the layer.
                 quarantine.append({"source_id": source_id, "source_file": source_file,
                                    "source_row_number": row_number, "reason_codes": reasons,
-                                   "rejected_at": rejection_at, "raw_record": raw_record})
+                                   "rejected_at": rejection_at, "raw_record": raw_record,
+                                   "raw_line": _truncate_raw_line(raw_line)})
                 continue
             normalized = {"source_id": source_id, "source_file": source_file,
                           "source_row_number": row_number, "region": row["region"],
@@ -407,25 +431,69 @@ def _run_pipeline_in_place(
     market_source, weather_source = market_sources[0], weather_sources[0]
     weather = {(r["region"], r["interval_utc"]): r
                for r in silver_by_source.get(weather_source["source_id"], [])}
+    market_rows = silver_by_source.get(market_source["source_id"], [])
+    weather_rows = silver_by_source.get(weather_source["source_id"], [])
+    # Dataset-level freshness. Previously each Gold row reported its own
+    # interval_utc as latest_event_utc, which is a tautology: a consumer reading
+    # one row learned nothing about how fresh the dataset was, and a stale
+    # dataset was indistinguishable from a current one. Freshness is part of the
+    # acceptance gate, so it must describe the set.
+    latest_market = max((row["interval_utc"] for row in market_rows), default=None)
+    latest_weather = max((row["interval_utc"] for row in weather_rows), default=None)
+    latest_event = max([value for value in (latest_market, latest_weather) if value], default=None)
     gold = []
-    for market in silver_by_source.get(market_source["source_id"], []):
+    matched_weather = 0
+    for market in market_rows:
         key = (market["region"], market["interval_utc"])
         weather_row = weather.get(key)
+        if weather_row is not None:
+            matched_weather += 1
         gold.append({"region": market["region"], "interval_utc": market["interval_utc"],
                      "demand_mw": market["demand_mw"], "price_per_mwh": market["price_per_mwh"],
                      "temperature_c": weather_row["temperature_c"] if weather_row else None,
+                     # An absent weather match is stated explicitly rather than
+                     # inferred from a null temperature, which is ambiguous: a
+                     # matched row may legitimately carry no temperature.
+                     "weather_matched": weather_row is not None,
                      "freshness": {"pipeline_ingested_at": ingested_at,
-                                   "latest_event_utc": market["interval_utc"]},
+                                   "row_event_utc": market["interval_utc"],
+                                   "latest_event_utc": latest_event,
+                                   "latest_market_event_utc": latest_market,
+                                   "latest_weather_event_utc": latest_weather},
                      "lineage": {"market": market["lineage"],
                                  "weather": weather_row["lineage"] if weather_row else None,
                                  "source_ids": [market_source["source_id"], weather_source["source_id"]]}})
     gold.sort(key=lambda r: (r["region"], r["interval_utc"]))
     _write_jsonl(out / "gold" / "market_weather.jsonl", gold)
+
+    # Gold reconciliation. A silently unmatched join is the failure mode this
+    # guards: Gold row count equals the market row count either way, so counts
+    # alone cannot distinguish a fully enriched dataset from one where every
+    # weather match failed (as happens when the two contracts declare different
+    # source_timezone values). Record the split so it is visible in evidence.
+    gold_reconciliation = {
+        "market_silver": len(market_rows),
+        "weather_silver": len(weather_rows),
+        "gold": len(gold),
+        "weather_matched": matched_weather,
+        "weather_unmatched": len(gold) - matched_weather,
+        "weather_unused": len(weather_rows) - matched_weather,
+        "latest_event_utc": latest_event,
+        "latest_market_event_utc": latest_market,
+        "latest_weather_event_utc": latest_weather,
+        "market_source_timezone": market_source["source_timezone"],
+        "weather_source_timezone": weather_source["source_timezone"],
+    }
+    if gold_reconciliation["gold"] != gold_reconciliation["market_silver"]:
+        raise RuntimeError("GOLD_RECONCILIATION_FAILED:row_count")
+    if matched_weather != len(gold) - gold_reconciliation["weather_unmatched"]:
+        raise RuntimeError("GOLD_RECONCILIATION_FAILED:match_accounting")
     manifest = {"layers": {"bronze": len(bronze), "silver": sum(map(len, silver_by_source.values())),
                             "quarantine": len(quarantine), "gold": len(gold)},
                 "source_definitions": {"read": len(source_ids), "selected": len(metadata["sources"])},
                 "sources": {source_id: source_reconciliation[source_id] for source_id in sorted(source_reconciliation)},
                 "source_ids": sorted(sources), "pipeline_ingested_at": ingested_at,
+                "gold": gold_reconciliation,
                 "metadata_sha256": metadata_hash}
     if run_id is not None:
         manifest["run_id"] = run_id

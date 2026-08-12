@@ -158,6 +158,13 @@ Pipeline complete: bronze=11, silver=6, quarantine=3, gold=3
 }
 ```
 
+> **Superseded for two artifacts.** The hashes below are the verbatim record of
+> this run and are left unedited. The bug-fix work for `agentic-energy-yx8` and
+> `agentic-energy-aln` later added keys to the quarantine and Gold layers, so
+> `gold/market_weather.jsonl` and `quarantine/rejected.jsonl` no longer reproduce
+> these values. Row counts and business values are unchanged. Current baseline:
+> `docs/test-evidence/2026-08-12-bugfix-quarantine-and-gold.md`.
+
 `sha256` of every artifact (run 1):
 
 ```text
