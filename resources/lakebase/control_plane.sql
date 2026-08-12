@@ -79,6 +79,102 @@ CREATE TABLE IF NOT EXISTS agentic_energy.pipeline_run_sources (
     PRIMARY KEY (run_id, source_id)
 );
 
+-- Native, application-owned annotation table (challenge-spec 8.2).
+--
+-- Writable Postgres state sitting alongside the read-only synced Gold relation.
+-- Authorship is assigned by the database, never by the caller: an
+-- author_identity the client can set is not an identity but free text, and the
+-- audit trail would then faithfully record a forged author.
+CREATE TABLE IF NOT EXISTS agentic_energy.operator_annotations (
+    annotation_id BIGSERIAL PRIMARY KEY,
+    gold_entity_key TEXT NOT NULL CHECK (gold_entity_key ~ '^[A-Z0-9]+\|[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$'),
+    note TEXT NOT NULL CHECK (btrim(note) <> ''),
+    status TEXT NOT NULL DEFAULT 'flagged' CHECK (status IN ('reviewed', 'flagged', 'acknowledged')),
+    author_identity TEXT NOT NULL DEFAULT current_user,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    audit_version INT NOT NULL DEFAULT 1 CHECK (audit_version >= 1)
+);
+
+CREATE INDEX IF NOT EXISTS operator_annotations_entity_idx
+    ON agentic_energy.operator_annotations (gold_entity_key, updated_at DESC);
+CREATE INDEX IF NOT EXISTS operator_annotations_author_idx
+    ON agentic_energy.operator_annotations (author_identity, updated_at DESC);
+
+-- Audit fields are maintained server-side. Without this the columns are
+-- stale-by-construction: updated_at would keep its insert value forever and
+-- audit_version would never leave 1, which is worse than having no audit
+-- fields because the row still looks authoritative. The trigger touches only
+-- this table, so it is not a write-back path into Gold (spec 8.3).
+CREATE OR REPLACE FUNCTION agentic_energy.operator_annotations_touch()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at := now();
+    NEW.audit_version := OLD.audit_version + 1;
+    -- Authorship and creation time are immutable once written.
+    NEW.author_identity := OLD.author_identity;
+    NEW.created_at := OLD.created_at;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS operator_annotations_touch_trg ON agentic_energy.operator_annotations;
+CREATE TRIGGER operator_annotations_touch_trg
+    BEFORE UPDATE ON agentic_energy.operator_annotations
+    FOR EACH ROW EXECUTE FUNCTION agentic_energy.operator_annotations_touch();
+
+-- Role separation (spec 8.4). Roles are cluster-level and have no
+-- IF NOT EXISTS, so guard them for repeat applies.
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'agentic_energy_annotator') THEN
+        CREATE ROLE agentic_energy_annotator NOLOGIN;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'agentic_energy_reader') THEN
+        CREATE ROLE agentic_energy_reader NOLOGIN;
+    END IF;
+END
+$$;
+
+-- Row-level security is what actually separates authors. The grants below are
+-- table-wide; without RLS any annotator could rewrite any other author's row.
+ALTER TABLE agentic_energy.operator_annotations ENABLE ROW LEVEL SECURITY;
+-- FORCE so the table owner is held to the same boundary rather than bypassing it.
+ALTER TABLE agentic_energy.operator_annotations FORCE ROW LEVEL SECURITY;
+
+-- Annotations and their audit context are readable by the whole workspace
+-- (spec 8.3 step 3); only writes are identity-scoped.
+DROP POLICY IF EXISTS operator_annotations_select ON agentic_energy.operator_annotations;
+CREATE POLICY operator_annotations_select
+    ON agentic_energy.operator_annotations
+    FOR SELECT
+    USING (true);
+
+-- New rows are bound to the session identity, so a caller cannot file a note
+-- under another principal.
+DROP POLICY IF EXISTS operator_annotations_insert ON agentic_energy.operator_annotations;
+CREATE POLICY operator_annotations_insert
+    ON agentic_energy.operator_annotations
+    FOR INSERT
+    WITH CHECK (author_identity = current_user);
+
+-- USING decides which rows may be modified; WITH CHECK decides what they may
+-- become. USING alone would let an author hand a row to another identity and
+-- escape their own audit trail.
+DROP POLICY IF EXISTS operator_annotations_update ON agentic_energy.operator_annotations;
+CREATE POLICY operator_annotations_update
+    ON agentic_energy.operator_annotations
+    FOR UPDATE
+    USING (author_identity = current_user)
+    WITH CHECK (author_identity = current_user);
+
+GRANT USAGE ON SCHEMA agentic_energy TO agentic_energy_annotator, agentic_energy_reader;
+-- INSERT/UPDATE only. No DELETE: annotations are audit records, superseded by
+-- status changes rather than destroyed.
+GRANT SELECT, INSERT, UPDATE ON agentic_energy.operator_annotations TO agentic_energy_annotator;
+GRANT USAGE, SELECT ON SEQUENCE agentic_energy.operator_annotations_annotation_id_seq TO agentic_energy_annotator;
+GRANT SELECT ON agentic_energy.operator_annotations TO agentic_energy_reader;
+
 CREATE INDEX IF NOT EXISTS pipeline_runs_status_idx
     ON agentic_energy.pipeline_runs (status, created_at DESC);
 CREATE INDEX IF NOT EXISTS pipeline_run_sources_source_idx
@@ -161,3 +257,11 @@ COMMENT ON TABLE agentic_energy.pipeline_runs IS
     'One row per dispatcher run across the selected source set.';
 COMMENT ON TABLE agentic_energy.pipeline_run_sources IS
     'Per-source worker execution and reconciliation evidence.';
+COMMENT ON TABLE agentic_energy.operator_annotations IS
+    'Native writable operator annotations. Authorship is server-assigned from '
+    'current_user and enforced by row-level security; annotations never mutate '
+    'Gold and never flow back to the upstream provider.';
+COMMENT ON COLUMN agentic_energy.operator_annotations.gold_entity_key IS
+    'Logical Gold business key (region|interval_utc). Validated by CHECK rather '
+    'than a physical foreign key, because a synced read-only relation may not '
+    'support inbound FK enforcement (spec 8.2).';
