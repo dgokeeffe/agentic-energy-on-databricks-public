@@ -93,16 +93,26 @@ independent jobs. Three rules keep that true:
    run IDs are workspace-unique, so concurrent runs from different identities
    cannot overwrite each other's evidence.
 
-Each deploying identity needs `WRITE_VOLUME` on the landing Volume:
+Each deploying identity needs `WRITE_VOLUME` on the landing Volume, plus
+`CREATE_TABLE` and `SELECT` on the schema so the run can publish its governed
+tables:
 
 ```bash
 scripts/grant-workshop-access.sh <principal> [<principal> ...]   # deployers
 scripts/grant-workshop-access.sh --readers <participant-group>    # read-only
 ```
 
-The script grants the whole `USE_CATALOG` → `USE_SCHEMA` → `READ/WRITE_VOLUME`
-chain and verifies it, because a missing *parent* grant surfaces at run time as a
-permission error on the Volume path and reads like a Volume-grant problem.
+The script grants the whole `USE_CATALOG` → `USE_SCHEMA` + `SELECT` +
+`CREATE_TABLE` → `READ/WRITE_VOLUME` chain and verifies it, because a missing
+*parent* grant surfaces at run time as a permission error on the Volume path and
+reads like a Volume-grant problem.
+
+`CREATE_TABLE` is the grant most likely to be missed, because it fails *late*:
+the run writes its Volume evidence successfully first, so the run directory
+exists while the tables do not, and the failure looks like a pipeline bug rather
+than a missing grant. `--readers` deliberately grants `SELECT` without
+`CREATE_TABLE`, which is what business consumers of the Gold tables need.
+`SELECT` is granted at schema level so it covers tables a later run adds.
 
 Two traps when granting to a fleet:
 
@@ -203,10 +213,12 @@ Publication is opt-in at the CLI level (`--publish-catalog` / `--publish-schema`
 which also require `--run-id`). Without them the local fixture run is unchanged
 and needs no workspace, Spark, or credentials.
 
-The publishing identity needs `USE CATALOG`, `USE SCHEMA`, and `CREATE TABLE` on
-the target schema in addition to the existing `WRITE VOLUME` grant. A missing
-`CREATE TABLE` surfaces at run time, after the Volume evidence has been written
-successfully — the run directory will exist while the tables do not.
+The publishing identity needs `USE_CATALOG`, `USE_SCHEMA`, `CREATE_TABLE`, and
+`SELECT` in addition to the existing `WRITE_VOLUME` grant. Provision them with
+`scripts/grant-workshop-access.sh` (see “Many developers at once”), which grants
+and verifies the whole chain. A missing `CREATE_TABLE` surfaces at run time,
+after the Volume evidence has been written successfully — the run directory will
+exist while the tables do not.
 
 The job accepts a metadata contract as a job parameter. With no override it
 uses the fixture contract packaged in the wheel. To run an immutable contract
