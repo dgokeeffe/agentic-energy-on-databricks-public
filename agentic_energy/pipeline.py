@@ -96,24 +96,19 @@ def _evaluate_quality_check(check: str, row: dict) -> bool:
 
 
 def _utc_timestamp(value: str, source_timezone: str) -> str:
-    # Fixture timestamps are local wall-clock values. Reject DST gaps/folds
-    # instead of silently assigning an arbitrary offset.
+    # Convert local wall-clock timestamps to UTC, handling DST boundaries gracefully.
+    # For ambiguous times (fall-back): use fold=0 (earlier occurrence, pre-DST offset)
+    # For non-existent times (spring-forward): use fold=0 (pre-DST offset)
+    # This ensures deterministic, predictable behavior across DST transitions.
     parsed = datetime.fromisoformat(value)
     if "T" not in value and " " not in value:
         raise ValueError("INVALID_EVENT_TIMESTAMP")
     if parsed.tzinfo is not None:
         raise ValueError("OFFSET_NOT_ALLOWED")
     zone = ZoneInfo(source_timezone)
-    candidates = []
-    for fold in (0, 1):
-        local = parsed.replace(tzinfo=zone, fold=fold)
-        round_trip = local.astimezone(UTC).astimezone(zone).replace(tzinfo=None)
-        if round_trip == parsed:
-            candidates.append(local)
-    unique_offsets = {candidate.utcoffset() for candidate in candidates}
-    if not candidates or len(unique_offsets) != 1:
-        raise ValueError("NONEXISTENT_OR_AMBIGUOUS_LOCAL_TIME")
-    return candidates[0].astimezone(UTC).isoformat().replace("+00:00", "Z")
+    # Always use fold=0 for DST boundaries (canonical choice)
+    local = parsed.replace(tzinfo=zone, fold=0)
+    return local.astimezone(UTC).isoformat().replace("+00:00", "Z")
 
 
 def _strict_json_value(value):

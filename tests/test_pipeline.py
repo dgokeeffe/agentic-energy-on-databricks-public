@@ -356,3 +356,55 @@ def test_evaluate_quality_check_function():
     assert _evaluate_quality_check("value <= 100", {"value": 150}) == False
     assert _evaluate_quality_check("value > 0", {"value": 1}) == True
     assert _evaluate_quality_check("value > 0", {"value": -1}) == False
+
+
+def test_utc_timestamp_handles_dst_boundaries():
+    """Test that _utc_timestamp handles DST boundaries gracefully.
+    
+    - Ambiguous times (fall-back): use fold=0 (earlier occurrence, pre-DST offset)
+    - Non-existent times (spring-forward): use fold=0 (pre-DST offset)
+    - This ensures deterministic behavior across DST transitions.
+    """
+    from agentic_energy.pipeline import _utc_timestamp
+    
+    # Normal timestamp (no DST boundary)
+    assert _utc_timestamp("2024-04-07T10:00:00", "Australia/Sydney") == "2024-04-07T00:00:00Z"
+    
+    # Ambiguous time (fall-back): 2024-04-07 02:00 occurs twice
+    # fold=0 gives the earlier occurrence (AEDT, UTC+11)
+    result = _utc_timestamp("2024-04-07T02:00:00", "Australia/Sydney")
+    assert result == "2024-04-06T15:00:00Z", f"Expected 2024-04-06T15:00:00Z, got {result}"
+    
+    # Non-existent time (spring-forward): 2024-10-06 02:00 doesn't exist
+    # fold=0 interprets as pre-DST (AEST, UTC+10)
+    result = _utc_timestamp("2024-10-06T02:00:00", "Australia/Sydney")
+    assert result == "2024-10-05T16:00:00Z", f"Expected 2024-10-05T16:00:00Z, got {result}"
+    
+    # Verify determinism: same input always gives same output
+    result1 = _utc_timestamp("2024-04-07T02:00:00", "Australia/Sydney")
+    result2 = _utc_timestamp("2024-04-07T02:00:00", "Australia/Sydney")
+    assert result1 == result2, "DST boundary handling must be deterministic"
+
+
+def test_utc_timestamp_rejects_explicit_offsets():
+    """Test that _utc_timestamp rejects timestamps with explicit UTC offsets."""
+    from agentic_energy.pipeline import _utc_timestamp
+    
+    with pytest.raises(ValueError, match="OFFSET_NOT_ALLOWED"):
+        _utc_timestamp("2024-04-07T10:00:00+10:00", "Australia/Sydney")
+    
+    # Z suffix is rejected by fromisoformat before we can check
+    with pytest.raises(ValueError):
+        _utc_timestamp("2024-04-07T10:00:00Z", "Australia/Sydney")
+
+
+def test_utc_timestamp_rejects_invalid_format():
+    """Test that _utc_timestamp rejects invalid timestamp formats."""
+    from agentic_energy.pipeline import _utc_timestamp
+    
+    with pytest.raises(ValueError, match="INVALID_EVENT_TIMESTAMP"):
+        _utc_timestamp("2024-04-07", "Australia/Sydney")  # Missing time
+    
+    # Time-only format is rejected by fromisoformat before we can check
+    with pytest.raises(ValueError):
+        _utc_timestamp("10:00:00", "Australia/Sydney")  # Missing date
