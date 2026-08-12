@@ -29,6 +29,7 @@ directories are `sha256`-identical.
 - [Physical layout](#physical-layout)
 - [Control-plane tables](#control-plane-tables)
 - [How to reproduce](#how-to-reproduce)
+- [Run evidence and work tracking](#run-evidence-and-work-tracking)
 
 ## Pipeline at a glance
 
@@ -364,6 +365,58 @@ for layer in ("bronze", "silver"):
             print(layer, json.dumps(r, indent=2)[:400])
 PY
 ```
+
+## Run evidence and work tracking
+
+The foundation run documented above is recorded against the participant Beads
+graph as **`agentic-energy-93y` — "Foundation: run the deterministic fixture
+ETL"**, closed with the full reconciliation evidence as its close reason
+(1,895 characters: commands, counts, `metadata_sha256`, every acceptance
+equation, the three quarantine reason codes, and the DST offsets).
+
+Verified state at time of writing:
+
+| Check | Result |
+|---|---|
+| `agentic-energy-93y` status | `closed` |
+| `closed_at` | `2026-08-12T04:42:19Z` |
+| Close reason cites layer counts, metadata hash, replay, tests | yes |
+| Dependents unblocked | 5 of 5 (`zwh`, `02f`, `yx8`, `5g3`, `aln`) |
+| Foundation absent from `bd ready` | yes |
+| Contract suite | 24 passed |
+
+Reproduce the closure check:
+
+```bash
+bd show agentic-energy-93y --json | python3 -c \
+  'import sys,json; i=json.load(sys.stdin); i=i[0] if isinstance(i,list) else i; \
+   print(i["status"], i["closed_at"], len(i["close_reason"]))'
+# closed 2026-08-12T04:42:19Z 1895
+
+bd ready          # expect the 5 dependents, and not agentic-energy-93y
+```
+
+Two caveats for anyone relying on this:
+
+- **The closure is not asserted by the test suite, by design.** The Beads Dolt
+  database is gitignored (`.beads/.gitignore` ignores `embeddeddolt/`), so a test
+  that queried `bd` would fail on every fresh clone and in CI. Work-graph state
+  is verified by running the snippet above, not by `pytest`.
+- **Each participant initializes an independent local Beads database.** Issue IDs
+  are stable, but a closure on one machine is not visible to others; claims and
+  statuses are coordinated by the facilitator and referenced from Git branches
+  and pull requests. Cite the issue ID in the PR rather than assuming a shared
+  graph.
+
+The five unblocked issues include two whose symptoms this document already bears
+on — `agentic-energy-yx8` (malformed rows not quarantined) and `agentic-energy-02f`
+(market timestamps not normalized). Both behaved **correctly** for the checked-in
+fixtures: all three bad rows were isolated with reason codes, and the AEDT/AEST
+offsets resolved properly. The seeded defects therefore trigger on input shapes
+the fixtures do not cover — a DST fold or gap value, an offset-bearing timestamp,
+or a non-object JSON line are the codes to probe first (see
+[Quarantine reason codes](#quarantine-reason-codes)). A green fixture run is not
+evidence that those defects are absent.
 
 ## Related
 
