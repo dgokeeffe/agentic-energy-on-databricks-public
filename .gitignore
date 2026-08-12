@@ -37,3 +37,6 @@ uv.lock
 .claude/
 .codex/
 .pi-subagents/
+
+# Beads / Dolt files (added by bd init)
+*.gate.lock*
