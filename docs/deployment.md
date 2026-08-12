@@ -27,22 +27,7 @@ Authenticate outside the repository. Do not put tokens in `.env` or Git:
 databricks auth login --host https://<workspace-host>
 ```
 
-**Working inside a CoDA container (Databricks App terminal / Omnigent runner)?
-Skip that step.** Auth is already brokered there: a fresh OAuth bearer is minted
-per CLI invocation, no PAT is stored, and `databricks auth login` cannot complete
-(its OAuth redirect targets a loopback port no outside browser can reach). Run
-`databricks current-user me` to confirm, then deploy. The deploying identity is
-the app's service principal unless a PAT was injected — which changes who needs
-the Unity Catalog grants below. Full detail, including the two auth errors that
-look like missing credentials:
-[`.claude/skills/deploying-from-coda/SKILL.md`](../.claude/skills/deploying-from-coda/SKILL.md).
-
-Set the required bundle variables in the shell or CI secret store. The
-Databricks CLI reads bundle variables from `BUNDLE_VAR_<name>` — the
-`DATABRICKS_` prefix is **not** recognised and leaves every variable unassigned:
-
-`scripts/deploy.sh` resolves `DATABRICKS_HOST` from the authenticated CLI when it
-is not already exported, so only the bundle variables are mandatory:
+Set the required bundle variables in the shell or CI secret store:
 
 ```bash
 export DATABRICKS_HOST="https://<workspace-host>"   # optional; auto-resolved
@@ -59,55 +44,12 @@ export BUNDLE_VAR_runtime_service_principal="<etl-service-principal-application-
 `.env.example` documents the names but is intentionally not loaded
 automatically.
 
-## Pushing Git branches from a CoDA container
+## Git collaboration
 
-Databricks auth is brokered in a CoDA container, but **Git push auth is not.**
-`GH_TOKEN` is held by the runner supervisor and allow-listed into a filtered
-environment for the *initial clone only*; the helper is injected as throwaway
-`git -c credential.helper=...` flags that deliberately never reach the cloned
-remote. So a clone succeeds and a later push fails:
-
-```text
-fatal: could not read Username for 'https://github.com': No such device or address
-```
-
-This is expected, not a broken container. Do **not** try to recover the token
-from `/proc/<pid>/environ`.
-
-The supported source is the **`coda-omnigent` Databricks secret scope**, readable
-with the already-brokered CLI:
-
-```bash
-databricks secrets list-scopes
-databricks secrets list-secrets coda-omnigent   # key: dgokeeffe-github-token
-```
-
-Secret values come back base64-encoded. Decode in memory and hand the token to
-Git through an ephemeral `GIT_ASKPASS` helper so it never enters argv, the remote
-URL, `.git/config`, or the shell history:
-
-```bash
-TOK=$(databricks secrets get-secret coda-omnigent dgokeeffe-github-token \
-  | python3 -c 'import sys,json,base64; print(base64.b64decode(json.load(sys.stdin)["value"]).decode())')
-ASKPASS=$(mktemp) && chmod 700 "$ASKPASS"
-printf '#!/bin/sh\ncase "$1" in *Username*) echo <github-user>;; *) printf "%%s" "$GH_PUSH_TOKEN";; esac\n' > "$ASKPASS"
-GH_PUSH_TOKEN="$TOK" GIT_ASKPASS="$ASKPASS" GIT_TERMINAL_PROMPT=0 \
-  git push -u origin <branch>
-rm -f "$ASKPASS"
-```
-
-Rules when using it:
-
-- **Never commit, `echo`, or log the value.** Print only length or a short prefix
-  if you must confirm retrieval, and pipe push output through a redaction filter.
-- Do not write it into `.git/config`, `~/.git-credentials`, or a `credential.helper`.
-- Remove the askpass helper immediately; do not leave it in the workspace.
-- Verify afterwards that nothing leaked: `git config --get-all credential.helper`
-  should be empty and `.git/config` should contain no token material.
-
-`gh auth login` is the alternative — the `gh` wrapper on `PATH` is pre-tuned for
-it (`-h github.com -p https -w --skip-ssh-key`) and gives a browser device-code
-flow, after which `gh auth setup-git` makes push work for the session.
+Use the repository's normal GitHub authentication and branch/PR workflow. Do not
+put tokens in repository files, remotes, shell history, or issue notes. Coda,
+CI, and other hosted environments must supply Git and Databricks credentials
+through their own approved secret or identity mechanism.
 
 ## Local verification
 
