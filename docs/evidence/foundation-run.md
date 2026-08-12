@@ -88,6 +88,14 @@ Seven files per run. SHA-256 values are identical for run A and run B.
 Output directories are gitignored (`.gitignore:14`), so this document is the
 durable record of the run.
 
+> **Superseded for `manifest.json` only.** `agentic-energy-g77` added a per-source
+> `watermark` and `watermark_field` to the manifest, so it is now 863 bytes with
+> hash `28c2a5413fa4905dafb3f05413c854e8308929ae6518009f093431487b69d99c`. The row
+> above is the correct value for this commit and remains the reference point for
+> that change. The other six artifacts are byte-identical before and after —
+> re-verified with `diff -r` against a run reproduced from this document — so the
+> data-plane evidence below still stands unchanged. See *Gaps and findings* item 1.
+
 ## Manifest
 
 ```json
@@ -108,6 +116,11 @@ durable record of the run.
   }
 }
 ```
+
+Post-`agentic-energy-g77` each entry under `sources` additionally carries
+`"watermark": "2024-04-07T00:30:00Z"` and `"watermark_field"` (`interval_datetime`
+for the market source, `observed_at` for weather). Nothing shown above was
+removed or renamed.
 
 `metadata_sha256` was cross-checked against
 `sha256sum agentic_energy/resources/metadata/sources.json` — identical.
@@ -253,6 +266,14 @@ a named counter.
    every source in the contract but is not read anywhere in `agentic_energy/`.
    Deduplication is driven by `ingestion_sequence` instead. No test covers a
    watermark, because no watermark behaviour exists.
+
+   > **Resolved by `agentic-energy-g77`.** The manifest now reports, per source,
+   > `watermark` (the high-water mark over the declared field, normalised to UTC)
+   > and `watermark_field` (the declared field it came from), and the pipeline
+   > rejects a contract whose `watermark_field` it cannot honour. Both fixture
+   > sources report `2024-04-07T00:30:00Z`, matching `max(interval_utc)` in Silver.
+   > This is the only change to the artifacts recorded above, and it affects
+   > `manifest.json` alone.
 2. **No explicit run-status field.** EQ7 holds only implicitly: `manifest.json`
    is written last, so its presence signals completion. The three write-once and
    failure-recovery tests listed above supply the missing proof.
@@ -265,8 +286,23 @@ a named counter.
    will need a DST-edge row the fixture does not contain. Noted for that issue,
    out of scope here.
 
-Items 1–3 are candidate scope for `agentic-energy-g77`
-("Engineering: inspect and improve the metadata contract").
+5. **Declared `quality_checks` did not execute.** Found while scoping
+   `agentic-energy-g77`: the contract declared `demand_mw >= 0` and
+   `price_per_mwh is not null`, but row validation was hardcoded in
+   `pipeline.py` behind an `is_market` branch, so the declared rules were
+   decorative. Appending a check the fixture violates left `quarantine` at 3,
+   proving the contract had no effect.
+
+   > **Resolved by `agentic-energy-g77`.** Quality rules are now parsed from the
+   > contract and evaluated generically; the `is_market` branch is gone from row
+   > validation, and an unparseable check aborts the run rather than being
+   > silently skipped. Quarantine output for this fixture is unchanged
+   > (`42abde41…`), so the evidence above still holds.
+
+Items 1 and 5 were taken up by `agentic-energy-g77` ("Engineering: inspect and
+improve the metadata contract") and are resolved as noted. Items 2 and 3
+(no run-status field, no code/parser version in the manifest) remain open and
+are still candidate scope for a follow-up.
 
 ## Environment deviations
 
