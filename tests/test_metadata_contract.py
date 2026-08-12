@@ -15,7 +15,11 @@ from pathlib import Path
 
 import pytest
 
-from agentic_energy.pipeline import run_pipeline
+from agentic_energy.pipeline import (
+    _parse_quality_check,
+    _quality_check_reasons,
+    run_pipeline,
+)
 
 REPOSITORY_ROOT = Path(__file__).resolve().parent.parent
 SHIPPED_METADATA = REPOSITORY_ROOT / "agentic_energy/resources/metadata/sources.json"
@@ -198,3 +202,187 @@ def test_shipped_fixture_quarantine_is_exactly_pinned(tmp_path):
         ("aemo_dispatch_fixture", 5, ["MISSING_PRICE"]),
         ("weather_fixture", 4, ["MISSING_TEMPERATURE"]),
     ]
+
+
+# --------------------------------------------------------------------------- #
+# Evaluator unit tests: the parser's accepted language and the type floor.
+# --------------------------------------------------------------------------- #
+
+
+@pytest.mark.parametrize(
+    "check,expected",
+    [
+        ("demand_mw >= 0", ("demand_mw", "at_least", 0.0)),
+        ("demand_mw >= -10.5", ("demand_mw", "at_least", -10.5)),
+        ("  demand_mw >= 0  ", ("demand_mw", "at_least", 0.0)),
+        ("price_per_mwh is not null", ("price_per_mwh", "not_null", None)),
+        ("temperature_c is not null", ("temperature_c", "not_null", None)),
+        ("region is not null", ("region", "not_null", None)),
+    ],
+)
+def test_parser_accepts_the_two_supported_forms(check, expected):
+    assert _parse_quality_check(check) == expected
+
+
+@pytest.mark.parametrize(
+    "check",
+    [
+        "demand_mw > 0",                          # unsupported operator
+        "demand_mw <= 0",
+        "demand_mw == 0",
+        "demand_mw >= abc",                       # non-numeric bound
+        "demand_mw >= ",
+        "demand_mw >= nan",                       # nan bound: comparison always false
+        "demand_mw >= inf",
+        "unknown_field >= 0",                     # field not in the registry
+        "unknown_field is not null",
+        "demand_mw >= 0 and price_per_mwh >= 0",  # composed expressions
+        "demand_mw >= 0 or price_per_mwh >= 0",
+        "demand_mw is null",                      # inverted predicate
+        "region is not NULL",                     # case-sensitive by design
+        "region >= 0",                            # numeric bound on a string field
+        "__import__('os').system('boom') is not null",
+        "",
+        "   ",
+        None,
+        42,
+        ["demand_mw >= 0"],
+    ],
+)
+def test_parser_rejects_everything_outside_the_supported_forms(check):
+    """A check that cannot be parsed must raise, never be silently skipped.
+
+    A quietly-ignored rule is worse than an absent one: the contract would claim
+    a guarantee the pipeline does not provide.
+    """
+    with pytest.raises(ValueError, match="UNSUPPORTED_QUALITY_CHECK"):
+        _parse_quality_check(check)
+
+
+@pytest.mark.parametrize(
+    "value,expected",
+    [
+        (21.5, []),
+        (0, []),
+        (-40, []),                              # cold, but a real measurement
+        (None, ["MISSING_TEMPERATURE"]),
+        ("abc", ["MISSING_TEMPERATURE"]),        # a nullness check alone would admit this
+        ("21.5", ["MISSING_TEMPERATURE"]),       # numeric string is not a number
+        (True, ["MISSING_TEMPERATURE"]),         # bool is an int subclass in Python
+        ([1], ["MISSING_TEMPERATURE"]),
+        ({}, ["MISSING_TEMPERATURE"]),
+        (float("nan"), ["MISSING_TEMPERATURE"]),
+        (float("inf"), ["MISSING_TEMPERATURE"]),
+    ],
+)
+def test_numeric_type_floor_applies_even_to_a_nullness_check(value, expected):
+    """``temperature_c is not null`` still demands a finite number.
+
+    The declared predicate constrains nullness only, but a non-numeric measure is
+    not a usable measurement. Without this floor the contract-driven path would be
+    weaker than the hardcoded validation it replaced.
+    """
+    checks = [_parse_quality_check("temperature_c is not null")]
+    assert _quality_check_reasons({"temperature_c": value}, checks) == expected
+
+
+@pytest.mark.parametrize(
+    "value,expected",
+    [
+        (0, []),                        # boundary: >= is inclusive
+        (0.0, []),
+        (0.001, []),
+        (-0.001, ["INVALID_DEMAND"]),   # boundary: just below fails
+        (-1, ["INVALID_DEMAND"]),
+    ],
+)
+def test_at_least_boundary_is_inclusive(value, expected):
+    checks = [_parse_quality_check("demand_mw >= 0")]
+    assert _quality_check_reasons({"demand_mw": value}, checks) == expected
+
+
+def test_missing_field_violates_any_declared_check():
+    """An absent field cannot satisfy a check that constrains it."""
+    checks = [_parse_quality_check("demand_mw >= 0")]
+    assert _quality_check_reasons({}, checks) == ["INVALID_DEMAND"]
+
+
+def test_reasons_follow_declared_order_and_deduplicate():
+    checks = [_parse_quality_check(c) for c in ("demand_mw >= 0", "price_per_mwh is not null")]
+    assert _quality_check_reasons({"demand_mw": -1, "price_per_mwh": None}, checks) == [
+        "INVALID_DEMAND",
+        "MISSING_PRICE",
+    ]
+    twice = [_parse_quality_check(c) for c in ("demand_mw >= 0", "demand_mw >= 100")]
+    assert _quality_check_reasons({"demand_mw": -1}, twice) == ["INVALID_DEMAND"]
+
+
+# --------------------------------------------------------------------------- #
+# The contract drives behaviour: end-to-end, in both directions.
+# --------------------------------------------------------------------------- #
+
+
+def mutated_run(tmp_path, mutate):
+    """Run the shipped fixtures under a mutated contract."""
+    (tmp_path / "metadata").mkdir()
+    (tmp_path / "fixtures").mkdir()
+    metadata = contract()
+    mutate(metadata)
+    (tmp_path / "metadata/sources.json").write_text(json.dumps(metadata))
+    for name in ("aemo_dispatch", "weather"):
+        (tmp_path / f"fixtures/{name}.jsonl").write_text(
+            (REPOSITORY_ROOT / f"agentic_energy/resources/fixtures/{name}.jsonl").read_text()
+        )
+    counts = run_pipeline(tmp_path / "metadata/sources.json", tmp_path / "out")
+    return counts, lines(tmp_path / "out/quarantine/rejected.jsonl")
+
+
+def test_tightening_a_declared_check_quarantines_more(tmp_path):
+    """A stricter contract must reject more rows: the declaration is not decorative."""
+
+    def tighten(metadata):
+        for source in metadata["sources"]:
+            if source["dataset"] == "DISPATCH_SCADA":
+                source["quality_checks"].append("demand_mw >= 999999")
+
+    counts, rejected = mutated_run(tmp_path, tighten)
+    assert counts["quarantine"] == 7, "every market row violates the tightened bound"
+    assert counts["silver"] == 3
+    assert counts["gold"] == 0
+    assert all(
+        "INVALID_DEMAND" in row["reason_codes"]
+        for row in rejected
+        if row["source_id"] == "aemo_dispatch_fixture"
+    )
+
+
+@pytest.mark.parametrize(
+    "source_index,check,surviving_codes",
+    [
+        (0, "demand_mw >= 0", {"MISSING_PRICE", "MISSING_TEMPERATURE"}),
+        (0, "price_per_mwh is not null", {"INVALID_DEMAND", "MISSING_TEMPERATURE"}),
+        (1, "temperature_c is not null", {"INVALID_DEMAND", "MISSING_PRICE"}),
+    ],
+)
+def test_removing_a_declared_check_loosens_behaviour(tmp_path, source_index, check, surviving_codes):
+    """Deleting a rule from the contract must stop it being enforced.
+
+    Together with the tightening test this shows the contract, not the code,
+    decides which rows are quarantined.
+    """
+    counts, rejected = mutated_run(
+        tmp_path, lambda metadata: metadata["sources"][source_index]["quality_checks"].remove(check)
+    )
+    assert counts["quarantine"] == 2
+    assert {code for row in rejected for code in row["reason_codes"]} == surviving_codes
+
+
+def test_unsupported_check_aborts_the_run_and_writes_no_output(tmp_path):
+    """A typo in the contract must fail the run, not degrade it silently."""
+
+    def typo(metadata):
+        metadata["sources"][0]["quality_checks"].append("demand_mw > 0")
+
+    with pytest.raises(ValueError, match="UNSUPPORTED_QUALITY_CHECK"):
+        mutated_run(tmp_path, typo)
+    assert not (tmp_path / "out").exists(), "failed validation must leave no partial output"
