@@ -32,6 +32,12 @@ For the layer schemas, the per-record lineage of every fixture row, quarantine
 reason codes, and the reconciliation equations, see
 [`docs/data-lineage.md`](docs/data-lineage.md).
 
+When deployed, the same run is also published as governed Unity Catalog Delta
+tables (`bronze_records`, `silver_observations`, `quarantine_rejections`,
+`gold_market_weather`, `run_manifest`) so the layers are queryable for business
+consumption. The Volume run directory stays the immutable evidence. See
+[`docs/deployment.md`](docs/deployment.md#unity-catalog-publication).
+
 The optional live command requires explicit source-use and network approval:
 
 ```bash

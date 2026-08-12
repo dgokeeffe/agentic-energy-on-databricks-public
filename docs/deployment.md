@@ -93,16 +93,26 @@ independent jobs. Three rules keep that true:
    run IDs are workspace-unique, so concurrent runs from different identities
    cannot overwrite each other's evidence.
 
-Each deploying identity needs `WRITE_VOLUME` on the landing Volume:
+Each deploying identity needs `WRITE_VOLUME` on the landing Volume, plus
+`CREATE_TABLE` and `SELECT` on the schema so the run can publish its governed
+tables:
 
 ```bash
 scripts/grant-workshop-access.sh <principal> [<principal> ...]   # deployers
 scripts/grant-workshop-access.sh --readers <participant-group>    # read-only
 ```
 
-The script grants the whole `USE_CATALOG` → `USE_SCHEMA` → `READ/WRITE_VOLUME`
-chain and verifies it, because a missing *parent* grant surfaces at run time as a
-permission error on the Volume path and reads like a Volume-grant problem.
+The script grants the whole `USE_CATALOG` → `USE_SCHEMA` + `SELECT` +
+`CREATE_TABLE` → `READ/WRITE_VOLUME` chain and verifies it, because a missing
+*parent* grant surfaces at run time as a permission error on the Volume path and
+reads like a Volume-grant problem.
+
+`CREATE_TABLE` is the grant most likely to be missed, because it fails *late*:
+the run writes its Volume evidence successfully first, so the run directory
+exists while the tables do not, and the failure looks like a pipeline bug rather
+than a missing grant. `--readers` deliberately grants `SELECT` without
+`CREATE_TABLE`, which is what business consumers of the Gold tables need.
+`SELECT` is granted at schema level so it covers tables a later run adds.
 
 Two traps when granting to a fleet:
 
@@ -155,6 +165,61 @@ The output includes Bronze, Silver, Quarantine, Gold, and `manifest.json`.
 The manifest records the external job run ID when the job is launched by
 Databricks.
 
+## Unity Catalog publication
+
+The Volume run directory is the immutable evidence, but JSONL in a Volume cannot
+be queried or granted, so the job also publishes each run as governed Delta
+tables in the target catalog/schema:
+
+| Table | Grain |
+|---|---|
+| `bronze_records` | one row per acquired raw record, with retrieval lineage |
+| `silver_observations` | typed, timezone-normalized, deduplicated observations |
+| `quarantine_rejections` | rejected records with reason codes |
+| `gold_market_weather` | business-facing projection, one row per region/interval |
+| `run_manifest` | per-run counts, metadata hash, mode, and freshness |
+
+Four properties are deliberate and are covered by tests in
+`tests/test_publish.py`:
+
+1. **Publication never mutates run evidence.** It reads the promoted output
+   directory and only writes to Unity Catalog, so a publication failure cannot
+   corrupt the manifest a run is reconciled against.
+2. **Republishing is idempotent.** Every table carries `run_id`, and publication
+   deletes that run's rows before appending. A retried task does not
+   double-count.
+3. **Counts are reconciled before any write.** If the row count for a layer
+   disagrees with `manifest.json`, the run fails before touching a table rather
+   than publishing misleading numbers.
+4. **Schemas are declared, not inferred.** Tables are created with explicit DDL
+   so a nullable measure cannot land as the wrong type, and a later run cannot
+   silently widen a column under a downstream metric view.
+
+Because `run_manifest` is written last, a run that dies mid-publication is
+absent from `run_manifest` and must not be treated as published. Query current
+state by joining to the latest `run_id`, since the tables accumulate runs:
+
+```sql
+SELECT g.*
+FROM <catalog>.<schema>.gold_market_weather g
+JOIN (SELECT max(run_id) AS run_id FROM <catalog>.<schema>.run_manifest) latest
+  USING (run_id);
+```
+
+Sources stay data, not code: `silver_observations` is one table whose market and
+weather measures are nullable per source, rather than a table per source.
+
+Publication is opt-in at the CLI level (`--publish-catalog` / `--publish-schema`,
+which also require `--run-id`). Without them the local fixture run is unchanged
+and needs no workspace, Spark, or credentials.
+
+The publishing identity needs `USE_CATALOG`, `USE_SCHEMA`, `CREATE_TABLE`, and
+`SELECT` in addition to the existing `WRITE_VOLUME` grant. Provision them with
+`scripts/grant-workshop-access.sh` (see “Many developers at once”), which grants
+and verifies the whole chain. A missing `CREATE_TABLE` surfaces at run time,
+after the Volume evidence has been written successfully — the run directory will
+exist while the tables do not.
+
 The job accepts a metadata contract as a job parameter. With no override it
 uses the fixture contract packaged in the wheel. To run an immutable contract
 snapshot staged in a Volume, pass its path and snapshot ID without rebuilding
@@ -165,6 +230,39 @@ databricks bundle run agentic_energy_etl -t dev --params \
   metadata_path=/Volumes/<catalog>/<schema>/<volume>/metadata/snapshot.json,\
   metadata_snapshot_id=snapshot-20260810
 ```
+
+## Live NEMWEB acquisition (facilitator only)
+
+Acquisition mode is a job parameter defaulting to `fixture`, so a deploy never
+starts pulling live source data on its own. Enabling live NEMWEB is a deliberate
+per-run override:
+
+```bash
+databricks bundle run agentic_energy_etl -t dev --params \
+  mode=live,\
+  metadata_path=/Volumes/<catalog>/<schema>/<volume>/metadata/sources.live.json,\
+  metadata_snapshot_id=<snapshot-id>
+```
+
+This is a parameter rather than a code change on purpose: the choice is recorded
+against the job run, stamped into the run manifest and the published
+`run_manifest` table, needs no wheel rebuild, and reverts to `fixture` on the
+next run unless someone opts in again.
+
+**Do not run this until all of the following hold.** These are governance
+preconditions, not setup steps:
+
+- **PF-8 is resolved**: AEMO data-use authorization for NEMWEB DISPATCHIS is
+  confirmed for this workspace and purpose. `docs/challenge-spec.md` makes this a
+  hard stop: *"Stop if AEMO data use is unauthorized."*
+- A facilitator has approved live acquisition for this specific target.
+- Egress to `nemweb.com.au` is permitted from the serverless compute (PF-6).
+
+The adapter is bounded by design — HTTPS only, host allowlisted from metadata,
+redirects refused, response and archive-member size capped — but those are
+technical controls, not authorization. A live run also makes freshness real:
+`pipeline_ingested_at` becomes the actual retrieval instant rather than the
+contract's fixed timestamp.
 
 The metadata file remains the input contract. For a Volume snapshot, stage it
 using the same contract-root layout as the wheel:

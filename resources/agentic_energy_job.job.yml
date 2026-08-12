@@ -18,6 +18,15 @@ resources:
           default: ""
         - name: metadata_snapshot_id
           default: ""
+        # Acquisition mode is a run parameter, defaulting to fixture. Live
+        # NEMWEB acquisition requires PF-8 (AEMO data-use authorization) and
+        # facilitator approval, so enabling it is a deliberate per-run override
+        # that is recorded against the job run and stamped into the run
+        # manifest. Keeping it a parameter rather than a redeploy means the
+        # decision is auditable and reversible: no wheel rebuild, and the next
+        # run reverts to fixture unless someone opts in again.
+        - name: mode
+          default: fixture
       tasks:
         - task_key: metadata_etl
           environment_key: default
@@ -39,10 +48,17 @@ resources:
               - /Volumes/${var.catalog}/${var.schema}/${var.landing_volume}/${bundle.target}/runs/{{job.run_id}}
               - --run-id
               - "{{job.run_id}}"
-              # The initial workshop deployment is fixture-only. Live mode
-              # requires a reviewed bundle change and human deployment gate.
+              # Publish the run's layers as governed Delta tables so Bronze/
+              # Silver/Quarantine/Gold are queryable in Unity Catalog. The
+              # Volume run directory remains the immutable evidence; these
+              # tables are keyed by {{job.run_id}} and a republish deletes that
+              # run's rows first, so a retried task cannot double-count.
+              - --publish-catalog
+              - ${var.catalog}
+              - --publish-schema
+              - ${var.schema}
               - --mode
-              - fixture
+              - "{{job.parameters.mode}}"
       environments:
         - environment_key: default
           spec:
