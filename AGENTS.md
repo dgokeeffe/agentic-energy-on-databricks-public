@@ -46,6 +46,24 @@ Git and Beads are separate synchronization channels:
 - `bd dolt push` publishes issue claims, dependencies, notes, and statuses.
 - Do not use `.beads/issues.jsonl` as the source of truth.
 
+### `git push` from a CoDA container
+
+`git clone` works but `git push` has **no** credential configured in an agent
+session — `GH_TOKEN` is scoped to clone-time only, so a push fails with
+`could not read Username for 'https://github.com'`. This is expected; do **not**
+scrape the token from `/proc/<pid>/environ`.
+
+The supported source is the GitHub token in the **`coda-omnigent` Databricks
+secret scope**, readable with the already-brokered CLI:
+
+```bash
+databricks secrets list-secrets coda-omnigent   # key: dgokeeffe-github-token
+```
+
+Decode it in memory and pass it to Git via an ephemeral `GIT_ASKPASS`. Never
+commit, echo, or persist the value. Recipe and handling rules:
+[`docs/deployment.md`](docs/deployment.md#pushing-git-branches-from-a-coda-container).
+
 ## Safety boundaries
 
 - Do not put credentials, tokens, workspace-specific secrets, or private tenant

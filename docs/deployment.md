@@ -59,6 +59,56 @@ export BUNDLE_VAR_runtime_service_principal="<etl-service-principal-application-
 `.env.example` documents the names but is intentionally not loaded
 automatically.
 
+## Pushing Git branches from a CoDA container
+
+Databricks auth is brokered in a CoDA container, but **Git push auth is not.**
+`GH_TOKEN` is held by the runner supervisor and allow-listed into a filtered
+environment for the *initial clone only*; the helper is injected as throwaway
+`git -c credential.helper=...` flags that deliberately never reach the cloned
+remote. So a clone succeeds and a later push fails:
+
+```text
+fatal: could not read Username for 'https://github.com': No such device or address
+```
+
+This is expected, not a broken container. Do **not** try to recover the token
+from `/proc/<pid>/environ`.
+
+The supported source is the **`coda-omnigent` Databricks secret scope**, readable
+with the already-brokered CLI:
+
+```bash
+databricks secrets list-scopes
+databricks secrets list-secrets coda-omnigent   # key: dgokeeffe-github-token
+```
+
+Secret values come back base64-encoded. Decode in memory and hand the token to
+Git through an ephemeral `GIT_ASKPASS` helper so it never enters argv, the remote
+URL, `.git/config`, or the shell history:
+
+```bash
+TOK=$(databricks secrets get-secret coda-omnigent dgokeeffe-github-token \
+  | python3 -c 'import sys,json,base64; print(base64.b64decode(json.load(sys.stdin)["value"]).decode())')
+ASKPASS=$(mktemp) && chmod 700 "$ASKPASS"
+printf '#!/bin/sh\ncase "$1" in *Username*) echo <github-user>;; *) printf "%%s" "$GH_PUSH_TOKEN";; esac\n' > "$ASKPASS"
+GH_PUSH_TOKEN="$TOK" GIT_ASKPASS="$ASKPASS" GIT_TERMINAL_PROMPT=0 \
+  git push -u origin <branch>
+rm -f "$ASKPASS"
+```
+
+Rules when using it:
+
+- **Never commit, `echo`, or log the value.** Print only length or a short prefix
+  if you must confirm retrieval, and pipe push output through a redaction filter.
+- Do not write it into `.git/config`, `~/.git-credentials`, or a `credential.helper`.
+- Remove the askpass helper immediately; do not leave it in the workspace.
+- Verify afterwards that nothing leaked: `git config --get-all credential.helper`
+  should be empty and `.git/config` should contain no token material.
+
+`gh auth login` is the alternative — the `gh` wrapper on `PATH` is pre-tuned for
+it (`-h github.com -p https -w --skip-ssh-key`) and gives a browser device-code
+flow, after which `gh auth setup-git` makes push work for the session.
+
 ## Local verification
 
 Run the same checks used before deployment:
