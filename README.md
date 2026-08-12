@@ -1,5 +1,11 @@
 # Agentic Energy on Databricks
 
+<!-- token-usage:begin -->
+![agent tokens](https://img.shields.io/badge/agent%20tokens-15.1M%20billed%20%7C%20116.3K%20generated-blue)
+
+<sub>Token usage for the AI agent session that produced the recent commits: **15,135,851 billed** across 204 model calls, of which **116,309** are generated output. Billed input is dominated by re-sending the conversation each turn; the unique conversation is about 186,049 tokens. Refresh with `python3 scripts/token-usage.py --write`. See [`docs/test-evidence/agent-token-usage.md`](docs/test-evidence/agent-token-usage.md).</sub>
+<!-- token-usage:end -->
+
 A metadata-driven energy data foundation and workshop exercise for Databricks.
 The repository contains a deterministic local Bronze → Silver → Quarantine →
 Gold ETL runner, an installable Python package, and a direct-engine Databricks

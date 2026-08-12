@@ -9,6 +9,9 @@ is worth keeping but which the automated suite cannot assert on its own.
 |---|---|---|---|
 | 2026-08-12 | [`2026-08-12-foundation-fixture-run.md`](2026-08-12-foundation-fixture-run.md) | Deterministic fixture ETL run, manifest reconciliation, replay determinism, closure of `agentic-energy-93y` | PASS |
 | 2026-08-12 | [`2026-08-12-metadata-contract-validation.md`](2026-08-12-metadata-contract-validation.md) | Contract validation hardening for `agentic-energy-zwh`: unvalidated required fields, mutation test, unchanged baseline | PASS |
+| 2026-08-12 | [`2026-08-12-databricks-dev-deployment.md`](2026-08-12-databricks-dev-deployment.md) | Bundle deploy to the `dev` target, serverless run, byte-level local/serverless equivalence | PASS (with caveats) |
+| 2026-08-12 | [`2026-08-12-bugfix-quarantine-and-gold.md`](2026-08-12-bugfix-quarantine-and-gold.md) | Bug fixes for `agentic-energy-yx8` / `aln` / `02f`: self-contained quarantine evidence, Gold join accounting and dataset freshness, DST regression coverage; **changes two baseline hashes** | PASS (with caveats) |
+| ongoing | [`agent-token-usage.md`](agent-token-usage.md) | What the README token badge measures, how to refresh it, and why two totals are quoted | reference |
 
 ## Helpers
 
