@@ -40,3 +40,6 @@ uv.lock
 
 # Beads / Dolt files (added by bd init)
 *.gate.lock*
+
+# Databricks CLI bundle deployment state (per-developer, never shared)
+.databricks/
