@@ -167,9 +167,9 @@ changes; deterministic fixtures remain the CI and workshop fallback.
 
 ## Workshop mapping
 
-- **Business participants** use the governed Gold projection in Genie One,
-  combining it with one preflighted SharePoint or Confluence context source
-  during Brief → Research → Analysis stages.
+- **Business participants** create a metric view over the governed Gold
+  projection, ground a Genie Agent in it, use the agent in Genie One, and add one
+  approved MCP with its identity and access boundary recorded.
 - **Technical participants** change Lakebase metadata or a registered parser,
   then prove that the same dispatcher and worker produce correct Bronze/Silver
   results without a new source-specific workflow.
@@ -186,5 +186,6 @@ Before deploying the Databricks target, confirm:
 - secret/OAuth handling for Lakebase and any permitted source;
 - serverless Jobs/Lakeflow availability and workspace permissions;
 - source licensing/provenance approval for live NEMWEB retrieval; and
-- Genie One and the selected SharePoint/Confluence connector and identity
-  boundaries for the business lane, plus a curated cited fallback.
+- metric-view creation, Genie Agent and Genie One availability, and one approved
+  MCP with its identity and access boundary for the business lane, plus prepared
+  fallback artefacts.

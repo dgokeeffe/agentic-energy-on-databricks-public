@@ -5,15 +5,18 @@
 The workshop uses real NEMWEB market data to teach two different skills on the
 same governed foundation:
 
-1. **Business value discovery:** turn energy-market data and one approved,
-   preflighted SharePoint or Confluence context source—or the curated cited
-   fallback—into a defensible brief, research trail, and analysis.
+1. **Business value discovery:** turn energy-market data into a metric view, a
+   scoped Genie Agent, a Genie One analysis, and one approved MCP with a recorded
+   access boundary.
 2. **Metadata-driven engineering:** maintain one ingestion pipeline through
    Silver while adding or changing sources through metadata rather than source-
    specific orchestration code.
 
 Both tracks consume the same run, source lineage, freshness markers, and data
-quality evidence. Neither track creates a parallel data store.
+quality evidence. Neither track creates a parallel data store. Section one begins
+in Omnigent for both tracks: product participants research NEMWEB and refine an
+evidence-backed Beads requirement with their paired engineering group before
+implementation starts.
 
 ## Shared foundation outcome
 
@@ -50,39 +53,44 @@ the deployment extension complete from fixture evidence alone.
 
 ### Stage A1: Brief
 
-Participants choose an energy-market decision, not a technology feature. A
-brief must state:
+Participants begin in Omnigent with their paired engineering group and choose an
+energy-market decision, not a technology feature. Before engineering dispatches,
+they turn the research into an approved Beads requirement. The brief must state:
 
 - the audience and decision owner;
 - the operational or commercial question;
 - the expected value if the question is answered;
 - the NEMWEB fields and time grain needed;
-- what context is expected from the selected SharePoint or Confluence source; and
+- the measures and dimensions the metric view must expose;
+- the intended Genie Agent scope and MCP access boundary; and
 - the evidence that would change the decision.
 
 **Output:** a one-page question brief with a measurable value hypothesis.
 
 ### Stage A2: Research
 
-Participants use governed data in Genie One, or the approved fallback
-query/result, and content from the selected SharePoint or Confluence source or
-curated cited pack to check whether the question is answerable. They record:
+During section one, participants research NEMWEB in Omnigent and attach the
+baseline, freshness, uncertainty, and evidence to the Beads requirement. During
+section two, they create a metric view, ground a Genie Agent in it, use the agent
+in Genie One, and add one approved MCP. They record:
 
-- source and document references;
-- definitions and assumptions;
+- source references, the Genie Agent scope, and the MCP access boundary;
+- metric definitions and assumptions;
 - time-window and region choices;
 - data freshness and known gaps; and
 - competing explanations or missing context.
 
-**Output:** a research log with citations, source freshness, and unresolved
-questions. It is not sufficient to provide an uncited answer or a chart without
-an interpretation.
+**Output:** an approved Beads requirement plus a research log with citations,
+source freshness, and unresolved questions. It is not sufficient to provide an
+uncited answer or a chart without an interpretation.
 
 ### Stage A3: Analysis
 
-Participants use Genie One, or the approved fallback query/result, to combine
-NEMWEB-derived tables with relevant context from the selected SharePoint or
-Confluence source or curated cited pack. Analysis should include:
+Participants use Genie One through the scoped Genie Agent, metric view, and
+approved MCP, or the prepared fallback transcript, to analyse NEMWEB-derived
+tables. They then build an AI/BI dashboard or Databricks App from the metric view,
+create Genie Agent benchmark cases, and try a Genie One skill. Analysis should
+include:
 
 - the query or analytical method;
 - the observed pattern and its uncertainty;
@@ -90,17 +98,18 @@ Confluence source or curated cited pack. Analysis should include:
 - the business implication; and
 - a recommended next action or experiment.
 
-**Output:** a short decision-ready analysis with governed source/freshness
-context and links to the research evidence.
+**Output:** a dashboard or app showing owner, source, and freshness; Genie Agent
+benchmark cases; a recorded Genie One skill result, refusal, or fallback; and a
+short decision-ready analysis with links to the research evidence.
 
 ### Business scoring signals
 
 | Signal | Evidence |
 |---|---|
 | Value | Question is tied to a real decision and measurable benefit |
-| Research quality | Sources, assumptions, gaps, and selected SharePoint/Confluence context are cited |
+| Research quality | Sources, assumptions, gaps, the metric definitions, and the scoped agent are recorded |
 | Analytical reasoning | Pattern is tested against a baseline; correlation is not presented as causation |
-| Governance | Answers retain source, freshness, document reference, and the granted access boundary; live identity propagation is claimed only after preflight |
+| Governance | Answers retain source, freshness, the Genie Agent scope, and the MCP access boundary; live identity propagation is claimed only after preflight |
 | Actionability | Recommendation has an owner, next step, and measurable follow-up |
 
 ## Track B — metadata-driven engineering

@@ -11,9 +11,11 @@
 
 This challenge gives participants a bounded, realistic energy-market data
 foundation on Databricks and asks them to operate on it in one of two lanes:
-a business-experience lane using Genie One plus one approved SharePoint or
-Confluence context source, or a software-engineering lane using a coding/code-
-review agent.
+a business-experience lane using a metric view, Genie Agent, Genie One, and one
+approved MCP, or a software-engineering lane using a coding/code-
+review agent. Section one begins in Omnigent for both lanes: product participants
+research NEMWEB and refine evidence-backed Beads requirements with their paired
+engineering group before implementation starts.
 
 The shared foundation is a metadata-driven Lakeflow pipeline ingesting public
 AEMO/NEMWEB market data and weather enrichment, refining it through
@@ -45,8 +47,8 @@ Participants who complete the challenge will have demonstrated:
 
 | Lane | Audience | Primary surface |
 |---|---|---|
-| A | Business-facing analysts, operators, energy-market staff | Brief → Research → Analysis in Genie One + one approved SharePoint/Confluence source |
-| B | Software engineers, data engineers | Lakebase metadata + one serverless ingestion workflow |
+| A | Business-facing analysts, operators, energy-market staff | Omnigent research and shared Beads requirements in section one; metric view, Genie Agent, Genie One, and one approved MCP in section two |
+| B | Software engineers, data engineers | Omnigent and the shared Beads frontier in section one; Lakebase metadata plus one serverless ingestion workflow |
 
 All participants complete the common data foundation first. Then each team
 selects **one** lane. Completing both lanes is an optional stretch goal.
@@ -60,20 +62,27 @@ selects **one** lane. Completing both lanes is an optional stretch goal.
    ├── Verify Bronze/Silver/quarantine counts, keys, timezone, and freshness
    └── Read the shared governed projection in Genie One
 
-2. Lane selection (one required)
+2. Section-one start in Omnigent (all participants)
+   ├── Product participants research NEMWEB and record baseline, freshness, uncertainty, and evidence
+   ├── Product and engineering pairs refine an evidence-backed Beads requirement
+   └── A human approves the ready frontier before implementation
+
+3. Lane selection (one required)
    ├── Lane A: Business value
-   │   ├── Write a decision brief and value hypothesis
-   │   ├── Research NEMWEB plus permitted SharePoint/Confluence context
-   │   ├── Analyze in Genie One with source/freshness evidence
+   │   ├── Carry the NEMWEB research forward as the decision brief and value hypothesis
+   │   ├── Create a metric view, then ground a Genie Agent in it
+   │   ├── Use the agent in Genie One and add one approved MCP
+   │   ├── Build an AI/BI dashboard or Databricks App from the metric view
+   │   ├── Create Genie Agent benchmark cases and try a Genie One skill
    │   └── Produce a recommendation and next action
    └── Lane B: Metadata-driven engineering
-       ├── Read the source contract and current run evidence
+       ├── Read the approved Beads requirement, source contract, and current run evidence
        ├── Add/change metadata in Lakebase, not orchestration code
        ├── Run the single generic serverless path through Silver
        ├── Prove replay, quarantine, deduplication, and timezone behavior
        └── Extend with a new source without a new pipeline
 
-3. Stretch (optional)
+4. Stretch (optional)
    ├── Add a second live NEMWEB report family
    ├── Lakebase synced Gold and native annotations
    ├── Selected SharePoint or Confluence connector and identity-bound Genie One analysis
@@ -90,9 +99,13 @@ selects **one** lane. Completing both lanes is an optional stretch goal.
 
 ### Lane A — Business value
 
+- An approved, evidence-backed Beads requirement handed to the paired engineering group.
 - A decision brief with a measurable value hypothesis.
 - A research log citing NEMWEB and the selected SharePoint or Confluence source.
-- A Genie One analysis with method, uncertainty, recommendation, and next action.
+- A metric view, a scoped Genie Agent, a Genie One analysis, and one approved MCP with its recorded access boundary.
+- An AI/BI dashboard or Databricks App from the metric view, showing owner, source, and freshness.
+- Genie Agent benchmark cases and a recorded Genie One skill result, refusal, or fallback.
+- A recommendation and next action with method and uncertainty.
 
 ### Lane B — Engineering
 
@@ -109,7 +122,7 @@ selects **one** lane. Completing both lanes is an optional stretch goal.
 |---|---|
 | Foundation | Metadata validates; fixtures ingest deterministically; Silver dedup/quarantine correct; Gold grain/freshness checks pass |
 | Lakebase | Synced Gold key/row-count/freshness reconciles; synced relation is read-only to participants; annotation CRUD authorized; audit fields present; logical referential integrity holds |
-| Lane A | Brief is decision-led; research cites NEMWEB and the selected context source; analysis is governed, explicit about uncertainty, and actionable |
+| Lane A | The approved Beads requirement carries NEMWEB evidence; the metric view and scoped Genie Agent are governed; the approved MCP has a recorded access boundary; the dashboard or app shows owner, source, and freshness; benchmarks and the Genie One skill result are recorded |
 | Lane B | Metadata drives the same worker path; Silver invariants and run evidence reconcile; no source-specific pipeline is introduced |
 
 ## 7. Shared data foundation
@@ -550,10 +563,10 @@ the target Agentic Energy tenant before any scaffold or integration work may beg
 
 | ID | Decision | Blocks |
 |---|---|---|
-| PF-1 | Genie One availability and surface in target workspace | Lane A scaffold |
-| PF-2 | Genie Agent invocation, supported assets, citation behavior, permissions | Lane A scaffold |
-| PF-3 | Select SharePoint or Confluence; verify connector type, tenant/site, consent, scopes, identity mapping, and cited fallback | Lane A context integration |
-| PF-4 | Managed MCP endpoint availability, supported tools, caller identity, authorization, auditability | Lane A MCP edge |
+| PF-1 | Metric-view creation over Gold: warehouse, UC permissions, supported YAML version, and Genie compatibility | Lane A scaffold |
+| PF-2 | Genie One availability and the supported surface for the scoped agent and metric view | Lane A scaffold |
+| PF-3 | Genie Agent creation, supported assets, citation behavior, and permissions | Lane A scaffold |
+| PF-4 | Approved Managed MCP endpoint availability, supported tools, caller identity, authorization, and auditability | Lane A MCP edge |
 | PF-5 | Identity propagation: UC principals, service principals, app registration/consent, per-user Microsoft OAuth | All scaffold |
 | PF-6 | Network policy and permitted managed MCP endpoints | All scaffold |
 | PF-7 | Lakebase autoscaling availability in target region | Lakebase scaffold |
