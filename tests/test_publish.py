@@ -207,3 +207,56 @@ def test_publication_does_not_mutate_run_evidence(tmp_path):
     publish_run(output, catalog="c", schema="s", run_id="job-run-6", writer=RecordingWriter())
     after = {p.relative_to(output): p.read_bytes() for p in output.rglob("*") if p.is_file()}
     assert before == after
+
+
+def test_retry_after_publication_failure_resumes_instead_of_failing(tmp_path):
+    """A publication failure must leave the run retryable.
+
+    Observed in the workspace: attempt 0 wrote valid run evidence and then failed
+    on a missing CREATE TABLE grant. The platform retried, the pipeline refused
+    to overwrite write-once evidence, and the retry died with
+    OUTPUT_ALREADY_EXISTS -- masking the permission error that actually needed
+    fixing. The second attempt must reuse the evidence and retry publication.
+    """
+    from agentic_energy.cli import _completed_run
+
+    output = tmp_path / "runs" / "456"
+    output.mkdir(parents=True)
+    (output / "manifest.json").write_text(
+        json.dumps({"run_id": "456", "layers": {"bronze": 11, "silver": 6, "quarantine": 3, "gold": 3}}),
+        encoding="utf-8",
+    )
+    assert _completed_run(str(output), "456") == {
+        "bronze": 11,
+        "silver": 6,
+        "quarantine": 3,
+        "gold": 3,
+    }
+
+
+def test_completed_run_refuses_evidence_from_a_different_run(tmp_path):
+    """Adopting another run's directory would publish it under the wrong key."""
+    from agentic_energy.cli import _completed_run
+
+    output = tmp_path / "runs" / "456"
+    output.mkdir(parents=True)
+    (output / "manifest.json").write_text(
+        json.dumps({"run_id": "999", "layers": {"bronze": 11}}), encoding="utf-8"
+    )
+    assert _completed_run(str(output), "456") is None
+
+
+def test_completed_run_ignores_absent_or_unusable_evidence(tmp_path):
+    """Without a trustworthy manifest the pipeline must run normally."""
+    from agentic_energy.cli import _completed_run
+
+    missing = tmp_path / "nope"
+    assert _completed_run(str(missing), "456") is None
+
+    corrupt = tmp_path / "runs" / "456"
+    corrupt.mkdir(parents=True)
+    (corrupt / "manifest.json").write_text("{not json", encoding="utf-8")
+    assert _completed_run(str(corrupt), "456") is None
+
+    # No run_id means no idempotency key, so resuming is never safe.
+    assert _completed_run(str(corrupt), None) is None
