@@ -8,6 +8,7 @@ is worth keeping but which the automated suite cannot assert on its own.
 | Date | Record | Scope | Result |
 |---|---|---|---|
 | 2026-08-12 | [`2026-08-12-foundation-fixture-run.md`](2026-08-12-foundation-fixture-run.md) | Deterministic fixture ETL run, manifest reconciliation, replay determinism, closure of `agentic-energy-93y` | PASS |
+| 2026-08-12 | [`2026-08-12-metadata-contract-validation.md`](2026-08-12-metadata-contract-validation.md) | Contract validation hardening for `agentic-energy-zwh`: unvalidated required fields, mutation test, unchanged baseline | PASS |
 
 ## Helpers
 

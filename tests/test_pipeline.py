@@ -7,7 +7,12 @@ import pytest
 
 import agentic_energy.pipeline as pipeline_module
 from agentic_energy.acquisition import parse_dispatchis_zip
-from agentic_energy.pipeline import run_pipeline, _utc_timestamp
+from agentic_energy.pipeline import (
+    REQUIRED_SOURCE_FIELDS,
+    _utc_timestamp,
+    _validate_source,
+    run_pipeline,
+)
 
 
 def lines(path):
@@ -327,4 +332,107 @@ def test_live_mode_stamps_the_real_ingestion_instant(monkeypatch, tmp_path):
     gold = lines(out / "gold/market_weather.jsonl")
     assert {row["freshness"]["pipeline_ingested_at"] for row in gold} == {
         "2026-08-12T03:04:05Z"
+    }
+
+
+def _external_contract(tmp_path):
+    """Stage the shipped contract and fixtures under an approved external root."""
+    root = tmp_path / "contract-root"
+    metadata_dir = root / "metadata"
+    fixture_dir = root / "fixtures"
+    metadata_dir.mkdir(parents=True)
+    fixture_dir.mkdir()
+    repository_root = Path(__file__).resolve().parent.parent
+    metadata = json.loads(
+        (repository_root / "agentic_energy/resources/metadata/sources.json").read_text()
+    )
+    for fixture in (repository_root / "agentic_energy/resources/fixtures").glob("*.jsonl"):
+        (fixture_dir / fixture.name).write_bytes(fixture.read_bytes())
+    return root, metadata_dir / "snapshot.json", metadata
+
+
+@pytest.mark.parametrize("field", REQUIRED_SOURCE_FIELDS)
+def test_incomplete_contract_is_rejected_before_side_effects(tmp_path, field):
+    """An absent required field must be a validated rejection, not a KeyError.
+
+    These fields are read unconditionally by the generic worker. Before this
+    check they surfaced as `KeyError: 'source_timezone'` part-way through a run,
+    which violates validate-before-side-effects and gives a participant adding a
+    source a stack trace instead of a contract error.
+    """
+    root, metadata_path, metadata = _external_contract(tmp_path)
+    del metadata["sources"][0][field]
+    metadata_path.write_text(json.dumps(metadata))
+    output = tmp_path / f"output-missing-{field}"
+
+    with pytest.raises(ValueError, match=f"MISSING_SOURCE_FIELD:{field}"):
+        run_pipeline(metadata_path, output, metadata_root=root, mode="fixture",
+                     metadata_snapshot_id="snapshot-1")
+
+    assert not output.exists(), "validation must reject before writing any layer"
+
+
+@pytest.mark.parametrize(
+    "field,value,expected",
+    [
+        ("source_timezone", "Mars/Olympus", "INVALID_SOURCE_TIMEZONE"),
+        ("source_timezone", "", "MISSING_SOURCE_FIELD:source_timezone"),
+        ("source_timezone", "   ", "MISSING_SOURCE_FIELD:source_timezone"),
+        ("deduplication_rule", "first_by_coin_flip", "UNSUPPORTED_DEDUPLICATION_RULE"),
+        ("provider", "", "MISSING_SOURCE_FIELD:provider"),
+        ("source_version", "", "MISSING_SOURCE_FIELD:source_version"),
+        ("licensing_provenance", "", "MISSING_SOURCE_FIELD:licensing_provenance"),
+    ],
+)
+def test_invalid_contract_values_are_rejected(tmp_path, field, value, expected):
+    root, metadata_path, metadata = _external_contract(tmp_path)
+    metadata["sources"][0][field] = value
+    metadata_path.write_text(json.dumps(metadata))
+    output = tmp_path / "output-invalid"
+
+    with pytest.raises(ValueError, match=expected):
+        run_pipeline(metadata_path, output, metadata_root=root, mode="fixture",
+                     metadata_snapshot_id="snapshot-1")
+
+    assert not output.exists(), "validation must reject before writing any layer"
+
+
+def test_non_string_required_field_is_rejected_not_coerced(tmp_path):
+    """A structurally wrong type must fail validation rather than stringify later."""
+    root, metadata_path, metadata = _external_contract(tmp_path)
+    metadata["sources"][0]["source_version"] = 1.0
+    metadata_path.write_text(json.dumps(metadata))
+
+    with pytest.raises(ValueError, match="MISSING_SOURCE_FIELD:source_version"):
+        run_pipeline(metadata_path, tmp_path / "output-typed", metadata_root=root,
+                     mode="fixture", metadata_snapshot_id="snapshot-1")
+
+
+def test_shipped_contracts_still_satisfy_the_stricter_validation(tmp_path):
+    """Regression guard: the stricter checks must not reject what ships."""
+    repository_root = Path(__file__).resolve().parent.parent
+    metadata_root = repository_root / "agentic_energy/resources/metadata"
+    for name in ("sources.json", "sources.live.json"):
+        metadata = json.loads((metadata_root / name).read_text())
+        for source in metadata["sources"]:
+            _validate_source(source, metadata_root.parent)
+
+
+def test_validation_change_preserves_the_fixture_baseline(tmp_path):
+    """The stricter contract must not alter row accounting for a valid contract."""
+    root, metadata_path, metadata = _external_contract(tmp_path)
+    metadata_path.write_text(json.dumps(metadata))
+    output = tmp_path / "baseline"
+
+    counts = run_pipeline(metadata_path, output, metadata_root=root, mode="fixture",
+                          metadata_snapshot_id="snapshot-1")
+
+    assert counts == {"bronze": 11, "silver": 6, "quarantine": 3, "gold": 3}
+    manifest = json.loads((output / "manifest.json").read_text())
+    assert manifest["layers"] == {"bronze": 11, "silver": 6, "quarantine": 3, "gold": 3}
+    assert manifest["sources"]["aemo_dispatch_fixture"] == {
+        "accepted": 4, "bronze": 6, "deduplicated": 1, "quarantine": 2, "silver": 3
+    }
+    assert manifest["sources"]["weather_fixture"] == {
+        "accepted": 4, "bronze": 5, "deduplicated": 1, "quarantine": 1, "silver": 3
     }
