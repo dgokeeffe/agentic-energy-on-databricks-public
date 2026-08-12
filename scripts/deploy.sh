@@ -11,7 +11,21 @@ case "$TARGET" in
     ;;
 esac
 
-: "${DATABRICKS_HOST:?Set DATABRICKS_HOST to the selected workspace URL}"
+# The bundle cannot interpolate auth fields, so the workspace comes from the
+# environment. Prefer an explicit DATABRICKS_HOST, but fall back to whatever the
+# already-authenticated CLI resolves: inside a CoDA container (Databricks App
+# terminal / Omnigent runner) auth is brokered per-invocation and DATABRICKS_HOST
+# is deliberately NOT exported, so demanding it turned a working deploy into a
+# fake "no credentials" dead end. `auth describe` is the supported read of the
+# resolved host; it works for a PAT, a profile, or the brokered token alike.
+if [ -z "${DATABRICKS_HOST:-}" ]; then
+  DATABRICKS_HOST=$(databricks auth describe --output json 2>/dev/null \
+    | python3 -c 'import json,sys; print(json.load(sys.stdin).get("details",{}).get("host",""))' \
+    2>/dev/null) || DATABRICKS_HOST=""
+  export DATABRICKS_HOST
+  [ -n "$DATABRICKS_HOST" ] && echo "==> Resolved DATABRICKS_HOST from the authenticated CLI: $DATABRICKS_HOST"
+fi
+: "${DATABRICKS_HOST:?Set DATABRICKS_HOST to the selected workspace URL (or authenticate the databricks CLI first)}"
 # The Databricks CLI resolves bundle variables from BUNDLE_VAR_<name>, not
 # DATABRICKS_BUNDLE_VAR_<name>. Using the wrong prefix makes every variable
 # read as unassigned and fails validation before the workspace is contacted.

@@ -27,12 +27,25 @@ Authenticate outside the repository. Do not put tokens in `.env` or Git:
 databricks auth login --host https://<workspace-host>
 ```
 
+**Working inside a CoDA container (Databricks App terminal / Omnigent runner)?
+Skip that step.** Auth is already brokered there: a fresh OAuth bearer is minted
+per CLI invocation, no PAT is stored, and `databricks auth login` cannot complete
+(its OAuth redirect targets a loopback port no outside browser can reach). Run
+`databricks current-user me` to confirm, then deploy. The deploying identity is
+the app's service principal unless a PAT was injected — which changes who needs
+the Unity Catalog grants below. Full detail, including the two auth errors that
+look like missing credentials:
+[`.claude/skills/deploying-from-coda/SKILL.md`](../.claude/skills/deploying-from-coda/SKILL.md).
+
 Set the required bundle variables in the shell or CI secret store. The
 Databricks CLI reads bundle variables from `BUNDLE_VAR_<name>` — the
 `DATABRICKS_` prefix is **not** recognised and leaves every variable unassigned:
 
+`scripts/deploy.sh` resolves `DATABRICKS_HOST` from the authenticated CLI when it
+is not already exported, so only the bundle variables are mandatory:
+
 ```bash
-export DATABRICKS_HOST="https://<workspace-host>"
+export DATABRICKS_HOST="https://<workspace-host>"   # optional; auto-resolved
 export BUNDLE_VAR_catalog="<catalog>"
 export BUNDLE_VAR_schema="<schema>"
 export BUNDLE_VAR_landing_volume="agentic_energy_landing"
