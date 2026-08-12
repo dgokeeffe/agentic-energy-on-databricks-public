@@ -28,6 +28,10 @@ or live source access. It produces deterministic JSONL artifacts under
 - `gold/` — market/weather projection
 - `manifest.json` — counts, source IDs, metadata hash, and reconciliation evidence
 
+For the layer schemas, the per-record lineage of every fixture row, quarantine
+reason codes, and the reconciliation equations, see
+[`docs/data-lineage.md`](docs/data-lineage.md).
+
 The optional live command requires explicit source-use and network approval:
 
 ```bash
@@ -49,9 +53,10 @@ bd ready
 
 The public participant graph contains workshop tasks and bounded seeded defects.
 Organizer-only solution notes, tenant preflight evidence, and private deployment
-records are intentionally not part of this repository. The organizer can set
-`BEADS_DOLT_REMOTE` during bootstrap to seed and synchronize a shared public
-Dolt remote; otherwise the script uses the repository's configured origin.
+records are intentionally not part of this repository. Each laptop initializes
+an independent local Beads database with stable issue IDs; claims and status
+updates are coordinated by the facilitator and referenced in Git branches and
+pull requests. Network access to a shared Beads database is not required.
 
 ## Databricks deployment
 
@@ -75,6 +80,7 @@ facilitator process.
 - `resources/` — DAB resources and idempotent Lakebase schema artifact
 - `tests/` — deterministic local contract tests
 - `docs/` — participant architecture, acceptance, and deployment guidance
+  ([`data-lineage.md`](docs/data-lineage.md) documents the layer contracts)
 - `.beads/` — public participant Beads bootstrap/configuration only
 
 The current package supports the deterministic market/weather MVP. Broader

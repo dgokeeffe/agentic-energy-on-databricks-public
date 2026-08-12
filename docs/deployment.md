@@ -27,22 +27,7 @@ Authenticate outside the repository. Do not put tokens in `.env` or Git:
 databricks auth login --host https://<workspace-host>
 ```
 
-**Working inside a CoDA container (Databricks App terminal / Omnigent runner)?
-Skip that step.** Auth is already brokered there: a fresh OAuth bearer is minted
-per CLI invocation, no PAT is stored, and `databricks auth login` cannot complete
-(its OAuth redirect targets a loopback port no outside browser can reach). Run
-`databricks current-user me` to confirm, then deploy. The deploying identity is
-the app's service principal unless a PAT was injected — which changes who needs
-the Unity Catalog grants below. Full detail, including the two auth errors that
-look like missing credentials:
-[`.claude/skills/deploying-from-coda/SKILL.md`](../.claude/skills/deploying-from-coda/SKILL.md).
-
-Set the required bundle variables in the shell or CI secret store. The
-Databricks CLI reads bundle variables from `BUNDLE_VAR_<name>` — the
-`DATABRICKS_` prefix is **not** recognised and leaves every variable unassigned:
-
-`scripts/deploy.sh` resolves `DATABRICKS_HOST` from the authenticated CLI when it
-is not already exported, so only the bundle variables are mandatory:
+Set the required bundle variables in the shell or CI secret store:
 
 ```bash
 export DATABRICKS_HOST="https://<workspace-host>"   # optional; auto-resolved
@@ -58,6 +43,13 @@ export BUNDLE_VAR_runtime_service_principal="<etl-service-principal-application-
 
 `.env.example` documents the names but is intentionally not loaded
 automatically.
+
+## Git collaboration
+
+Use the repository's normal GitHub authentication and branch/PR workflow. Do not
+put tokens in repository files, remotes, shell history, or issue notes. Coda,
+CI, and other hosted environments must supply Git and Databricks credentials
+through their own approved secret or identity mechanism.
 
 ## Local verification
 

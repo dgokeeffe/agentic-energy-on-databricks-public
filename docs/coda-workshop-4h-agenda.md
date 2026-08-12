@@ -242,8 +242,8 @@ evidence, make the decision.
 
 ## Preflight this agenda depends on
 
-From `docs/coda-workshop-4h-agl-open-decisions.md`. None of these may be
-presented as proven without current evidence from the target workspace.
+These are open capability decisions. None may be presented as proven without
+current evidence from the target workspace.
 
 | Item | Needed by | Fallback if it fails |
 |---|---|---|

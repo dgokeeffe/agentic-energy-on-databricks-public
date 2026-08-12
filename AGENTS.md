@@ -1,68 +1,73 @@
-# AGENTS.md — agent context for agentic-energy-on-databricks
+# Agent instructions
 
-Canonical guidance for AI coding agents in this repo. `CLAUDE.md` and `GEMINI.md`
-are thin pointers here so they can never drift.
+This repository uses **Beads** for workshop task tracking. Beads is part of the
+participant workflow and must be used for all implementation work.
 
-## Before you try to deploy
+## Start here
 
-If you are running inside a **CoDA container** (a Databricks App terminal or an
-Omnigent runner — the usual case for agents in this workshop), Databricks auth is
-**already configured**. Do not run `databricks auth login`, do not hunt for a PAT,
-and do not conclude that deployments are impossible when a CLI call fails on
-credentials.
+From a fresh clone, initialize the local participant graph:
 
 ```bash
-databricks current-user me        # this works with no setup step
-./scripts/deploy.sh dev          # after exporting the BUNDLE_VAR_* values
+scripts/bootstrap-participant-beads.sh
+bd ready
 ```
 
-Read this before deploying:
-**[`.claude/skills/deploying-from-coda/SKILL.md`](.claude/skills/deploying-from-coda/SKILL.md)**
+Each participant laptop has its own local Beads database. There is no shared
+Beads server in the workshop execution environment, so do not assume that a
+claim or status update is visible to another laptop.
 
-It covers the auth model, which identity you deploy as (the app's own service
-principal unless a PAT was injected), the Unity Catalog grants that identity
-needs, and an error → cause → fix table for the auth failures that *look* like
-missing credentials.
+Read `.beads/README.md` for the participant Beads model.
 
-Do **not** scrape credentials out of the app process (`/proc/<pid>/environ`) to
-work around an auth error. CoDA strips the app SP secret and `GH_TOKEN` from
-terminals deliberately; the brokered token path is the supported route and a
-fresh bearer is minted per CLI invocation. `git push` likewise works through
-CoDA's configured credential helper without extracting a token.
+## Beads workflow
 
-## Workspace / bundle facts
+1. Select an unblocked issue with `bd ready`.
+2. Inspect it with `bd show <issue-id>`.
+3. Claim it atomically:
+   ```bash
+   bd update <issue-id> --claim
+   ```
+4. Create a Git branch containing the Beads ID.
+5. Implement the change and add or update tests.
+6. Run the relevant deterministic checks.
+7. Record evidence and the pull request URL in Beads:
+   ```bash
+   bd update <issue-id> --notes "Tests: <commands/results>. PR: <url>"
+   ```
+8. Do not close issues until the human review/merge gate is complete.
 
-| Thing | Value |
-|---|---|
-| Bundle | Databricks Asset Bundle, `databricks.yml`, `engine: direct` |
-| Default target | `dev` (`mode: development`, namespaced per deploying identity) |
-| Catalog / schema / volume (dev) | `edp_entdata_exp_dev_landing` / `agentic_energy` / `agentic_energy_landing` |
+Git and Beads are separate, and Beads is local in the workshop:
 
-Bundle variables are never committed. Supply them as `BUNDLE_VAR_<name>` env vars
-(the `DATABRICKS_` prefix is **not** recognised) or `--var`:
+- `git push` publishes code branches and pull requests.
+- `bd update` records claims and evidence on the participant laptop only.
+- The stable Beads ID must be included in the Git branch and pull request.
+- The facilitator is the source of truth for team assignment and completion.
+- `bd dolt push/pull` is optional organizer maintenance only, not a participant
+  dependency.
 
-| Variable | dev value |
-|---|---|
-| `catalog` | `edp_entdata_exp_dev_landing` |
-| `schema` | `agentic_energy` |
-| `landing_volume` | `agentic_energy_landing` |
-| `participant_group` | workshop participant group |
-| `facilitator_group` | workshop facilitator group |
-| `runtime_service_principal` | ETL SP — **`workshop` target only** |
+## Safety boundaries
 
-`DATABRICKS_HOST` is optional: `scripts/deploy.sh` resolves it from the
-authenticated CLI when it is not exported (CoDA does not export it).
+- Do not put credentials, tokens, workspace-specific secrets, or private tenant
+  details in Git or Beads.
+- Do not enable live data acquisition without facilitator approval.
+- Do not create a source-specific Databricks Job or pipeline; extend the generic
+  metadata-driven package instead.
+- Do not merge or deploy workshop changes automatically.
+- Do not close human review, merge, or deployment gates as an agent.
 
-Deployed dev jobs are per-identity and disposable — the durable evidence of a run
-is the immutable manifest under the landing Volume, not the job. Expect one
-`[dev <identity>] [dev] Agentic Energy ETL` job per deployer.
+## Validation
 
-## Everything else
+For the local ETL package, run:
 
-- Deployment model, per-developer `dev` target rules, and the UC grant traps
-  (service principals are not in `account users`; UC cannot grant to
-  workspace-local groups): [`docs/deployment.md`](docs/deployment.md)
-- Local fixture workflow (no workspace, credentials, or network) and the Beads
-  task graph: [`README.md`](README.md)
-- Keep changes focused, and run the suite before deploying:
-  `uv run --extra test python -m pytest`
+```bash
+uv run --extra test python -m pytest
+rm -rf dist && uv build --wheel --out-dir dist
+```
+
+For Databricks changes, use the direct-engine bundle and validate before
+requesting deployment:
+
+```bash
+databricks bundle validate --strict -t dev
+```
+
+Use only an explicitly selected authenticated workspace/profile for deployment.
