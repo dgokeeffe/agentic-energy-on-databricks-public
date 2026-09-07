@@ -1,0 +1,28 @@
+# Python/local pipeline artifacts
+.venv/
+
+# Build artifacts. Kept ignored so a local `uv build` cannot be committed.
+dist/
+build/
+
+# Subagent scratch state from coding-agent runs.
+.pi-subagents/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+output/
+uv.lock
+!nemweb_foundation/uv.lock
+!nemweb_ml/uv.lock
+
+# Local agent/session artifacts and environment secrets
+.pi-subagents/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+.DS_Store

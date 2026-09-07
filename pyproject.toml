@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agentic-energy-workshop-validation"
+version = "0.1.0"
+description = "Root validation facade for the Agentic Energy workshop"
+license = {file = "LICENSE"}
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+test = ["pytest>=8.0", "pyyaml>=6.0"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "nemweb_foundation/tests", "nemweb_ml/tests", "workshop/lakebase/tests"]
+pythonpath = ["nemweb_foundation", "nemweb_ml/src", "."]
+addopts = "-q --import-mode=importlib"
+
+[tool.setuptools]
+py-modules = []

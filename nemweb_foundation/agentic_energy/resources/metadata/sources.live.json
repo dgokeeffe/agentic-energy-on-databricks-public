@@ -1,0 +1,52 @@
+{
+  "sources": [
+    {
+      "source_id": "aemo_dispatchis_live",
+      "source_version": "1.0",
+      "provider": "AEMO",
+      "dataset": "DISPATCHIS",
+      "region": "NEM",
+      "url_or_fixture_path": "https://nemweb.com.au/Reports/Current/DispatchIS_Reports/",
+      "allowed_hosts": ["nemweb.com.au"],
+      "format": "ZIP_CSV",
+      "compression": "zip",
+      "extraction_mode": "live",
+      "schedule": "*/5 * * * *",
+      "file_name_regex": "PUBLIC_DISPATCHIS_.*\\.zip$",
+      "event_timestamp_field": "interval_datetime",
+      "ingestion_timestamp_field": "_ingested_at",
+      "source_timezone": "Australia/Brisbane",
+      "schema_reference": "aemo_dispatchis_price_regionsum_v1",
+      "natural_key": ["region", "interval_datetime"],
+      "watermark_field": "interval_datetime",
+      "deduplication_rule": "last_by_ingestion_sequence",
+      "quality_checks": ["demand_mw >= 0", "price_per_mwh is not null"],
+      "quarantine_policy": "isolate_with_reason",
+      "licensing_provenance": "AEMO NEMWEB public DISPATCHIS report; verify workshop use terms before deployment"
+    },
+    {
+      "source_id": "weather_fixture",
+      "source_version": "1.0",
+      "provider": "Open-Meteo",
+      "dataset": "HOURLY_WEATHER",
+      "region": "NEM",
+      "url_or_fixture_path": "fixtures/weather.jsonl",
+      "fixture_path": "fixtures/weather.jsonl",
+      "format": "JSONL",
+      "compression": "none",
+      "extraction_mode": "fixture",
+      "schedule": "manual",
+      "event_timestamp_field": "observed_at",
+      "ingestion_timestamp_field": "_ingested_at",
+      "source_timezone": "Australia/Sydney",
+      "schema_reference": "weather_fixture_v1",
+      "natural_key": ["region", "observed_at"],
+      "watermark_field": "observed_at",
+      "deduplication_rule": "last_by_ingestion_sequence",
+      "quality_checks": ["temperature_c is not null", "region is not null"],
+      "quarantine_policy": "isolate_with_reason",
+      "licensing_provenance": "Open-Meteo-shaped deterministic workshop fixture"
+    }
+  ],
+  "pipeline_ingestion_timestamp": "2024-04-07T00:00:00Z"
+}

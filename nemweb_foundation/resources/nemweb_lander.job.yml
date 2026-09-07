@@ -1,0 +1,86 @@
+# Modified from the reference NEMWEB file-lander resource; see NOTICE.md.
+# This bounded wheel task is invoked by orchestration jobs and has no schedule of its own.
+resources:
+  jobs:
+    nemweb_lander:
+      name: "${var.resource_prefix}-lander"
+      # This shared lander is invoked by BOTH the five-minute critical job and the
+      # daily context job. Serialising it to one run made a five-minute cycle wait
+      # behind another caller: 325s of queue wait inside a 432s task, which then
+      # TIMEDOUT (runs 486195461989653 and 668122879838789, 2026-09-02) even though
+      # the lander itself only needs 131s-178s.
+      #
+      # Concurrency is safe here because landing is content-addressed and
+      # write-once: raw archives are stored at raw/<family>/<publication>/<sha256>
+      # and parsed output under parsed/<family>/<sha256>, published with a
+      # same-directory os.replace; an identical checksum is a no-op, a differing
+      # one at the same immutable path is a hard error, and each cycle owns a
+      # unique write-once ingestion run ID. Overlap of a five-minute CYCLE is still
+      # prevented by max_concurrent_runs: 1 on nemweb_refresh itself.
+      max_concurrent_runs: 4
+      queue:
+        enabled: true
+      permissions:
+        - level: CAN_VIEW
+          group_name: ${var.participant_group}
+        - level: CAN_MANAGE
+          group_name: ${var.facilitator_group}
+      parameters:
+        - name: mode
+          default: ${var.nemweb_mode}
+        - name: scope
+          default: critical
+        - name: critical_lookback_hours
+          default: ${var.critical_lookback_hours}
+        - name: context_lookback_days
+          default: ${var.context_lookback_days}
+      tasks:
+        - task_key: land_nemweb_files
+          environment_key: default
+          max_retries: 0
+          # Outer safety bound only. This one Job serves both scopes, and a task
+          # timeout cannot be overridden by a run_job_task caller, so the tight
+          # five-minute bound is enforced on the CALLING task in
+          # nemweb_refresh.job.yml instead. The daily context scope legitimately
+          # needs longer: a single 600s bound made the context run TIMEDOUT
+          # (lander run 93562901524477, 2026-09-02) while downloading monthly
+          # MMSDM registration and daily bid archives.
+          timeout_seconds: 3600
+          python_wheel_task:
+            package_name: agentic-energy-on-databricks
+            entry_point: main
+            parameters:
+              - land
+              - --mode
+              - "{{job.parameters.mode}}"
+              - --scope
+              - "{{job.parameters.scope}}"
+              # Shared managed Volume parent. The lander appends the validated
+              # mode, writing to <landing_path>/snapshot or <landing_path>/live.
+              # It never writes raw/parsed/manifests directly at the parent.
+              - --volume-path
+              - ${var.landing_path}
+              - --critical-lookback-hours
+              - "{{job.parameters.critical_lookback_hours}}"
+              - --context-lookback-days
+              - "{{job.parameters.context_lookback_days}}"
+              - --max-files
+              - ${var.max_files_per_cycle}
+              - --network-timeout-seconds
+              - ${var.network_timeout_seconds}
+              - --network-retry-count
+              - ${var.network_retry_count}
+              - --cycle-id
+              - "{{job.run_id}}"
+              - --allow-live
+              - ${var.allow_live_nemweb}
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "4"
+            dependencies:
+              - ../dist/*.whl
+      tags:
+        data_source: nemweb
+        source_provider: aemo
+        source_mode: ${var.nemweb_mode}

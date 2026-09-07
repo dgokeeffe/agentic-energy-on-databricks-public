@@ -1,0 +1,110 @@
+# Rewritten from the reference pipeline resource; see NOTICE.md.
+# Every Python source under pipeline/ is included. Critical definitions are added
+# in dependency order without commented-out libraries or legacy DLT APIs.
+resources:
+  pipelines:
+    nemweb:
+      name: "${var.resource_prefix}-pipeline"
+      catalog: ${var.catalog}
+      schema: ${var.schema}
+      serverless: true
+      # Publish the event log to Unity Catalog so expectation metrics are
+      # queryable. The list-pipeline-events API did not surface any
+      # data_quality/expectations payload for these updates (0 of 478 events on
+      # update 76139c2c, 2026-09-02), so the event log table is the authoritative
+      # source for per-update expectation pass/drop counts in the evidence pack.
+      event_log:
+        catalog: ${var.catalog}
+        schema: ${var.schema}
+        name: nemweb_pipeline_event_log_d4
+      photon: true
+      channel: CURRENT
+      # The repository root keeps the agentic_energy package importable by
+      # every explicitly listed source. Do not hide required tables behind a
+      # commented-out library or an overly broad source glob.
+      root_path: ..
+      libraries:
+        # config.py and io.py are NOT listed as pipeline libraries. They are
+        # helper modules imported by the dataset files below. Listing them would
+        # evaluate io.py's @dp.temporary_view decorator once as a library and
+        # again on import, which fails the update with
+        # "Found duplicate dataset `_nemweb_parsed_records`".
+        # Declares the shared _nemweb_parsed_records view exactly once.
+        - file:
+            path: ../agentic_energy/nemweb/pipeline/parsed_records.py
+        - file:
+            path: ../agentic_energy/nemweb/pipeline/bronze_dispatchis.py
+        - file:
+            path: ../agentic_energy/nemweb/pipeline/bronze_scada.py
+        - file:
+            path: ../agentic_energy/nemweb/pipeline/bronze_unit_solution.py
+        - file:
+            path: ../agentic_energy/nemweb/pipeline/bronze_registration.py
+        - file:
+            path: ../agentic_energy/nemweb/pipeline/silver_region_dispatch.py
+        - file:
+            path: ../agentic_energy/nemweb/pipeline/silver_scada.py
+        - file:
+            path: ../agentic_energy/nemweb/pipeline/silver_constraints.py
+        - file:
+            path: ../agentic_energy/nemweb/pipeline/silver_interconnectors.py
+        - file:
+            path: ../agentic_energy/nemweb/pipeline/silver_unit_solution.py
+        - file:
+            path: ../agentic_energy/nemweb/pipeline/silver_facilities.py
+        - file:
+            path: ../agentic_energy/nemweb/pipeline/gold_region_dispatch.py
+        - file:
+            path: ../agentic_energy/nemweb/pipeline/gold_unit_dispatch.py
+        - file:
+            path: ../agentic_energy/nemweb/pipeline/gold_scada_generation.py
+        - file:
+            path: ../agentic_energy/nemweb/pipeline/gold_constraints.py
+        - file:
+            path: ../agentic_energy/nemweb/pipeline/gold_interconnectors.py
+        - file:
+            path: ../agentic_energy/nemweb/pipeline/gold_unit_solution.py
+        - file:
+            path: ../agentic_energy/nemweb/pipeline/gold_app_region_status.py
+        - file:
+            path: ../agentic_energy/nemweb/pipeline/gold_additional_aggregates.py
+        # Slower analyst context. Market notices remain deliberately omitted
+        # until their plain-text source has a bounded, tested parser.
+        - file:
+            path: ../agentic_energy/nemweb/pipeline/bronze_bids.py
+        - file:
+            path: ../agentic_energy/nemweb/pipeline/silver_bids.py
+        - file:
+            path: ../agentic_energy/nemweb/pipeline/gold_bids.py
+        - file:
+            path: ../agentic_energy/nemweb/pipeline/bronze_trading.py
+        - file:
+            path: ../agentic_energy/nemweb/pipeline/silver_trading.py
+        - file:
+            path: ../agentic_energy/nemweb/pipeline/gold_trading.py
+        - file:
+            path: ../agentic_energy/nemweb/pipeline/bronze_settlement.py
+        - file:
+            path: ../agentic_energy/nemweb/pipeline/silver_settlement.py
+        - file:
+            path: ../agentic_energy/nemweb/pipeline/gold_settlement.py
+      configuration:
+        # NEM timestamps are fixed AEST (UTC+10, no daylight saving). Explicit
+        # session timezone makes parsing and market-day/window bucketing stable.
+        spark.sql.session.timeZone: Australia/Brisbane
+        nemweb.source_mode: ${var.nemweb_mode}
+        # Shared managed Volume parent. PipelineConfig appends source_mode so
+        # Auto Loader reads exactly the <parent>/snapshot or <parent>/live root
+        # written by the lander. Keep this paired with nemweb.source_mode.
+        nemweb.landing_path: ${var.landing_path}
+        nemweb.market_timezone: Australia/Brisbane
+        nemweb.critical_lookback_hours: ${var.critical_lookback_hours}
+        nemweb.context_lookback_days: ${var.context_lookback_days}
+      permissions:
+        - level: CAN_RUN
+          group_name: ${var.participant_group}
+        - level: CAN_MANAGE
+          group_name: ${var.facilitator_group}
+      tags:
+        data_source: nemweb
+        source_provider: aemo

@@ -1,0 +1,31 @@
+bundle:
+  name: nemweb-ml
+  engine: direct
+
+include:
+  - resources/*.yml
+
+artifacts:
+  default:
+    type: whl
+    path: .
+    build: rm -rf dist && uv build --wheel --out-dir dist
+
+variables:
+  resource_prefix:
+    description: Run-specific prefix beginning with agentic-energy-workshop-
+  mlflow_experiment_name:
+    description: Workspace MLflow experiment path supplied outside Git
+  uc_model_name:
+    description: Three-level Unity Catalog model name supplied outside Git
+  training_table:
+    description: Three-level governed historical training table
+  feature_table:
+    description: Three-level governed batch feature table
+  prediction_table:
+    description: Three-level governed prediction target table
+
+targets:
+  dev:
+    default: true
+    mode: development

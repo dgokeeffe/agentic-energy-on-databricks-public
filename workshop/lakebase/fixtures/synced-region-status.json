@@ -1,0 +1,40 @@
+[
+  {
+    "regionId": "NSW1",
+    "intervalEnd": "2026-07-01T00:05:00+10:00",
+    "intervention": 0,
+    "rrpAudPerMwh": 128.5,
+    "totalDemandMw": 8123.4,
+    "sourceIntervalWatermark": "2026-07-01T00:05:00+10:00",
+    "sourcePublicationAt": "2026-07-01T00:06:00+10:00",
+    "goldPublishedAt": "2026-06-30T14:07:00Z",
+    "marketWideBindingConstraintCount": 3,
+    "marketWideInterconnectorCount": 6,
+    "marketWideInterconnectorSourceSignFlowMw": -42.5,
+    "predictionScore": null,
+    "predictionModelVersion": null,
+    "predictionFeatureTime": null,
+    "predictionScoredAt": null,
+    "predictionSourceFreshness": null,
+    "predictionMissingFeatureStatus": "NOT_SCORED"
+  },
+  {
+    "regionId": "VIC1",
+    "intervalEnd": "2026-07-01T00:05:00+10:00",
+    "intervention": 0,
+    "rrpAudPerMwh": 115.25,
+    "totalDemandMw": 5340.2,
+    "sourceIntervalWatermark": "2026-07-01T00:05:00+10:00",
+    "sourcePublicationAt": "2026-07-01T00:06:00+10:00",
+    "goldPublishedAt": "2026-06-30T14:07:00Z",
+    "marketWideBindingConstraintCount": 3,
+    "marketWideInterconnectorCount": 6,
+    "marketWideInterconnectorSourceSignFlowMw": -42.5,
+    "predictionScore": 0.18,
+    "predictionModelVersion": "prepared-fixture-only",
+    "predictionFeatureTime": "2026-07-01T00:05:00+10:00",
+    "predictionScoredAt": "2026-06-30T14:07:30Z",
+    "predictionSourceFreshness": "CURRENT",
+    "predictionMissingFeatureStatus": "COMPLETE"
+  }
+]

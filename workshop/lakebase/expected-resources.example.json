@@ -1,0 +1,10 @@
+{
+  "mode": "mock",
+  "resource_prefix": "agentic-energy-workshop-<run-id>",
+  "app_read_schema": "app_read",
+  "region_status_table": "nem_region_status_synced",
+  "app_write_schema": "app_write",
+  "investigations_table": "investigations",
+  "cdf_history_table": "lb_investigations_history",
+  "current_state_table": "silver_nem_investigations_current"
+}

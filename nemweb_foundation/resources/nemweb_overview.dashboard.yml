@@ -1,0 +1,16 @@
+# AI/BI dashboard is managed as one stable bundle resource so updates retain its
+# identity. All dataset SQL must pass scripts/validate_nemweb_genie.py first.
+resources:
+  dashboards:
+    nemweb_overview:
+      display_name: "${var.resource_prefix}-overview"
+      file_path: ../dashboards/nemweb_overview.lvdash.json
+      warehouse_id: ${var.warehouse_id}
+      dataset_catalog: ${var.catalog}
+      dataset_schema: ${var.schema}
+      embed_credentials: false
+      permissions:
+        - level: CAN_READ
+          group_name: ${var.participant_group}
+        - level: CAN_MANAGE
+          group_name: ${var.facilitator_group}

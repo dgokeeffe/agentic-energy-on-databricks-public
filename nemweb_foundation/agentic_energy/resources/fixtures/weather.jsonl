@@ -1,0 +1,5 @@
+{"region":"NSW1","observed_at":"2024-04-07T10:00:00","temperature_c":24.0,"ingestion_sequence":1}
+{"region":"VIC1","observed_at":"2024-04-07T10:30:00","temperature_c":18.5,"ingestion_sequence":1}
+{"region":"NSW1","observed_at":"2024-04-07T10:00:00","temperature_c":24.5,"ingestion_sequence":2}
+{"region":"QLD1","observed_at":"2024-04-07T11:00:00","temperature_c":null,"ingestion_sequence":1}
+{"region":"NSW1","observed_at":"2024-01-15T10:00:00","temperature_c":29.0,"ingestion_sequence":1}

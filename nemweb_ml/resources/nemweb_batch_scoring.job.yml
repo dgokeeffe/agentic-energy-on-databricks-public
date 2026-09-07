@@ -1,0 +1,26 @@
+resources:
+  jobs:
+    nemweb_batch_scoring:
+      name: "${var.resource_prefix}-ml-score"
+      max_concurrent_runs: 1
+      queue:
+        enabled: true
+      tasks:
+        - task_key: score_challenger
+          environment_key: default
+          notebook_task:
+            notebook_path: ../notebooks/batch_score.py
+            base_parameters:
+              model_name: ${var.uc_model_name}
+              feature_table: ${var.feature_table}
+              prediction_table: ${var.prediction_table}
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "4"
+            dependencies:
+              - mlflow>=3.0
+              - ../dist/*.whl
+      tags:
+        prepared: "true"
+        scoring: batch

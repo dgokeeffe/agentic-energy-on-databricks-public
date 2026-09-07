@@ -1,0 +1,36 @@
+bundle:
+  name: agentic-energy-workshop-app
+
+variables:
+  app_name:
+    description: Run-specific app name beginning with agentic-energy-workshop-
+  sql_warehouse_id:
+    description: SQL Warehouse ID supplied outside Git
+  postgres_branch:
+    description: Full Lakebase Autoscaling branch resource name supplied outside Git
+  postgres_database:
+    description: Full Lakebase Autoscaling database resource name supplied outside Git
+
+resources:
+  apps:
+    app:
+      name: ${var.app_name}
+      description: NEM regional operations AppKit starter
+      source_code_path: ./
+      lifecycle:
+        started: true
+      resources:
+        - name: sql-warehouse
+          sql_warehouse:
+            id: ${var.sql_warehouse_id}
+            permission: CAN_USE
+        - name: postgres
+          postgres:
+            branch: ${var.postgres_branch}
+            database: ${var.postgres_database}
+            permission: CAN_CONNECT_AND_CREATE
+
+targets:
+  dev:
+    default: true
+    mode: development

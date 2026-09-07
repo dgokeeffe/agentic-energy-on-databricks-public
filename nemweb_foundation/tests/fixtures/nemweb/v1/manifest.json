@@ -1,0 +1,177 @@
+{
+  "artifacts": [
+    {
+      "classification": "synthetic minimal mutation based on documented/current NEMWEB section headers; not live evidence",
+      "path": "raw/dispatchis/PUBLIC_DISPATCHIS_202401010005_SYNTHETIC.zip",
+      "publication": "202401010005",
+      "report_family": "dispatchis",
+      "report_versions": [
+        "PRICE.v5",
+        "REGIONSUM.v9",
+        "CONSTRAINT.v5",
+        "INTERCONNECTORRES.v3"
+      ],
+      "retrieved_at": "2026-09-02T11:30:00+10:00",
+      "sha256": "5237f3725f6355b6cf2ca0a2e701d6531d42e720d27bf55fdefd738fefdedf62",
+      "source_filename": "PUBLIC_DISPATCHIS_202401010005_SYNTHETIC.zip",
+      "source_url": "https://www.nemweb.com.au/REPORTS/CURRENT/DispatchIS_Reports/",
+      "synthetic": true
+    },
+    {
+      "classification": "second consecutive synthetic five-minute cycle using the same documented/current NEMWEB section headers; not live evidence",
+      "path": "raw/dispatchis/PUBLIC_DISPATCHIS_202401010010_SYNTHETIC.zip",
+      "publication": "202401010010",
+      "report_family": "dispatchis",
+      "report_versions": [
+        "PRICE.v5",
+        "REGIONSUM.v9",
+        "CONSTRAINT.v5",
+        "INTERCONNECTORRES.v3"
+      ],
+      "retrieved_at": "2026-09-02T11:30:00+10:00",
+      "sha256": "66b7a03dabddb6c98f36b2b1a3f95a844441f93a2d6248217abef7d98508b20b",
+      "source_filename": "PUBLIC_DISPATCHIS_202401010010_SYNTHETIC.zip",
+      "source_url": "https://www.nemweb.com.au/REPORTS/CURRENT/DispatchIS_Reports/",
+      "synthetic": true
+    },
+    {
+      "classification": "synthetic SCADA values using real MMSDM DUID identities for deterministic enrichment tests; not live evidence",
+      "path": "raw/dispatch_scada/PUBLIC_DISPATCHSCADA_202607010005_SYNTHETIC.zip",
+      "publication": "202607010005",
+      "report_family": "dispatch_scada",
+      "report_versions": [
+        "UNIT_SCADA.v1"
+      ],
+      "retrieved_at": "2026-09-02T11:30:00+10:00",
+      "sha256": "f3ce6bfd05e76d995f70f47141e0ac64c389f596849e938c2300dd82b8f87315",
+      "source_filename": "PUBLIC_DISPATCHSCADA_202607010005_SYNTHETIC.zip",
+      "source_url": "https://www.nemweb.com.au/REPORTS/CURRENT/Dispatch_SCADA/",
+      "synthetic": true
+    },
+    {
+      "classification": "second consecutive synthetic five-minute SCADA cycle using the same real MMSDM DUID identities; not live evidence",
+      "path": "raw/dispatch_scada/PUBLIC_DISPATCHSCADA_202607010010_SYNTHETIC.zip",
+      "publication": "202607010010",
+      "report_family": "dispatch_scada",
+      "report_versions": [
+        "UNIT_SCADA.v1"
+      ],
+      "retrieved_at": "2026-09-02T11:30:00+10:00",
+      "sha256": "7478688dfafdb4f4de90f8ba961362248d505461136d6b9bc08a84b4470abe36",
+      "source_filename": "PUBLIC_DISPATCHSCADA_202607010010_SYNTHETIC.zip",
+      "source_url": "https://www.nemweb.com.au/REPORTS/CURRENT/Dispatch_SCADA/",
+      "synthetic": true
+    },
+    {
+      "classification": "synthetic minimal mutation based on documented/current NEMWEB section headers, aligned to snapshot SCADA DUID/interval keys solely to test T+1 reconciliation; not live evidence",
+      "path": "raw/next_day_dispatch/PUBLIC_NEXT_DAY_DISPATCH_20260702_SYNTHETIC.zip",
+      "publication": "202607020100",
+      "report_family": "next_day_dispatch",
+      "report_versions": [
+        "UNIT_SOLUTION.v6"
+      ],
+      "retrieved_at": "2026-09-02T11:30:00+10:00",
+      "sha256": "36c2323f83717b70ae9096ba4faf6526fe7d3f232e75f9e164609260e7a795f9",
+      "source_filename": "PUBLIC_NEXT_DAY_DISPATCH_20260702_SYNTHETIC.zip",
+      "source_url": "https://www.nemweb.com.au/REPORTS/CURRENT/Next_Day_Dispatch/",
+      "synthetic": true
+    },
+    {
+      "classification": "deterministic row excerpt from three unmodified AEMO MMSDM monthly archive CSVs; rows and headers unmodified, archive repackaged; original archive checksums recorded; not live evidence",
+      "path": "raw/registration/AEMO_MMSDM_REGISTRATION_EXCERPT_202607.zip",
+      "publication": "20260701",
+      "report_family": "registration",
+      "report_versions": [
+        "DUDETAILSUMMARY.v7",
+        "DUALLOC.v1",
+        "GENUNITS.v3"
+      ],
+      "retrieved_at": "2026-09-02T12:05:00+10:00",
+      "sha256": "d45166e366cd5cea5c44207b3f2082802a20e7c5a2513137f759c8071812edfa",
+      "source_filename": "AEMO_MMSDM_REGISTRATION_EXCERPT_202607.zip",
+      "source_url": "https://nemweb.com.au/Data_Archive/Wholesale_Electricity/MMSDM/2026/MMSDM_2026_07/MMSDM_Historical_Data_SQLLoader/DATA/",
+      "synthetic": false,
+      "original_archive_sha256": {
+        "DUDETAILSUMMARY": "c87e888dbae6e65fba3b07aba89c04c1f3e3a17f38e811cfe0b1ee6833139b1e",
+        "DUALLOC": "7aa9fabcf18c9c5cb1e280bf7aa333b4384709e90a4c5a58ffa4bf8db7bee845",
+        "GENUNITS": "847de568b04902b6472df16cff89c4abce643323566cd79f966848500a29cc03"
+      }
+    }
+  ],
+  "attribution": "Contains a small row-preserving excerpt of AEMO MMSDM registration data plus clearly labelled synthetic NEMWEB-format dispatch examples. NEMWEB data/source formats © Australian Energy Market Operator Limited (AEMO). Not live evidence. See DATA_LICENSES.md.",
+  "case_provenance": {
+    "retrieved_at": "2026-09-02T11:30:00+10:00",
+    "source_urls": {
+      "dispatchis": "https://www.nemweb.com.au/REPORTS/CURRENT/DispatchIS_Reports/",
+      "dispatch_scada": "https://www.nemweb.com.au/REPORTS/CURRENT/Dispatch_SCADA/"
+    },
+    "source_versions": [
+      "PRICE.v5",
+      "REGIONSUM.v9",
+      "CONSTRAINT.v5",
+      "INTERCONNECTORRES.v3",
+      "UNIT_SCADA.v1"
+    ],
+    "statement": "Every case is a named synthetic mutation of the versioned headers above, not an unmodified AEMO report and not live evidence."
+  },
+  "cases": [
+    {
+      "classification": "synthetic adversarial test case; not live evidence",
+      "path": "cases/duplicate_archive/DUPLICATE_SAME_CHECKSUM.zip",
+      "sha256": "5237f3725f6355b6cf2ca0a2e701d6531d42e720d27bf55fdefd738fefdedf62",
+      "synthetic": true
+    },
+    {
+      "classification": "synthetic adversarial test case; not live evidence",
+      "path": "cases/later_correction/LATER_CORRECTION.zip",
+      "sha256": "ae9f8287eed44943dfc1a6ff376f7e7b66539aa517676b25a3cec8e3c45a7047",
+      "synthetic": true
+    },
+    {
+      "classification": "synthetic adversarial test case; not live evidence",
+      "path": "cases/malformed_footer/MALFORMED_FOOTER.zip",
+      "sha256": "6ecaa9194e6b6509c40c7b5a8bff5864ea3ae9d26f5e2482822286df3e032485",
+      "synthetic": true
+    },
+    {
+      "classification": "synthetic adversarial test case; not live evidence",
+      "path": "cases/malformed_row/MALFORMED_ROW.zip",
+      "sha256": "a5e1558863dc081e1c9aabca52c387475a7a1c1d3708e023b924f0b772945b46",
+      "synthetic": true
+    },
+    {
+      "classification": "synthetic adversarial test case; not live evidence",
+      "path": "cases/missing_required_column/MISSING_REQUIRED.zip",
+      "sha256": "ea28ef8e503d1f330fb58894a5a2978a0b81e87f6d698756f1a0f0ef12239eb4",
+      "synthetic": true
+    },
+    {
+      "classification": "synthetic adversarial test case; not live evidence",
+      "path": "cases/multi_section/ALL_MEMBERS_AND_SECTIONS.zip",
+      "sha256": "5237f3725f6355b6cf2ca0a2e701d6531d42e720d27bf55fdefd738fefdedf62",
+      "synthetic": true
+    },
+    {
+      "classification": "synthetic adversarial test case; not live evidence",
+      "path": "cases/timezone_boundary/TIMEZONE_BOUNDARY.zip",
+      "sha256": "6e156d9b6b29c0663b140230273a986eee61462c8be6ad70e08cb7f9462eaa69",
+      "synthetic": true
+    },
+    {
+      "classification": "synthetic adversarial test case; not live evidence",
+      "path": "cases/unknown_column/UNKNOWN_COLUMN.zip",
+      "sha256": "7e08d7c6fbd060da7b48973c0f794f4d678d10017935095e5cd56829fbf88fab",
+      "synthetic": true
+    }
+  ],
+  "frozen_landed_at": "2024-01-02T00:00:00+00:00",
+  "purpose": "Deterministic workshop and parser safety tests with minimum necessary rows.",
+  "required_families": [
+    "dispatchis",
+    "dispatch_scada",
+    "next_day_dispatch",
+    "registration"
+  ],
+  "retrieved_on": "2026-09-02",
+  "snapshot_version": "v1"
+}

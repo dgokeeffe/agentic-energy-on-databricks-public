@@ -1,0 +1,151 @@
+# Five-minute critical path: bounded Current landing -> triggered Lakeflow update
+# -> evidence capture. The trigger is deliberately paused on deployment.
+resources:
+  jobs:
+    nemweb_refresh:
+      name: "${var.resource_prefix}-refresh"
+      max_concurrent_runs: 1
+      queue:
+        enabled: true
+      # Operating cadence.
+      #
+      # AEMO publishes a new dispatch interval every five minutes and this job
+      # must incorporate every one of them. The 2026-09-05 closure query found
+      # zero non-five-minute gaps across all five critical Gold subjects from
+      # 09:00 through each family's latest 09:45 or 09:50 interval.
+      #
+      # The trigger fires every 5 minutes. Measured end-to-end cycle time is
+      # ~340s, dominated by cold serverless start-up (~135s for the lander wheel
+      # task, ~96s WAITING_FOR_RESOURCES for the pipeline update) rather than by
+      # data volume (~80s of actual transformation). A cycle can therefore
+      # occasionally overrun its own interval.
+      #
+      # No interval is lost when that happens. The lander discovers by a bounded
+      # lookback window (critical_lookback_hours, default 2h) rather than by
+      # "what arrived since the last run", so the next cycle still picks up any
+      # interval published during an overrun. Landing is content-addressed and
+      # idempotent, so re-seeing an archive is a no-op. max_concurrent_runs: 1
+      # plus queueing means an overrunning cycle delays the next one instead of
+      # running two cycles over the same landing zone.
+      #
+      # Consequence to understand before changing this: the CADENCE OF DATA is
+      # five-minute and complete, while an individual cycle's wall-clock latency
+      # can exceed five minutes. Source-to-Gold lag is therefore reported
+      # separately from the trigger interval in the evidence pack. Do not "fix"
+      # an occasionally-queued cycle by widening the interval without first
+      # checking Gold interval continuity, and do not use the deprecated pipeline
+      # continuous setting.
+      trigger:
+        pause_status: PAUSED
+        periodic:
+          interval: 5
+          unit: MINUTES
+      permissions:
+        - level: CAN_MANAGE_RUN
+          group_name: ${var.participant_group}
+        - level: CAN_MANAGE
+          group_name: ${var.facilitator_group}
+      tasks:
+        - task_key: land_current
+          # Caller-side bound protecting the cycle: the shared lander Job's own
+          # task timeout is an outer safety bound a run_job_task caller cannot
+          # override.
+          #
+          # Measured live critical landings take several minutes and a scheduled
+          # run's queue delay counts against this caller-side timeout. A 420s
+          # bound cancelled a healthy queued cycle before its lander could finish
+          # during the 2026-09-05 evidence run. Twenty minutes accommodates three
+          # queued evidence cycles while the lander's own bounded network limits
+          # and the parent job's single-run queue still prevent overlap.
+          timeout_seconds: 1200
+          run_job_task:
+            job_id: ${resources.jobs.nemweb_lander.id}
+            job_parameters:
+              mode: ${var.nemweb_mode}
+              scope: critical
+              critical_lookback_hours: ${var.critical_lookback_hours}
+              context_lookback_days: ${var.context_lookback_days}
+        - task_key: publish_medallion
+          depends_on:
+            - task_key: land_current
+          max_retries: 0
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.nemweb.id}
+            full_refresh: false
+            # Selectively refresh ONLY the critical five-minute datasets. Updating
+            # all 29 datasets took ~324s, and with ~150s of landing the whole cycle
+            # ran ~11 minutes, so five-minute triggers queued behind one another and
+            # landing tasks timed out waiting (cycles 529136120194486 and
+            # 614698912876449, 2026-09-02). The slower context domains (bids at
+            # ~1.29M rows, trading, settlement, T+1 unit solution and the monthly
+            # registration dimension) do not change every five minutes and are
+            # refreshed by nemweb_context_refresh, which updates the whole graph.
+            #
+            # The facility dimension IS included, despite being monthly reference
+            # data, because three selected Gold datasets
+            # (gold_nem_unit_dispatch_5min, gold_nem_scada_generation_5min and the
+            # T+1 unit solution) read it via spark.read.table. refresh_selection
+            # excludes non-selected datasets from the update graph entirely, so on
+            # a schema where the dimension has never been built the selected Gold
+            # datasets fail at planning time with SOURCE_TABLE_NOT_MATERIALIZED.
+            # An earlier revision excluded it on the theory that the Gold join
+            # would degrade to UNKNOWN enrichment; that is true for a STALE
+            # dimension but not an ABSENT one, so cold deployments broke while an
+            # already-materialised dev schema kept working. Selective refresh
+            # requires its dependencies to be materialised.
+            #
+            # Cost is acceptable: it is a small Materialized View, and it is not
+            # one of the slow context domains (bids, trading, settlement) that
+            # pushed the cycle to ~11 minutes. Do not remove it to save time
+            # without first making a full-graph run a deployment prerequisite.
+            refresh_selection:
+              - silver_nem_facility_dimension
+              - bronze_nem_dispatch_price
+              - bronze_nem_dispatch_region_sum
+              - bronze_nem_dispatch_constraint
+              - bronze_nem_dispatch_interconnector_res
+              - bronze_nem_dispatch_unit_scada
+              - silver_nem_region_dispatch
+              - silver_nem_dispatch_constraint
+              - silver_nem_interconnector_flow
+              - silver_nem_dispatch_unit_scada
+              - gold_nem_region_dispatch_5min
+              - gold_nem_binding_constraints_5min
+              - gold_nem_interconnector_flows_5min
+              - gold_nem_unit_dispatch_5min
+              - gold_nem_scada_generation_5min
+              - gold_nem_app_region_status
+        - task_key: capture_cycle_evidence
+          depends_on:
+            - task_key: land_current
+            - task_key: publish_medallion
+          run_if: ALL_DONE
+          environment_key: default
+          max_retries: 0
+          python_wheel_task:
+            package_name: agentic-energy-on-databricks
+            entry_point: main
+            parameters:
+              - evidence
+              - --catalog
+              - ${var.catalog}
+              - --schema
+              - ${var.schema}
+              - --mode
+              - ${var.nemweb_mode}
+              - --orchestration-run-id
+              - "{{job.run_id}}"
+              - --lander-task-run-id
+              - "{{tasks.land_current.run_id}}"
+              - --pipeline-task-run-id
+              - "{{tasks.publish_medallion.run_id}}"
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "4"
+            dependencies:
+              - ../dist/*.whl
+      tags:
+        cadence: five_minutes
+        data_source: nemweb
+        source_provider: aemo

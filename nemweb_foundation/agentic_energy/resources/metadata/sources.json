@@ -1,0 +1,19 @@
+{
+  "sources": [
+    {
+      "source_id": "aemo_dispatch_fixture", "source_version": "1.0", "provider": "AEMO", "dataset": "DISPATCH_SCADA", "region": "NEM",
+      "url_or_fixture_path": "fixtures/aemo_dispatch.jsonl", "fixture_path": "fixtures/aemo_dispatch.jsonl", "format": "JSONL", "compression": "none", "extraction_mode": "fixture", "schedule": "manual",
+      "event_timestamp_field": "interval_datetime", "ingestion_timestamp_field": "_ingested_at", "source_timezone": "Australia/Sydney", "schema_reference": "aemo_dispatch_fixture_v1",
+      "natural_key": ["region", "interval_datetime"], "watermark_field": "interval_datetime", "deduplication_rule": "last_by_ingestion_sequence",
+      "quality_checks": ["demand_mw >= 0", "price_per_mwh is not null"], "quarantine_policy": "isolate_with_reason", "licensing_provenance": "AEMO-shaped deterministic workshop fixture"
+    },
+    {
+      "source_id": "weather_fixture", "source_version": "1.0", "provider": "Open-Meteo", "dataset": "HOURLY_WEATHER", "region": "NEM",
+      "url_or_fixture_path": "fixtures/weather.jsonl", "fixture_path": "fixtures/weather.jsonl", "format": "JSONL", "compression": "none", "extraction_mode": "fixture", "schedule": "manual",
+      "event_timestamp_field": "observed_at", "ingestion_timestamp_field": "_ingested_at", "source_timezone": "Australia/Sydney", "schema_reference": "weather_fixture_v1",
+      "natural_key": ["region", "observed_at"], "watermark_field": "observed_at", "deduplication_rule": "last_by_ingestion_sequence",
+      "quality_checks": ["temperature_c is not null", "region is not null"], "quarantine_policy": "isolate_with_reason", "licensing_provenance": "Open-Meteo-shaped deterministic workshop fixture"
+    }
+  ],
+  "pipeline_ingestion_timestamp": "2024-04-07T00:00:00Z"
+}

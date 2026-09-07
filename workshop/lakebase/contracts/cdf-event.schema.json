@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Lakebase investigation CDF event",
+  "allOf": [
+    {"$ref": "investigation.schema.json"},
+    {
+      "type": "object",
+      "required": ["_pg_change_type", "_pg_lsn", "_pg_xid", "_timestamp", "_sort_by"],
+      "properties": {
+        "_pg_change_type": {"enum": ["insert", "update_preimage", "update_postimage", "delete"]},
+        "_pg_lsn": {"type": ["string", "integer"]},
+        "_pg_xid": {"type": ["string", "integer"]},
+        "_timestamp": {"type": "string", "format": "date-time"},
+        "_sort_by": {"type": ["string", "integer"]}
+      }
+    }
+  ]
+}

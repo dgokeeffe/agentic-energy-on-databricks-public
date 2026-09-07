@@ -1,0 +1,26 @@
+{
+  "case_id": "missing-generation",
+  "evidence_kind": "synthetic/non-live",
+  "live_evidence": false,
+  "origin": "Invented teaching input; no real unit identifiers, customer data, or live observations.",
+  "question": "For each supplied observation, what does actual_generation_mw establish about output and unit availability, and what remains unknown?",
+  "observations": [
+    {
+      "sample": "null-field",
+      "actual_generation_mw": null
+    },
+    {
+      "sample": "omitted-field"
+    }
+  ],
+  "source_refs": [
+    "README.md#governed-nemweb-analytics-on-databricks",
+    "docs/nemweb-migration-manifest.md#fixed-data-semantics",
+    "docs/nemweb-migration-manifest.md#report-to-subject-contract"
+  ],
+  "limitations": [
+    "Null and omitted values deliberately represent missing observations in this teaching input, not an asserted runtime schema or missing-value policy.",
+    "No authoritative T+1 unit-solution record, telemetry-quality check, or operational history is supplied.",
+    "No live workspace or source was queried; source_refs are repository-relative contract references, not observation provenance."
+  ]
+}

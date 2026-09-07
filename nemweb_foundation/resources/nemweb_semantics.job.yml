@@ -1,0 +1,42 @@
+# Manual semantic publication gate. Gold tables must exist and pass candidate-key
+# checks before governed comments and metric views are created. No schedule: the
+# deployment operator runs this after a successful NEMWEB pipeline update.
+resources:
+  jobs:
+    nemweb_semantics:
+      name: "${var.resource_prefix}-semantics"
+      max_concurrent_runs: 1
+      queue:
+        enabled: true
+      permissions:
+        - level: CAN_MANAGE_RUN
+          group_name: ${var.participant_group}
+        - level: CAN_MANAGE
+          group_name: ${var.facilitator_group}
+      tasks:
+        - task_key: validate_and_apply_comments
+          max_retries: 0
+          sql_task:
+            warehouse_id: ${var.warehouse_id}
+            file:
+              path: ${workspace.file_path}/sql/nemweb_semantics.sql
+              source: WORKSPACE
+            parameters:
+              catalog: ${var.catalog}
+              schema: ${var.schema}
+        - task_key: create_metric_views
+          depends_on:
+            - task_key: validate_and_apply_comments
+          max_retries: 0
+          sql_task:
+            warehouse_id: ${var.warehouse_id}
+            file:
+              path: ${workspace.file_path}/sql/nemweb_metric_views.sql
+              source: WORKSPACE
+            parameters:
+              catalog: ${var.catalog}
+              schema: ${var.schema}
+      tags:
+        data_source: nemweb
+        source_provider: aemo
+        semantic_layer: governed_metrics

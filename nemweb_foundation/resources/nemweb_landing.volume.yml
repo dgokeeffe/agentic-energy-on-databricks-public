@@ -1,0 +1,29 @@
+# Managed landing boundary for immutable AEMO NEMWEB archives, parsed files and manifests.
+resources:
+  volumes:
+    nemweb_landing:
+      catalog_name: ${var.catalog}
+      # Usually equal to the pipeline schema. The isolated live-evidence target
+      # reads the already managed development Volume, so its declaration must
+      # resolve to the same schema as landing_path even though selective live
+      # deployment deliberately excludes this pre-existing resource.
+      schema_name: ${var.landing_schema}
+      name: ${var.landing_volume}
+      volume_type: MANAGED
+      comment: >-
+        Governed NEMWEB landing data sourced from the Australian Energy Market
+        Operator (AEMO); raw archives are immutable provenance records.
+      lifecycle:
+        prevent_destroy: true
+      # Bundle grant lists MERGE across target overrides rather than replace, so
+      # the UC principals are variables. Unity Catalog resolves only
+      # account-level principals; workspace-local groups are valid for Job and
+      # Pipeline ACLs but not for UC grants.
+      grants:
+        - principal: ${var.volume_reader_principal}
+          privileges:
+            - READ_VOLUME
+        - principal: ${var.volume_writer_principal}
+          privileges:
+            - READ_VOLUME
+            - WRITE_VOLUME
