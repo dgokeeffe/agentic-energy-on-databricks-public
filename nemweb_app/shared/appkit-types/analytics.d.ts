@@ -5,6 +5,11 @@ import type { SQLTypeMarker, SQLStringMarker, SQLNumberMarker, SQLBooleanMarker,
 
 declare module "@databricks/appkit-ui/react" {
   interface QueryRegistry {
+    latest_fuel_generation: {
+        name: "latest_fuel_generation";
+        parameters: Record<string, never>;
+        result: unknown;
+      };
     latest_region_status: {
         name: "latest_region_status";
         parameters: Record<string, never>;
@@ -19,6 +24,10 @@ declare module "@databricks/appkit-ui/react" {
           rrp_aud_per_mwh: number;
           /** @sqlType DOUBLE */
           total_demand_mw: number;
+          /** @sqlType BIGINT */
+          price_source_run_no: number;
+          /** @sqlType BIGINT */
+          demand_source_run_no: number;
           /** @sqlType TIMESTAMP */
           source_interval_watermark: string;
           /** @sqlType TIMESTAMP */

@@ -11,6 +11,10 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './client/src'),
+      'echarts-for-react/esm/core': 'echarts-for-react/esm/core.js',
     },
+  },
+  ssr: {
+    noExternal: ['@databricks/appkit-ui', 'echarts-for-react'],
   },
 });
