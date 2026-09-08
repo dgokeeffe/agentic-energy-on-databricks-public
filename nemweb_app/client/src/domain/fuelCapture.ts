@@ -61,24 +61,46 @@ export type FuelToken =
   | 'bioenergy_biomass'
   | 'unknown';
 
+/**
+ * AEMO `CO2E_ENERGY_SOURCE` text to display token.
+ *
+ * The starred entries are the values actually observed in the deployed workspace
+ * on 2026-09-08, read from `silver_nem_facility_dimension.fuel_type_raw`. The
+ * first version of this table was written from guessed strings and silently sent
+ * two real fuels — "Natural Gas (Pipeline)" and "Diesel oil" — to the unknown
+ * bucket, where their generation appeared as "Unattributed fuel" on screen. AEMO
+ * qualifies several sources in parentheses, so exact-match keys must include those
+ * forms rather than the bare fuel name.
+ *
+ * Keys are compared lower-cased and trimmed, so casing differences between
+ * "Coal seam methane" (raw) and "Coal Seam Methane" (canonical) do not matter.
+ */
 const FUEL_TOKEN_BY_SOURCE: Record<string, FuelToken> = {
+  // Coal
   'black coal': 'coal_black',
   coal: 'coal_black',
   'brown coal': 'coal_brown',
   lignite: 'coal_brown',
+  // Gas. AEMO distinguishes the supply source, never the turbine technology, so
+  // every variant collapses to one token rather than guessing CCGT versus OCGT.
   'natural gas': 'gas',
+  'natural gas (pipeline)': 'gas', // * observed
+  'coal seam methane': 'gas', // * observed
   gas: 'gas',
-  'coal seam methane': 'gas',
   'gas other': 'gas',
+  // Liquid fuels
+  'diesel oil': 'distillate', // * observed
   diesel: 'distillate',
   distillate: 'distillate',
   kerosene: 'distillate',
-  hydro: 'hydro',
+  'fuel oil': 'distillate',
+  // Renewables and storage
+  hydro: 'hydro', // * observed
   water: 'hydro',
-  wind: 'wind',
-  solar: 'solar_utility',
+  wind: 'wind', // * observed
+  solar: 'solar_utility', // * observed
   battery: 'battery_discharging',
-  'battery storage': 'battery_discharging',
+  'battery storage': 'battery_discharging', // * observed
   bagasse: 'bioenergy_biomass',
   biomass: 'bioenergy_biomass',
   landfill: 'bioenergy_biomass',

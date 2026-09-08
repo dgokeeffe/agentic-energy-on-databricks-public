@@ -53,6 +53,33 @@ describe('fuelToken', () => {
     expect(fuelToken('')).toBe('unknown');
     expect(fuelToken('UNKNOWN')).toBe('unknown');
   });
+
+  it('maps every CO2E_ENERGY_SOURCE value observed in the deployed workspace', () => {
+    // Read from silver_nem_facility_dimension.fuel_type_raw on 2026-09-08. The
+    // first version of the mapping was written from guessed strings and sent
+    // "Natural Gas (Pipeline)" and "Diesel oil" to the unknown bucket, so their
+    // generation displayed as "Unattributed fuel". Only running it revealed that.
+    const observed: Record<string, string> = {
+      'Battery Storage': 'battery_discharging',
+      'Coal seam methane': 'gas',
+      'Diesel oil': 'distillate',
+      Hydro: 'hydro',
+      'Natural Gas (Pipeline)': 'gas',
+      Solar: 'solar_utility',
+      Wind: 'wind',
+    };
+    for (const [raw, expected] of Object.entries(observed)) {
+      expect(fuelToken(raw), `${raw} must not fall through to unknown`).toBe(expected);
+    }
+  });
+
+  it('maps the canonical initcap forms as well as the raw AEMO casing', () => {
+    // gold_nem_scada_generation_5min carries the canonicalised fuel_type, which
+    // differs in case from fuel_type_raw. Both must resolve identically.
+    expect(fuelToken('Coal Seam Methane')).toBe(fuelToken('Coal seam methane'));
+    expect(fuelToken('Natural Gas (pipeline)')).toBe(fuelToken('Natural Gas (Pipeline)'));
+    expect(fuelToken('Diesel Oil')).toBe(fuelToken('Diesel oil'));
+  });
 });
 
 describe('observationToken', () => {
