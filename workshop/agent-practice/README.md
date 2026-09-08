@@ -1,5 +1,11 @@
 # Read-only investigation practice
 
+> A separate, shorter facilitator demonstration drawn from a real defect in this
+> repository's own pipeline is in
+> [green-tests-wrong-code.md](green-tests-wrong-code.md). It asks where a test suite
+> touches the code that actually runs. It is not a participant exercise and shares
+> the placement and rehearsal limits below.
+
 This optional exercise asks a pair to investigate a supplied observation, check
 its reasoning independently, and test whether a proposed instruction helps on the
 original input and a variant. It is a small synthetic, non-live calibration, not

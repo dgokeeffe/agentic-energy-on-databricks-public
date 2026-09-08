@@ -22,6 +22,11 @@ Repository operators still need to close the live validation gate for the
 [full NEMWEB Lakeflow pipeline](features/full-nemweb-lakeflow.md). Local and
 snapshot results alone do not prove live five-minute operation.
 
+The Track C app was redesigned around fuel value capture; see
+[`decisions/app-value-capture-redesign.md`](decisions/app-value-capture-redesign.md).
+Its remaining dependency is a facilitator grant on
+`gold_nem_scada_generation_5min` in the app serving schema.
+
 ## Next safe action
 
 Run an independent repository review and the complete pre-deployment command set
@@ -42,6 +47,108 @@ initial pipeline, semantic, benchmark and dashboard SQL gates.
   actual output; never infer availability that AEMO Current does not publish.
 - Keep market notices omitted until a bounded plain-text parser, fixture and
   correction contract are independently proven.
+
+## Session handoff — 2026-09-08 (second)
+
+**Pipeline defect found and fixed: the facility dimension selected rows by the wall
+clock.** `silver_facilities.py` used `F.current_timestamp()` inside the `WHERE`
+clause choosing effective `DUDETAILSUMMARY` and `DUALLOC` rows, so the same Bronze
+data produced different Silver rows depending on when a refresh ran. Every DUID in
+the snapshot carries two registration periods, and a refresh either side of the
+boundary silently re-attributes five-minute generation to a different region or
+fuel — which moves the Track C app's revenue and capture figures while every value
+stays plausible. Latent in the current snapshot, because both periods there carry
+identical region and fuel. Now pinned to the maximum SCADA `interval_end` in Bronze
+and published as `registration_effective_at`. Full reasoning, three rejected
+alternatives, and the narrow audit are in
+[`decisions/facility-dimension-as-of.md`](decisions/facility-dimension-as-of.md).
+
+**Why 290 tests missed it.** `build_facility_dimension` takes an explicit `as_of`
+and is well tested; the pipeline never called it, reimplementing the same join in
+PySpark with a clock call substituted for the pinned parameter. Tested code and
+deployed code had diverged on exactly the time-dependent input.
+`test_snapshot_idempotency.py` covers landing and parsing only, never the Spark
+layer. Captured as facilitator material in
+[`../workshop/agent-practice/green-tests-wrong-code.md`](../workshop/agent-practice/green-tests-wrong-code.md).
+
+**The guard had the same bug it was written to catch.** The first AST checker looked
+for clock calls inside `.where()`, but the original code bound
+`F.current_timestamp()` to `now` and used the variable two lines later, so the
+checker passed against the real defect. It now tracks names bound to a clock call
+and asserts the inline shape, the via-variable shape, and a label-only `select` that
+must not be flagged. Verified by reverting the view under `git stash`: **9 pass on
+the fix, 2 fail on the original**, including the row-selecting clock check.
+
+**Narrow audit of the app's read path.** SCADA correction dedup is sound
+(`row_number() == 1` on `(interval_end, duid)`). The facility join cannot fan out,
+because all three registration sources deduplicate before joining.
+`is_effective_run` is filtered on the price path at three levels. It is **not
+applicable** on the fuel path and the absent `WHERE` clause is correct, because
+SCADA carries no intervention dimension. Only `silver_facilities.py` used a clock in
+a filter; the other 21 uses are processing-time labels.
+
+**Still open, outside the app's read path.** Interconnector and constraint join
+fan-out, late-arriving Bronze against full materialized-view recomputation, the
+fixed-AEST versus session-timezone boundary, and full-recompute cost at five-minute
+cadence. Also open: whether to collapse the PySpark reimplementation into
+`build_facility_dimension` so tested and deployed logic become the same code. That
+is the right eventual direction but a large change to a table five Gold surfaces
+depend on.
+
+**Evidence.** Foundation 299 passed with 36 subtests (9 new), modern-API check 33
+sources, root 33 passed, app 50 unit and 3 smoke. **The Spark view has not been
+executed** — the mechanism is proven with the shared pure function and by static
+reading of the PySpark; runtime behaviour is inferred. Confirming it needs an
+authorised workspace run.
+
+## Session handoff — 2026-09-08
+
+**Track C app redesigned around fuel value capture.** The screen previously asked
+whether the latest five-minute price could be trusted, which made data quality the
+subject rather than the discipline, framed itself for a trading desk that the same
+page forbade from trading, and put no magnitude at stake. It now answers "where did
+the value go?" — per-fuel capture rate against the regional time-weighted price,
+negative-price exposure, and the AEMO re-run that moves the revenue figure. The
+reasoning, the market citations, and the retired alternatives are in
+[`decisions/app-value-capture-redesign.md`](decisions/app-value-capture-redesign.md).
+
+The visual language is adapted from [Open Electricity](https://github.com/opennem/openelectricity)
+(MIT), whose palette is fundamentally a fuel-technology colour system and therefore
+maps one-to-one onto `gold_nem_scada_generation_5min`. Fonts are deliberately not
+self-hosted, so no font binary or third-party request was added. The AGL-inspired
+blue theme was retired, which also removed its trademark-adjacent risk; relevance
+to that audience now comes from the decision the app supports.
+
+**Four defects found by checking rather than assuming.** A charging battery
+produced a capture rate of −0.25×, because the ratio was applied to a buyer; it is
+now withheld for net consumers, and being paid to charge reads as earned rather
+than lost. The theme rendered near-black and unreadable for any reviewer whose OS
+prefers dark, because AppKit ships `prefers-color-scheme: dark` on
+`:root:not(.light)`, which outranks a bare `:root`; `client/index.html` now opts
+out and a smoke test asserts it under an emulated dark scheme. The screen opened on
+the first region alphabetically, which was the least interesting; it now opens on
+the weakest capture. Capture direction was carried by red/green alone, failing WCAG
+1.4.1, and now also carries a symbol and a screen-reader label.
+
+**Evidence.** App 50 unit tests and 3 Playwright smoke tests pass; typecheck,
+`eslint`, and `appkit lint` clean. Root suite 33 passed, foundation 290 passed with
+36 subtests, miniwiki 15 pages, links valid across 89 files, safety 370 files,
+modern-API check 33 sources, `git diff --check` clean. Prettier reports the same 3
+generated files as on HEAD and no others. Removing the ECharts `LineChart` reduced
+the main JavaScript asset from roughly 1,106 kB / 357 kB gzip to **479 kB / 141 kB
+gzip**.
+
+**Open dependency, needs workspace authority.** Fuel capture reads
+`gold_nem_scada_generation_5min`, declared as a second `uc_securable` in
+`nemweb_app/databricks.yml`. A facilitator must publish that table into the app
+serving schema and grant `SELECT`. Until then integration mode reports the
+generation read as unavailable and degrades only that section; fuel capture is
+proven against the prepared fixture alone and no live claim is made.
+
+**Still uncertain.** Whether the two-hour, three-region fixture window is the right
+teaching size, and whether an analyst reads capture rate without a short spoken
+introduction. Both need a rehearsal, not more code. The work is on branch
+`redesign-fuel-value-capture` and is uncommitted pending review.
 
 ## Session handoff — 2026-09-07
 
