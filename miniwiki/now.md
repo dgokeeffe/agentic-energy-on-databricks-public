@@ -139,8 +139,10 @@ fan-out, late-arriving Bronze against full materialized-view recomputation, the
 fixed-AEST versus session-timezone boundary, and full-recompute cost at five-minute
 cadence. Also open: whether to collapse the PySpark reimplementation into
 `build_facility_dimension` so tested and deployed logic become the same code. That
-is the right eventual direction but a large change to a table five Gold surfaces
-depend on.
+is the right eventual direction but a large change to a table three Gold surfaces
+depend on: gold_nem_scada_generation_5min, gold_nem_unit_dispatch_5min, and
+gold_nem_unit_dispatch_availability_t1. Verified 2026-09-08; earlier notes said
+"five", which was an unverified number.
 
 **Evidence.** Foundation 299 passed with 36 subtests (9 new), modern-API check 33
 sources, root 33 passed, app 50 unit and 3 smoke. **The Spark view has not been

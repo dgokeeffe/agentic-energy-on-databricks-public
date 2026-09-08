@@ -88,7 +88,7 @@ registration.
 
 **Calling `build_facility_dimension` from the pipeline.** The strongest fix, since
 it would collapse the two implementations into one. Deferred as too large a change
-to a table five Gold surfaces depend on, without a live gate to validate it. It
+to a table three Gold surfaces depend on, without a live gate to validate it. It
 remains the right eventual direction.
 
 **Maximum SCADA `interval_end` (chosen).** Derived, so it cannot go stale. It also
