@@ -82,6 +82,27 @@ resources:
           sql_warehouse:
             id: ${var.sql_warehouse_id}
             permission: CAN_USE
+        # Analytics runs as the App service principal. Declaring the fixed,
+        # reviewed serving table grants least-privilege SELECT without exposing
+        # a caller-controlled identifier.
+        - name: region-status-table
+          uc_securable:
+            securable_type: TABLE
+            securable_full_name: agentic_energy_workshop.agentic_energy_workshop_d4_serving.gold_nem_app_region_status
+            permission: SELECT
+        # Second, separate grant for the fuel value-capture read. It is declared
+        # explicitly rather than widened to the schema so the app's privileges stay
+        # enumerable, and so a workspace without this table published simply loses
+        # the value-capture section instead of failing the whole screen.
+        #
+        # Requires the facilitator to publish gold_nem_scada_generation_5min into
+        # the app serving schema. Until then, integration mode reports the
+        # generation read as unavailable by design.
+        - name: fuel-generation-table
+          uc_securable:
+            securable_type: TABLE
+            securable_full_name: agentic_energy_workshop.agentic_energy_workshop_d4_serving.gold_nem_scada_generation_5min
+            permission: SELECT
         # CAN_CONNECT_AND_CREATE lets the app's service principal create and
         # therefore own app_write on its own branch. Deploy the app BEFORE
         # running locally, or the schema ends up owned by a human identity and

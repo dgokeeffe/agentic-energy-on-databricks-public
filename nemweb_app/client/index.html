@@ -1,5 +1,13 @@
 <!doctype html>
-<html lang="en">
+<!--
+  class="light" is required, not cosmetic. AppKit's stylesheet carries a
+  `@media (prefers-color-scheme: dark) { :root:not(.light) { ... } }` block that
+  overrides the theme variables on any reviewer whose OS is in dark mode, which
+  rendered this light warm-grey theme as near-black with unreadable text. The
+  Open Electricity palette this theme adapts is light-only, so the app opts out of
+  the dark fallback explicitly rather than shipping a half-legible dark variant.
+-->
+<html lang="en" class="light">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -9,7 +17,7 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>agentic-energy-workshop-d4</title>
+    <title>NEM value capture · which fuels captured the price</title>
   </head>
   <body>
     <div id="root"></div>
