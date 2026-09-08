@@ -8,7 +8,20 @@ declare module "@databricks/appkit-ui/react" {
     latest_fuel_generation: {
         name: "latest_fuel_generation";
         parameters: Record<string, never>;
-        result: unknown;
+        result: Array<{
+          /** @sqlType TIMESTAMP */
+          interval_end: string;
+          /** @sqlType STRING */
+          region_id: string;
+          /** @sqlType STRING */
+          fuel_type: string;
+          /** Signed sum of per-DUID SCADA actual MW for the region/fuel group; storage/load values may be negative. */
+          actual_generation_mw: number;
+          /** @sqlType BIGINT */
+          facility_count: number;
+          /** Count of source facilities without both governed region and fuel enrichment; non-zero values are visible quality context. */
+          partially_enriched_facility_count: number;
+        }>;
       };
     latest_region_status: {
         name: "latest_region_status";
