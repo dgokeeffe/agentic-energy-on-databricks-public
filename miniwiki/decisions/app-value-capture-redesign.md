@@ -134,17 +134,47 @@ by resembling AGL's website. That is the stronger form of relevance.
   times the regional reference price: an indicative energy-value estimate that
   excludes FCAS, loss factors, contracts, and settlement adjustment.
 
-## Status and open dependency
+## Status
 
 Implemented: the theme, the fuel-capture domain module and its tests, the
 redesigned screen, and the reviewed SQL read path.
 
-**Open, needs a facilitator with workspace authority.** The app bundle grants
-`SELECT` on exactly one securable, `gold_nem_app_region_status`. Fuel-level
-capture reads two further Gold tables, so integration mode additionally requires
-those grants, or a published serving view equivalent to them. Until that is
-deployed and verified, fuel capture is proven only against the prepared local
-fixture. No live claim is made.
+### Dependency closed, dev deployment 2026-09-08
+
+`gold_nem_scada_generation_5min` is now published into the app serving schema by
+`nemweb_app_serving`, following the same reviewed pattern as
+`gold_nem_app_region_status`, and granted separately in the app bundle so the
+app's privileges stay enumerable.
+
+Verified with the `daveok` profile against
+`agentic_energy_workshop.agentic_energy_workshop_d4_serving`: job run
+`354366776080686` SUCCESS on both publication tasks, the serving table reconciles
+**22 rows to 22** against its pipeline source across 11 region/fuel pairs, and both
+reviewed app SQL files execute against the warehouse. Schedules stayed PAUSED and
+`nemweb.source_mode` stayed `snapshot` throughout.
+
+### The run found a real defect in the fuel mapping
+
+The mapping was written from guessed `CO2E_ENERGY_SOURCE` strings, and the local
+fixture was built from the same guesses — so the tests confirmed the assumption
+rather than the behaviour. Against real data, two fuels fell through to the unknown
+bucket and displayed real generation as "Unattributed fuel":
+
+```
+Natural Gas (Pipeline) -> unknown   (should be gas)
+Diesel oil             -> unknown   (should be distillate)
+```
+
+AEMO qualifies several sources in parentheses. Every distinct value observed in the
+workspace is now mapped and pinned by a test, plus a second test asserting the
+canonical initcap forms resolve identically to the raw AEMO casing, since
+`gold_nem_scada_generation_5min` carries the canonicalised value while the
+dimension carries the raw one.
+
+**Remaining limit.** The snapshot holds two intervals per region/fuel pair, so the
+screen renders correctly but the capture figures are not a realistic trading window.
+The prepared local fixture remains the better teaching artefact. No live NEMWEB
+claim is made: `allow_live_nemweb` stayed false and the mode stayed snapshot.
 
 ## Human review
 

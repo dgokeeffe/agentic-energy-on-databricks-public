@@ -48,6 +48,53 @@ initial pipeline, semantic, benchmark and dashboard SQL gates.
 - Keep market notices omitted until a bounded plain-text parser, fixture and
   correction contract are independently proven.
 
+## Session handoff — 2026-09-08 (third): authorised dev run
+
+**The pipeline fix is now proven at runtime, not just statically.** Authorised dev
+deployment against `agentic_energy_workshop_d4` with the `daveok` profile. Cold-start
+order followed: context, critical, semantics, app-serving. Both schedules stayed
+PAUSED and `nemweb.source_mode` stayed `snapshot` throughout; `allow_live_nemweb`
+stayed false. No live NEMWEB fetch occurred, so Gate 6 remains untouched and open.
+
+Pipeline update resolved by uniqueness proof, not "latest": window
+13:34:42.062Z-13:39:56.682Z gave exactly one candidate,
+`da84017c-b83c-42f2-8c47-510df3d3efb8`, COMPLETED, `full_refresh=False`.
+
+The decisive result: `registration_effective_at` is `2026-06-30T14:10:00Z`, equal to
+`MAX(interval_end)` in Bronze SCADA and **ten weeks behind** the `2026-09-08` wall
+clock. Before the fix it would have been today's date. One distinct value, 14 rows
+for 14 DUIDs, so the `crossJoin` produced a scalar and did not fan out.
+
+**The run found a second defect the fixture could never have caught.** The app's fuel
+mapping was written from guessed `CO2E_ENERGY_SOURCE` strings, and the local fixture
+was built from the same guesses. Against real data `Natural Gas (Pipeline)` and
+`Diesel oil` fell through to the unknown bucket and displayed real generation as
+"Unattributed fuel". Every distinct workspace value is now mapped and pinned, plus a
+test that the canonical initcap forms match the raw AEMO casing. Same lesson as the
+primary defect, one layer out: a test written from the same assumption as the code
+confirms the assumption, not the behaviour.
+
+**The app's open dependency is closed.** `gold_nem_scada_generation_5min` is
+published into the serving schema by a new `nemweb_app_serving` task following the
+reviewed pattern, with the overlap guard counting the composite natural key. Job run
+`354366776080686` SUCCESS on both tasks; serving reconciles 22 rows to 22 across 11
+region/fuel pairs; both reviewed app SQL files execute against the warehouse.
+
+**Also repaired.** `npm ci` during `make validate-local` cleared the typegen cache and
+silently downgraded `latest_region_status` to `result: unknown`. Both queries are now
+fully typed. Run typegen with `nemweb_app/.env` sourced; ad hoc environment variables
+leave it degraded.
+
+**Evidence.** Foundation 299 passed with 37 subtests, root 33, app 52 unit and 3
+smoke, links 92 files, safety 374 files, miniwiki 16 pages, both bundles
+`Validation OK!`.
+
+**Still open.** Whether the `crossJoin` broadcasts cleanly or adds a shuffle at
+sustained five-minute cadence — the snapshot is too small to show it. The three-cycle
+live gate. Interconnector and constraint join fan-out. Whether to collapse the PySpark
+reimplementation into `build_facility_dimension`. Two commits were added to PR #1
+after the run and still need independent review.
+
 ## Session handoff — 2026-09-08 (second)
 
 **Pipeline defect found and fixed: the facility dimension selected rows by the wall

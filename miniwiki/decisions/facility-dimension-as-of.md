@@ -147,13 +147,57 @@ five-minute cadence. These sit outside the app's read path.
 
 ## Evidence and limits
 
-Foundation suite 299 passed with 36 subtests, including the 9 new tests. Modern-API
+Foundation suite 299 passed with 37 subtests, including the 9 new tests. Modern-API
 check passes over 33 sources.
 
-**The Spark view has not been executed.** The defect mechanism is proven with the
-shared pure function and by static reading of the PySpark; runtime behaviour is
-inferred from the code. Confirming it needs a workspace and an authorised run,
-which the live gate has not closed.
+### Runtime evidence, dev deployment 2026-09-08
+
+The view **has now been executed**, which supersedes the static-only limit this
+page previously recorded. Authorised dev run against
+`agentic_energy_workshop.agentic_energy_workshop_d4` with the `daveok` profile,
+schedules PAUSED and `nemweb.source_mode=snapshot` throughout.
+
+Pipeline update resolved by the runbook's uniqueness proof rather than by selecting
+"latest": the critical job run window 13:34:42.062Z-13:39:56.682Z yielded exactly
+one candidate, `da84017c-b83c-42f2-8c47-510df3d3efb8`, COMPLETED, cause
+`JOB_TASK`, `full_refresh=False`.
+
+The decisive query:
+
+| Measure | Value |
+|---|---|
+| `MAX(registration_effective_at)` in the dimension | `2026-06-30T14:10:00Z` |
+| `MAX(interval_end)` in `bronze_nem_dispatch_unit_scada` | `2026-06-30T14:10:00Z` |
+| `CURRENT_DATE()` at query time | `2026-09-08` |
+| `COUNT(DISTINCT registration_effective_at)` | 1 |
+
+The effective instant equals the data watermark and is **ten weeks behind the wall
+clock**, which is exactly the divergence the defect hid. One distinct value confirms
+the `crossJoin` produced a single scalar. The dimension holds 14 rows for 14
+distinct DUIDs, so no fan-out: 13 `REGION_AND_FUEL` and 1 `REGION_ONLY`.
+
+Still not measured: whether the `crossJoin` broadcasts cleanly or adds a shuffle at
+sustained five-minute cadence. The snapshot is too small to show it.
+
+### A second defect the run exposed, downstream
+
+The deployed `fuel_type` values are not the strings the Track C app's mapping
+expected. `silver_nem_facility_dimension.fuel_type_raw` carries AEMO's qualified
+forms, and two real fuels fell through to the unknown bucket, displaying real
+generation as "Unattributed fuel":
+
+```
+Natural Gas (Pipeline) -> unknown   (should be gas)
+Diesel oil             -> unknown   (should be distillate)
+```
+
+The mapping had been written from guessed values, and the local fixture was built
+from the same guesses, so no unit test could have caught it. Every distinct value
+in the workspace is now mapped and pinned by a test, with a second test asserting
+that the canonical initcap forms resolve identically to the raw AEMO casing.
+
+This is the same lesson as the primary defect, one layer out: a test written from
+the same assumption as the code confirms the assumption, not the behaviour.
 
 ## Human review
 
