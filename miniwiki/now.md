@@ -3,14 +3,15 @@
 ## Current focus
 
 Workshop pairs execute the default challenge from
-[`../docs/participant/workshop-playbook.md`](../docs/participant/workshop-playbook.md):
+[`../QUICKSTART.md`](../QUICKSTART.md):
 
 > Can an operator trust the latest regional price trend, given NEMWEB
 > corrections, freshness, and timezone handling?
 
-Facilitators use [`../docs/facilitator/workshop-run-of-show.md`](../docs/facilitator/workshop-run-of-show.md).
-Use the shared GitHub-issue lifecycle, not a seeded patch from the historical lane
-directories. The optional [read-only investigation practice](../workshop/agent-practice/README.md)
+Facilitators use [`../foundation/deployment-gates.md`](../foundation/deployment-gates.md).
+Participants choose one self-contained track from [`../QUICKSTART.md`](../QUICKSTART.md);
+see [`decisions/track-structure.md`](decisions/track-structure.md).
+The optional [read-only investigation practice](../workshop/agent-practice/README.md)
 uses two synthetic cases to distinguish SCADA output from availability and missing
 input from zero. It requires issue/plan authorisation and facilitator placement and
 rehearsal; no live operation or successful agent replay is claimed by the fixtures.
@@ -24,7 +25,7 @@ snapshot results alone do not prove live five-minute operation.
 ## Next safe action
 
 Run an independent repository review and the complete pre-deployment command set
-in [`../docs/nemweb-operations.md`](../docs/nemweb-operations.md). Resolve every
+in [`../foundation/deployment-gates.md`](../foundation/deployment-gates.md). Resolve every
 blocking finding before an explicitly authorised dev deployment with the
 `daveok` profile and an isolated schema. Keep both schedules paused through the
 initial pipeline, semantic, benchmark and dashboard SQL gates.
@@ -41,6 +42,40 @@ initial pipeline, semantic, benchmark and dashboard SQL gates.
   actual output; never infer availability that AEMO Current does not publish.
 - Keep market notices omitted until a bounded plain-text parser, fixture and
   correction contract are independently proven.
+
+## Session handoff — 2026-09-07
+
+**Docs restructured to self-contained tracks.** `QUICKSTART.md` is now a chooser
+routing to Track A, Track B, or the new Track C (`workshop/track_c_app/`). Every
+wall-clock time, card number, the 14:27 evidence exchange, and cross-track pairing
+were removed. 64 broken links from the deletion are now 0. Decisions are in
+[`decisions/track-structure.md`](decisions/track-structure.md) and
+[`decisions/attendee-isolation.md`](decisions/attendee-isolation.md).
+
+Two deleted files held **governed data contracts**, not workshop scaffolding. The
+market-notices omission and the SCADA-versus-availability rule were recovered
+verbatim into [`../nemweb_foundation/DATA-CONTRACT.md`](../nemweb_foundation/DATA-CONTRACT.md);
+no test assertion was relaxed. `test_workshop_routing.py` had asserted that the
+lane directories must **not** be routed, the opposite of the new decision, so it
+was rewritten; `test_repository_safety.py` gained a narrow test bounding Track C's
+new deploy permission.
+
+**Facilitator-only deployment evidence.** Workspace-specific resource names,
+run identifiers, branch LSNs, service-principal identifiers, and attendee
+outcomes stay outside Git. This repository records the generic contracts,
+validation commands, and safety gates only; it does not claim that a public
+clone has access to a deployed workspace or live evidence.
+
+**Operational notes.** On a cold schema, the context job must run before the
+critical job. Lakebase resource identifiers and Postgres database names are
+distinct values and must be supplied from the approved target configuration.
+Both checks are recorded in
+[`../foundation/deployment-gates.md`](../foundation/deployment-gates.md).
+
+**Still uncertain.** The documented concurrent-compute limit has not been
+load-tested for the actual attendee count. No live NEMWEB cycle is claimed here,
+so the three-cycle gate remains open. The ML bundle validates locally but has no
+public deployment evidence.
 
 ## Session handoff — 2026-09-05
 

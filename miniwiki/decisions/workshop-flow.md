@@ -3,7 +3,7 @@
 ## Decision
 
 Participants execute one shared playbook,
-[`../../docs/participant/workshop-playbook.md`](../../docs/participant/workshop-playbook.md). Use a
+[`../../QUICKSTART.md`](../../QUICKSTART.md). Use a
 committed, loosely organized Markdown miniwiki for session continuity rather
 than a dependency graph or issue database.
 

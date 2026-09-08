@@ -33,11 +33,10 @@ residual risks. The reviewer returns:
 - `REQUEST_CHANGES`, naming the missing required criterion and evidence; or
 - `PASS`, confirming every required plan item is evidenced.
 
-This is a facilitated human review, not an automated service. Use the prepared
-verdict wording in the
-[fallback pack](../../../docs/facilitator/workshop-fallback.md#prepared-plan-compliance-verdicts)
-when the published switch trigger fires. Record one genuine rejection before
-repair; do not fix the evidence silently before review.
+This is a human review, not an automated service. The reviewer may be another
+attendee, the facilitator, or an independent fresh assistant session — but never
+the author. Record one genuine rejection before repair; do not fix the evidence
+silently before review.
 
 A verdict does not merge or deploy the change. Stop if the author is also the
 reviewer, a required criterion becomes optional, evidence is absent, or the

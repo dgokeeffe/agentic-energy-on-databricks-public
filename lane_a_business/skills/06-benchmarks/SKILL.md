@@ -1,6 +1,6 @@
 ---
 name: lane-a-benchmarks
-description: Turn questions asked during Track A into predeclared supported-answer and refusal benchmarks, compare the same rerun, decide keep or revert, and complete the pilot canvas.
+description: Turn questions asked during Track A into predeclared supported-answer and refusal benchmarks, compare the same rerun, decide keep or revert, and write the closing note.
 ---
 
 # Benchmarks and close
@@ -28,7 +28,7 @@ if the question, expected outcome, or data window changes to make the rerun pass
 
 ## Pilot canvas
 
-Complete [`../../../docs/participant/pilot-canvas.md`](../../../docs/participant/pilot-canvas.md) for one
+Complete the closing note in your [track record](../../../workshop/track-record-template.md) for one
 existing workflow that can run within a fortnight. Name:
 
 - the workflow and why it is not a sandbox;

@@ -2,18 +2,16 @@
 
 This directory is the read-only workshop framework for the governed NEMWEB
 foundation. Facilitators prepare and verify it before the workshop. Participants
-consume its governed outputs through [`QUICKSTART.md`](../QUICKSTART.md) and the
-[participant playbook](../docs/participant/workshop-playbook.md); they do not deploy, operate,
-or modify the foundation.
+consume its governed outputs through [`QUICKSTART.md`](../QUICKSTART.md) and
+their chosen track; they do not deploy, operate, or modify the foundation.
 
 > **Facilitators only:** Links from this component to
 > [`nemweb_foundation/`](../nemweb_foundation/README.md) identify the reviewed
 > implementation and its authoritative operational scripts. Do not route
 > participants into that directory.
 
-Keep every team as a cross-track pair with one Track A owner and one Track B
-owner. The shared foundation serves both owners; neither track creates a second
-data store.
+Each attendee completes one self-contained track. The shared foundation serves
+every track; no track creates a second data store.
 
 ## Fixed contracts
 
@@ -30,9 +28,9 @@ data store.
 | Landing roots | Snapshot and live data use separate `snapshot/` and `live/` siblings |
 
 The complete source-to-table mapping and provenance remain in the
-[migration manifest](../docs/nemweb-migration-manifest.md). The canonical
+[migration manifest](../nemweb_foundation/README.md). The canonical
 operating procedure remains in the
-[NEMWEB runbook](../docs/nemweb-operations.md).
+[NEMWEB runbook](deployment-gates.md).
 
 ## Facilitator sequence
 

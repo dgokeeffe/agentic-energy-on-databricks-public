@@ -12,8 +12,8 @@ foundation.
 
 1. [`../../Instructions.md`](../../Instructions.md)
 2. [`../../../PRE-REQUISITES.md`](../../../PRE-REQUISITES.md)
-3. [`../../../docs/nemweb-operations.md`](../../../docs/nemweb-operations.md)
-4. [`../../../docs/nemweb-migration-manifest.md`](../../../docs/nemweb-migration-manifest.md)
+3. [`../../deployment-gates.md`](../../deployment-gates.md)
+4. [`../../../nemweb_foundation/README.md`](../../../nemweb_foundation/README.md)
 
 > **Facilitators only:** The runbook links to the completed implementation in
 > `nemweb_foundation/`. Participants remain in `QUICKSTART.md` and the
@@ -34,7 +34,7 @@ completed stage does not authorise the next one.
 
 ## Preserve these contracts
 
-- Keep one Track A owner and one Track B owner in each cross-track pair.
+- Tracks are self-contained; do not reintroduce cross-track pairing.
 - Use one shared Bronze/Silver/Gold foundation; do not create another data
   store.
 - Treat interval-ending market time as fixed AEST and processing timestamps as

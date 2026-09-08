@@ -8,11 +8,12 @@ before acting; do not infer workshop steps from a chat summary.
 1. Read [`README.md`](README.md) for the repository and hybrid workshop layout.
 2. Read [`PRE-REQUISITES.md`](PRE-REQUISITES.md) before setup or workspace
    validation.
-3. Send participants to [`QUICKSTART.md`](QUICKSTART.md). Detailed participant
-   instructions are in
-   [`docs/participant/workshop-playbook.md`](docs/participant/workshop-playbook.md).
-   [`docs/facilitator/workshop-run-of-show.md`](docs/facilitator/workshop-run-of-show.md)
-   is the only clock source.
+3. Send participants to [`QUICKSTART.md`](QUICKSTART.md), which routes them to
+   exactly one self-contained track: Track A
+   ([`lane_a_business/`](lane_a_business/Instructions.md)), Track B
+   ([`lane_b_engineering/`](lane_b_engineering/Instructions.md)), or Track C
+   ([`workshop/track_c_app/`](workshop/track_c_app/Instructions.md)). Tracks are
+   self-paced; there is no fixed clock and no cross-track dependency.
 4. Participants inspect `nemweb_foundation/` for governed contracts, but must
    not deploy it or mutate workspace resources.
 5. Before miniwiki or handoff work, read the repository-owned
@@ -25,12 +26,13 @@ before acting; do not infer workshop steps from a chat summary.
 
 | Request keywords | Read first | Route |
 |---|---|---|
-| start, quickstart, participant, pair | [`QUICKSTART.md`](QUICKSTART.md) and [`docs/participant/workshop-pair-record.md`](docs/participant/workshop-pair-record.md) | Keep one Track A owner and one Track B owner in every cross-track pair. |
+| start, quickstart, participant, track | [`QUICKSTART.md`](QUICKSTART.md) and [`workshop/track-record-template.md`](workshop/track-record-template.md) | Route to exactly one self-contained track. Do not reintroduce cross-track pairing or a fixed clock. |
 | prerequisite, setup, access, profile, preflight, PF-1–PF-10 | [`PRE-REQUISITES.md`](PRE-REQUISITES.md) | Separate administrator, facilitator, and participant actions; never guess a workspace capability. |
-| issue, workshop-ready, participant, pair | [`.agents/skills/issue-navigator/SKILL.md`](.agents/skills/issue-navigator/SKILL.md) and [`docs/participant/workshop-playbook.md`](docs/participant/workshop-playbook.md) | Select one workshop-ready GitHub issue and keep business and engineering responsibilities in the pair. |
+| issue, workshop-ready, participant | [`.agents/skills/issue-navigator/SKILL.md`](.agents/skills/issue-navigator/SKILL.md) and [`QUICKSTART.md`](QUICKSTART.md) | Optional. A track is completed from its own `Instructions.md`; a GitHub issue is only needed when the work is contributed back. |
 | requirement, plan, implement, test, eval, review, pull request | [`.agents/skills/understand-requirement/SKILL.md`](.agents/skills/understand-requirement/SKILL.md), [`.agents/skills/plan-change/SKILL.md`](.agents/skills/plan-change/SKILL.md), and [`.agents/skills/implement-test/SKILL.md`](.agents/skills/implement-test/SKILL.md) | Follow requirement → plan → human approval → implementation → tests → eval → independent review → pull request → human disposition. |
-| NEMWEB, foundation, Bronze, Silver, Gold, lineage | [`foundation/AGENTS.md`](foundation/AGENTS.md), [`foundation/Instructions.md`](foundation/Instructions.md), and [`docs/nemweb-migration-manifest.md`](docs/nemweb-migration-manifest.md) | Use the read-only shared foundation; do not create another data store. |
-| facilitator, timing, fallback, prepared | [`docs/facilitator/workshop-run-of-show.md`](docs/facilitator/workshop-run-of-show.md) and [`docs/facilitator/workshop-fallback.md`](docs/facilitator/workshop-fallback.md) | Use the published clock and switching triggers. |
+| NEMWEB, foundation, Bronze, Silver, Gold, lineage | [`foundation/AGENTS.md`](foundation/AGENTS.md), [`foundation/Instructions.md`](foundation/Instructions.md), and [`nemweb_foundation/README.md`](nemweb_foundation/README.md) | Use the read-only shared foundation; do not create another data store. |
+| facilitator, deploy, gates, evidence | [`foundation/deployment-gates.md`](foundation/deployment-gates.md) and [`foundation/Instructions.md`](foundation/Instructions.md) | Follow the gate sequence. When a capability is unavailable, record `not-run` or `blocked` and label substitutes prepared. |
+| isolation, attendee, Lakebase branch, app slug | [`miniwiki/decisions/attendee-isolation.md`](miniwiki/decisions/attendee-isolation.md) and [`workshop/lakebase/scripts/provision-attendee-branches.sh`](workshop/lakebase/scripts/provision-attendee-branches.sh) | One branch and one app per attendee, both from `attendee_slug`. Mind the 20-concurrent-compute limit per project. |
 | issue, task, continuation, handoff, miniwiki | [`.agents/skills/miniwiki/SKILL.md`](.agents/skills/miniwiki/SKILL.md), [`miniwiki/now.md`](miniwiki/now.md), the applicable miniwiki page, and the current Git status | Use ordinary Markdown and the Git branch or pull request. No global skill installation, local issue database, or tracker CLI is required. |
 | deploy, run job, live data, schedule | [`PRE-REQUISITES.md`](PRE-REQUISITES.md), [`foundation/AGENTS.md`](foundation/AGENTS.md), and [`foundation/Instructions.md`](foundation/Instructions.md) | Facilitators use one numbered prompt at a time. Stop unless the current task explicitly authorises the external action. Every workspace-aware command must include `--profile daveok`; never use an implicit profile. |
 

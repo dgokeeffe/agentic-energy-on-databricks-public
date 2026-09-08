@@ -23,7 +23,7 @@ Choose preparation for the task, not a permission tier:
 | Translation or migration | Compare behaviour with the reference and check dependency or language differences; do not introduce a live migration exercise. |
 
 Record task kind, preparation choice, and verification rationale in the
-[pair record](../../../docs/participant/workshop-pair-record.md), or the existing
+[track record](../../../workshop/track-record-template.md), or the existing
 issue/plan for maintenance. Distinguish explanations ruled out with cited evidence
 from paths not investigated; missing evidence is not disproof. Task type never
 grants permissions. Maintainers need explicit task authority; participants retain

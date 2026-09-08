@@ -201,8 +201,9 @@ and other dependencies without a full refresh. The accepted scheduled runs were
 approximately 300 seconds apart, and all lander, exact pipeline update, quality,
 duplicate-key, watermark, and orchestration checks passed.
 
-The authoritative evidence is
-[`../../docs/test-evidence/nemweb-e2e-2026-09-05.md`](../../docs/test-evidence/nemweb-e2e-2026-09-05.md).
+The dated evidence file that recorded this run was removed from the repository in
+the 2026-09-07 cleanup, so the claim below is no longer backed by a committed
+artefact and must be re-established before it is relied on.
 `validate_nemweb_live.py` accepted three cycles and 15 critical-subject rows.
 Both the ordinary development schedule and the live-evidence schedule are
 paused. AEMO Current still does not contain unit target or availability:

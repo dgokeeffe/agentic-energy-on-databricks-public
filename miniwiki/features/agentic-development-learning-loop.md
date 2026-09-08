@@ -15,7 +15,7 @@ normal refinement, and reusable learning visible in the workshop itself.
 
 The active participant route is the shared GitHub-issue lifecycle in
 [QUICKSTART](../../QUICKSTART.md) and the
-[participant playbook](../../docs/participant/workshop-playbook.md). The retained
+[participant playbook](../../QUICKSTART.md). The retained
 business and engineering lane directories are historical; do not extend those as
 though they were the active exercises.
 
@@ -38,11 +38,10 @@ a parallel lifecycle or a large new agent team.
 - [adversarial-review](../../.agents/skills/adversarial-review/SKILL.md) covers important
   correctness and safety topics, but does not explicitly review code structure as a
   separate question from passing tests.
-- The [pair record](../../docs/participant/workshop-pair-record.md) records findings
+- The [pair record](../../workshop/track-record-template.md) records findings
   and repairs, but not the distinction between normal refinement, correction of an
   error, and abandoning an approach.
-- The active playbook and [run of show](../../docs/facilitator/workshop-run-of-show.md)
-  end with human disposition. They do not require a reusable lesson and a subsequent
+- The tracks end with human disposition. They do not require a reusable lesson and a subsequent
   local check showing whether it helps. This leaves Observe and Improve less visible
   than the delivery stages.
 - The repository-owned [verification skill](../../.agents/skills/agentic-verification/SKILL.md)
@@ -52,9 +51,10 @@ a parallel lifecycle or a large new agent team.
   undermines a fresh-clone workshop. Preserve the repository's current verification
   floor in the first patch. Any change to reviewer counts or model policy is a separate
   decision for David, not an incidental consequence of adding portable roles.
-- [The current-focus page](../now.md) still describes a seeded patch under a historical
-  lane, while the active run of show says those lanes are not routed. Reconcile that
-  pointer rather than using it to revive an old exercise.
+- The former contradiction here — a current-focus page describing a seeded patch under
+  a "historical" lane while the clock document said those lanes were not routed — was
+  resolved on 2026-09-07 by making the tracks the routed path. See
+  [`../decisions/track-structure.md`](../decisions/track-structure.md).
 - [Routing tests](../../tests/test_workshop_routing.py) mainly check file presence and
   keywords. They do not demonstrate source-aware investigation, structural review,
   or successful transfer of a lesson to another case.

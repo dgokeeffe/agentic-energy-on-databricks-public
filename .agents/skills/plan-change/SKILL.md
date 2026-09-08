@@ -19,7 +19,7 @@ interface and failure-path checks for a new component or multi-step change;
 cited supporting/contrary evidence and uninvestigated paths for an investigation;
 and reference-behaviour comparisons for a translation or migration. Record why
 these checks fit the task, along with unrun checks and limits, in the
-[pair record](../../../docs/participant/workshop-pair-record.md) or maintenance plan.
+[track record](../../../workshop/track-record-template.md) or maintenance plan.
 No task kind grants permissions or waives a required gate.
 
 The optional [read-only calibration](../../../workshop/agent-practice/README.md)

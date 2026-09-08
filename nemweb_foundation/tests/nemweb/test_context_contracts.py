@@ -108,7 +108,7 @@ def test_units_cadence_and_semantic_boundaries_are_in_table_comments() -> None:
 
 def test_market_notices_are_deliberately_omitted_not_half_wired() -> None:
     assert not any(PIPELINE.glob("*notices.py"))
-    manifest = (REPOSITORY_ROOT / "docs" / "nemweb-migration-manifest.md").read_text()
+    manifest = (ROOT / "DATA-CONTRACT.md").read_text()
     assert "Market notices are deliberately omitted in this slice" in manifest
     assert "unstructured plain-text notice" in manifest
     resource = (ROOT / "resources" / "nemweb.pipeline.yml").read_text()

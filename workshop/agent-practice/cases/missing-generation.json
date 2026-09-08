@@ -15,8 +15,8 @@
   ],
   "source_refs": [
     "README.md#governed-nemweb-analytics-on-databricks",
-    "docs/nemweb-migration-manifest.md#fixed-data-semantics",
-    "docs/nemweb-migration-manifest.md#report-to-subject-contract"
+    "nemweb_foundation/DATA-CONTRACT.md#fixed-data-semantics",
+    "nemweb_foundation/DATA-CONTRACT.md#report-to-subject-contract"
   ],
   "limitations": [
     "Null and omitted values deliberately represent missing observations in this teaching input, not an asserted runtime schema or missing-value policy.",

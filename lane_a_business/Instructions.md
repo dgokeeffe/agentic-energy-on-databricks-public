@@ -1,9 +1,14 @@
 # Track A — governed answer
 
 Track A turns the default operator question into an explainable answer that can
-also refuse an unsafe question. You are the Track A owner in one cross-track
-pair. Keep working with the same Track B owner: use their timezone and freshness
-evidence, and give them your approved brief and evidence threshold.
+also refuse an unsafe question.
+
+This track is self-contained. It does not depend on Track B, Track C, or a
+partner. Work at your own pace, in stage order. You may pair with someone on the
+same track if you prefer; nothing requires it.
+
+Copy [`../workshop/track-record-template.md`](../workshop/track-record-template.md)
+and keep it beside you.
 
 > Can an operator trust the latest regional price trend, given NEMWEB
 > corrections, freshness, and timezone handling?
@@ -12,8 +17,8 @@ Do not invent a different question, report family, or data store unless the
 facilitator approves the change. Do not assume a metric view, Genie Agent, Genie
 One feature, MCP endpoint, dashboard, or App exists. Use a workspace surface
 only after the facilitator confirms the relevant item in
-[`../PRE-REQUISITES.md`](../PRE-REQUISITES.md) and releases it. Otherwise follow
-the published [prepared fallback](../docs/facilitator/workshop-fallback.md).
+[`../PRE-REQUISITES.md`](../PRE-REQUISITES.md) and releases it. Otherwise record
+the step as `not-run` or `blocked` and continue with local work.
 
 ## What you must produce
 
@@ -26,11 +31,10 @@ the published [prepared fallback](../docs/facilitator/workshop-fallback.md).
 - one dashboard, App, or prepared Markdown surface showing owner, source, and
   freshness;
 - benchmark expectations written before rerun; and
-- a completed [pilot canvas](../docs/participant/pilot-canvas.md).
+- a short closing note: what this would need to be trusted in production.
 
-Record each result in the
-[pair record](../docs/participant/workshop-pair-record.md). Label evidence as **live**,
-**snapshot**, or **prepared fallback**. Snapshot and prepared material are never
+Record each result in your track record. Label evidence as **live**,
+**snapshot**, or **prepared**. Snapshot and prepared material are never
 live proof.
 
 ## Fixed analysis contract
@@ -50,23 +54,19 @@ live proof.
 Negative prices can be valid. Do not infer causation from a trend, recommend a
 bid, forecast unpublished intervals, or hide missing and uncertain context.
 
-## Numbered stages and clock
+## Numbered stages
 
 Use a fresh AI-assistant conversation for every prompt. Finish the current stage
 and record the human decision before starting the next.
 
-| Stage | Workshop time | Prompt | Output |
+| Stage | Prompt | Output |
 |---|---|---|---|
-| 1. Research and brief | Cards 1–5, 10:03–12:00 | [`01-research-and-brief.md`](prompts/01-research-and-brief.md) | cited contract, approved brief, Gold-window evidence |
-| 2. Metric view | Card 6, 13:25–13:50 | [`02-check-metric-view.md`](prompts/02-check-metric-view.md) | checked measures, dimensions, and filter |
-| 3. Genie Agent | Card 7, from 13:50 | [`03-scope-genie-agent.md`](prompts/03-scope-genie-agent.md) | agent purpose, assets, instructions, and limits |
-| 4. Genie One, refusal, and MCP | Cards 7–8, by 14:27 | [`04-test-genie-one-and-mcp.md`](prompts/04-test-genie-one-and-mcp.md) | supported answer, refusal, and MCP decision |
-| 5. Governed answer surface | Card 9, 15:00–15:22 | [`05-build-answer-surface.md`](prompts/05-build-answer-surface.md) | one surface showing owner, source, and freshness |
-| 6. Benchmarks and close | Card 10 and close, 15:22–16:00 | [`06-benchmark-and-close.md`](prompts/06-benchmark-and-close.md) | expected results, rerun decision, pilot canvas |
-
-At 12:00 update the status board. At 14:27 exchange evidence simultaneously
-with the Track B owner and record what your checks can now stop. The facilitator
-selects closing reports; the pair does not add a separate presentation task.
+| 1. Research and brief | [`01-research-and-brief.md`](prompts/01-research-and-brief.md) | cited contract, approved brief, Gold-window evidence |
+| 2. Metric view | [`02-check-metric-view.md`](prompts/02-check-metric-view.md) | checked measures, dimensions, and filter |
+| 3. Genie Agent | [`03-scope-genie-agent.md`](prompts/03-scope-genie-agent.md) | agent purpose, assets, instructions, and limits |
+| 4. Genie One, refusal, and MCP | [`04-test-genie-one-and-mcp.md`](prompts/04-test-genie-one-and-mcp.md) | supported answer, refusal, and MCP decision |
+| 5. Governed answer surface | [`05-build-answer-surface.md`](prompts/05-build-answer-surface.md) | one surface showing owner, source, and freshness |
+| 6. Benchmarks and close | [`06-benchmark-and-close.md`](prompts/06-benchmark-and-close.md) | expected results, rerun decision, closing note |
 
 ## Decisions and stop conditions
 
@@ -86,4 +86,5 @@ At every stage, a person chooses **accept**, **send back**, **reject**, or
 - the benchmark question or expected result changes to make a rerun pass.
 
 Do not deploy, merge, run a job, change permissions, expose credentials, or
-weaken a check. Use only the switching triggers in the fallback pack.
+weaken a check. When a capability is unavailable, record `not-run` or `blocked`
+and continue with local work.

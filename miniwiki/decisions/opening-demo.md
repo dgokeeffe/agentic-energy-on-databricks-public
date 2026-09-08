@@ -14,8 +14,9 @@ contract test.
 Runtime is about six minutes. The intended placement is inside the 09:45–09:58
 preflight slot, which is otherwise spent waiting on `make validate-local` (6m24s
 measured, roughly five minutes of it a cold `@playwright/test` install). No
-change to the [run of show](../../docs/facilitator/workshop-run-of-show.md)
-clock has been made, and none is required for that placement.
+fixed clock exists any more — see
+[`track-structure.md`](track-structure.md) — so the placement needs no clock
+change.
 
 ## Why this framing
 

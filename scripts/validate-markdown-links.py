@@ -16,6 +16,10 @@ def main() -> int:
     tracked = subprocess.check_output(["git", "ls-files", "*.md"], cwd=ROOT, text=True).splitlines()
     for relative in tracked:
         path = ROOT / relative
+        # A tracked path can be absent when a deletion is staged but not yet
+        # committed. Skip it rather than crashing before any link is checked.
+        if not path.is_file():
+            continue
         for target in LINK.findall(path.read_text(encoding="utf-8")):
             target = target.strip().split(" ", 1)[0].strip("<>")
             if not target or target.startswith(("#", "http://", "https://", "mailto:")):

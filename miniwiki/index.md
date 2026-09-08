@@ -9,8 +9,8 @@ installation. The repository-owned workflow is documented in
 
 ## Start with
 
-- Workshop participants start in [`../docs/participant/workshop-playbook.md`](../docs/participant/workshop-playbook.md),
-  then fill [`../docs/participant/workshop-pair-record.md`](../docs/participant/workshop-pair-record.md).
+- Workshop participants start in [`../QUICKSTART.md`](../QUICKSTART.md),
+  then fill [`../workshop/track-record-template.md`](../workshop/track-record-template.md).
 - [`now.md`](now.md) — current focus, open questions, and the next action.
 - [`session-template.md`](session-template.md) — copy this when a session needs
   a durable handoff.
@@ -42,6 +42,13 @@ installation. The repository-owned workflow is documented in
   demonstration that a data defect's result looks correct, the measured evidence
   behind it, and three discarded alternatives including a disproved
   "agent gets caught" premise.
+- [`decisions/track-structure.md`](decisions/track-structure.md) — why each track
+  is self-contained, why the fixed clock was removed, and what replaced the
+  cross-track pair record.
+- [`decisions/attendee-isolation.md`](decisions/attendee-isolation.md) — how each
+  attendee gets an isolated Lakebase branch and App in one shared workspace, the
+  20-concurrent-compute limit that actually binds, and the naming constraints
+  that make an explicit attendee slug unavoidable.
 
 ## How to grow this wiki
 

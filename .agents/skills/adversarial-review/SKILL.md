@@ -23,7 +23,7 @@ Return two explicit answers:
   Examine responsibilities, dependencies, duplication, and interfaces separately
   from passing tests. Name each material issue's location and consequence, not
   just a style preference. Record the result and remaining uncertainty in the
-  [pair record](../../../docs/participant/workshop-pair-record.md) or maintenance
+  [track record](../../../workshop/track-record-template.md) or maintenance
   task record. "No material issue found" or "not applicable" with a reason is
   valid; do not manufacture a defect or seed an extra exercise.
 

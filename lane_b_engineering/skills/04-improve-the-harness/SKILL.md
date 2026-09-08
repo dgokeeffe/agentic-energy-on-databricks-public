@@ -6,7 +6,7 @@ description: Improve one Track B test, evaluation criterion, plan check, or revi
 # Improve the harness
 
 Use this skill for Track B cards 9–10. Start from one failure recorded during
-the 14:27 cross-track exchange. Do not invent a failure for the exercise.
+an earlier stage. Do not invent a failure for the exercise.
 
 ## Change one thing
 
@@ -32,5 +32,5 @@ make a second harness change before measuring the first. Preserve the named UTC
 test, fixed-AEST market time, independent human review, no-merge rule, and
 no-deploy rule.
 
-Record the pair result and pilot-canvas inputs: an existing workflow, decision
+Record the track result and closing-note inputs: an existing workflow, decision
 owner, evidence required, stop, and date within a fortnight.

@@ -12,7 +12,7 @@ facilitator snapshot run.
 
 - [`../../Instructions.md`](../../Instructions.md)
 - [`../../../PRE-REQUISITES.md`](../../../PRE-REQUISITES.md)
-- [NEMWEB runbook sections 1–4](../../../docs/nemweb-operations.md#1-local-and-identity-gates)
+- [NEMWEB runbook sections 1–4](../../deployment-gates.md#1-local-and-identity-gates)
 
 > **Facilitators only:** The runbook's `nemweb_foundation/` commands operate the
 > reviewed implementation. Do not send participants to that directory.

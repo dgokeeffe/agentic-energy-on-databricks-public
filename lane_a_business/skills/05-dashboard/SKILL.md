@@ -6,7 +6,7 @@ description: Improve one governed dashboard, App, or prepared Markdown surface a
 # Governed answer surface
 
 Use this skill for Track A card 9. Start from one failure recorded during the
-14:27 partner exchange. Do not invent a new failure for this exercise.
+earlier stage. Do not invent a new failure for this exercise.
 
 Use an AI/BI dashboard or App only after the facilitator releases the verified
 surface. Otherwise use the prepared paper or Markdown substitute and label it.

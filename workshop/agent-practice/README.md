@@ -8,17 +8,15 @@ rehearsal is evidenced by these prepared files.
 
 ## Placement and limits
 
-Placement and rehearsal are pending facilitator approval. The
-[run of show](../../docs/facilitator/workshop-run-of-show.md) remains the only
-clock source; this exercise allocates no extra slot. Use it only when the selected
-`workshop-ready` issue and approved plan authorise it, and only if it fits without
-replacing any required check. Otherwise defer it or use a labelled prepared
-facilitator demonstration outside the required work. Do not consume review,
-repair, or human-disposition time silently.
+Placement and rehearsal are pending facilitator approval. Tracks are self-paced,
+so this exercise adds no clock pressure, but use it only when the current track
+stage and approved plan authorise it, and only if it fits without replacing any
+required check. Otherwise defer it or use a labelled prepared facilitator
+demonstration outside the required work.
 
 The investigator and reviewer inspect supplied artefacts only: no repository
 writes, commands, workspace access, external queries, or live data. The pair
-records the result in its existing [pair record](../../docs/participant/workshop-pair-record.md).
+records the result in its existing [track record](../track-record-template.md).
 A prompt alone does not enforce read-only access. The facilitator must verify the
 session's actual tool restrictions before using it. Use an already available
 restricted assistant, or a constrained fresh session with only the supplied text
@@ -43,8 +41,8 @@ The facilitator prepares two investigator packets, one per case:
   input, not observations of real units.
 - For each packet, include the investigator prompt below and the cited local
   source passages: the [repository introduction](../../README.md#governed-nemweb-analytics-on-databricks),
-  [fixed data semantics](../../docs/nemweb-migration-manifest.md#fixed-data-semantics),
-  and [report-to-subject contract](../../docs/nemweb-migration-manifest.md#report-to-subject-contract).
+  [fixed data semantics](../../nemweb_foundation/README.md),
+  and [report-to-subject contract](../../nemweb_foundation/README.md).
   The `source_refs` in the JSON are repository-relative, not relative to the case.
 
 The documented distinction is SCADA `actual_generation_mw` versus authoritative

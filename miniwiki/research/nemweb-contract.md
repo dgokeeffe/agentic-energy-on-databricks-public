@@ -11,7 +11,7 @@ The default workshop question is:
 > Can an operator trust the latest regional price trend, given NEMWEB
 > corrections, freshness, and timezone handling?
 
-Pairs execute from [`../../docs/participant/workshop-playbook.md`](../../docs/participant/workshop-playbook.md).
+Pairs execute from [`../../QUICKSTART.md`](../../QUICKSTART.md).
 If Omnigent is down, start here and label the research prepared.
 
 ## Current working assumptions

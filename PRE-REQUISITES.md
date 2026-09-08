@@ -34,11 +34,11 @@ The facilitator must:
 - record the current status and evidence for every applicable PF item in the
   table below;
 - prepare the labelled substitutes in
-  [`docs/facilitator/workshop-fallback.md`](docs/facilitator/workshop-fallback.md) for any required
+  a labelled prepared substitute for any required
   surface that is not verified;
-- confirm that each pair has one business outcome responsibility and one engineering quality responsibility;
-- provide a clean participant clone and keep the run of show as the only clock
-  source;
+- confirm that each participant has chosen one track and knows where its
+  `Instructions.md` is;
+- provide a clean participant clone;
 - keep workspace access validation-only during this preparation task; and
 - stop rather than guess when the selected profile, target workspace, Unity
   Catalog resources, permissions, or policy do not match the approved setup.
@@ -57,7 +57,7 @@ Each participant must:
 - join a cross-functional pair with named business outcome and engineering
   quality responsibilities;
 - read [`QUICKSTART.md`](QUICKSTART.md) and the
-  [`participant playbook`](docs/participant/workshop-playbook.md);
+  their chosen track's `Instructions.md`;
 - be able to edit the pair record and run `make validate-local`; and
 - avoid credentials, private tenant details, merge, deployment, live job runs,
   and schedule changes on the required workshop path.
@@ -130,5 +130,5 @@ published prepared substitute where the required path calls for one.
 
 No document connector, Genie, MCP, identity integration, deployment, or live-data
 activity may start until its applicable PF items are verified. Use the
-[prepared fallback pack](docs/facilitator/workshop-fallback.md) when the published switching
+a labelled prepared substitute when the switching
 trigger fires.

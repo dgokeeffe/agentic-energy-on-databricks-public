@@ -10,7 +10,7 @@ API choice, inspected evidence, failed attempts, recovery, safety limits, and
 whether the operator outcome was met. Cite files and command output. A green
 unit test is not an eval result, and an implementation recap is not evidence.
 
-Use the [pair record](../../../docs/participant/workshop-pair-record.md), or the
+Use the [track record](../../../workshop/track-record-template.md), or the
 existing maintenance task record, to explain whether the chosen preparation and
 proof fit the task. For investigations, separate explanations ruled out with
 cited evidence from paths not investigated. An unsupported inference is not proof

@@ -30,7 +30,7 @@ reliable demonstrations. Snapshot rows are never live evidence.
 ## Workshop layout
 
 The workshop uses a hybrid layout that keeps one shared foundation and
-one role for each owner in a cross-track pair:
+one role for each track:
 
 ```text
 QUICKSTART.md                 participant entry point
@@ -51,9 +51,7 @@ one `workshop-ready` GitHub issue, inspects the governed contracts in
 [issue lifecycle](.agents/skills/issue-navigator/SKILL.md). Participants may
 inspect the foundation, app, ML, and Lakebase starters, but must not deploy,
 provision, change grants, run jobs, enable live data, or change schedules.
-Facilitator presentation material is in
-[`presentations/`](presentations/coda-workshop-agenda.md). Use the current files
-linked from `QUICKSTART.md` for participant work.
+Use the current files linked from `QUICKSTART.md` for participant work.
 
 ## Local validation and snapshot
 
@@ -108,10 +106,10 @@ Never rely on an implicit Databricks profile.
 Facilitators follow the numbered stages in
 [`foundation/Instructions.md`](foundation/Instructions.md). Deployment,
 controlled operation, rollback, live SQL validation, and the final three-cycle
-evidence gate remain authoritative in
-[`docs/nemweb-operations.md`](docs/nemweb-operations.md). The source/table
-mapping and provenance are in
-[`docs/nemweb-migration-manifest.md`](docs/nemweb-migration-manifest.md).
+evidence gate are in
+[`foundation/deployment-gates.md`](foundation/deployment-gates.md). The
+authoritative implementation and its bundle are in
+[`nemweb_foundation/`](nemweb_foundation/README.md).
 
 ## Five-minute evidence
 
@@ -169,14 +167,14 @@ competing production path. Facilitators only can run it with:
 uv run --project nemweb_foundation agentic-energy-local-fixture --output output/local-fixture
 ```
 
-Its lineage is described in [`docs/data-lineage.md`](docs/data-lineage.md).
+
 
 ## Workshop continuity and licence
 
-Participants start at [`QUICKSTART.md`](QUICKSTART.md), then execute
-[`docs/participant/workshop-playbook.md`](docs/participant/workshop-playbook.md).
-Facilitators complete [`PRE-REQUISITES.md`](PRE-REQUISITES.md) and use
-[`docs/facilitator/workshop-run-of-show.md`](docs/facilitator/workshop-run-of-show.md).
+Participants start at [`QUICKSTART.md`](QUICKSTART.md) and choose one
+self-contained track. Facilitators complete
+[`PRE-REQUISITES.md`](PRE-REQUISITES.md) and use
+[`foundation/deployment-gates.md`](foundation/deployment-gates.md).
 Read the repository-owned
 [miniwiki skill](.agents/skills/miniwiki/SKILL.md) and
 [`miniwiki/now.md`](miniwiki/now.md), then validate miniwiki links before a

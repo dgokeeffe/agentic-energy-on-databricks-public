@@ -2,9 +2,13 @@
 
 Track B repairs one deliberately seeded UTC processing-time defect and proves
 that both deterministic checks and an agentic evaluation can reject weak work.
-You are the Track B owner in one cross-track pair. Keep working with the same
-Track A owner: use their approved question and evidence threshold, and give them
-your timezone and freshness evidence.
+
+This track is self-contained. It does not depend on Track A, Track C, or a
+partner. Work at your own pace, in stage order. You may pair with someone on the
+same track if you prefer; nothing requires it.
+
+Copy [`../workshop/track-record-template.md`](../workshop/track-record-template.md)
+and keep it beside you.
 
 The repository starts green. The exercise patch changes a processing timestamp
 to an AEST-naive wall clock. Your repair must restore UTC processing instants
@@ -20,7 +24,8 @@ fixed AEST (UTC+10, no daylight saving).
 - focused regression output and exact command exit codes;
 - an agentic evaluation of tool choice, trajectory, operating envelope, and
   rubric quality;
-- a facilitated verdict from a reviewer other than the author; and
+- a verdict from a reviewer other than the author — another attendee, the
+  facilitator, or an independent fresh assistant session; and
 - one measured harness improvement with a same-ticket before/after result and
   an explicit keep-or-revert decision.
 
@@ -29,8 +34,7 @@ the expected UTC processing timestamps. Evals inspect the agent's tool choice,
 trajectory, operating envelope, and work quality against the rubric. A passing
 test cannot compensate for a failed eval or an unapproved file change.
 
-Record results in the
-[pair record](../docs/participant/workshop-pair-record.md). An agent summary is a claim, not
+Record results in your track record. An agent summary is a claim, not
 proof; attach the command, exit code, test output, diff, and human decision.
 
 ## Authoritative exercise assets
@@ -62,20 +66,17 @@ Do not apply or reverse the patch when unrelated edits affect its target file.
 The facilitator validation compares the target file's SHA-256 before the patch
 and after reversal to prove byte-identical restoration.
 
-## Numbered stages and clock
+## Numbered stages
 
 Use a fresh AI-assistant conversation for every numbered prompt. Finish the
 current stage and record its human decision before starting the next.
 
-| Stage | Workshop time | Prompt | Output |
+| Stage | Prompt | Output |
 |---|---|---|---|
-| 1. Read evidence and approve plan | Cards 1–3, 10:03–10:58 | [`01-read-evidence-and-plan.md`](prompts/01-read-evidence-and-plan.md) | defect statement, cited contracts, approved plan |
-| 2. Seed, reproduce, and repair | Cards 4–5, 10:58–12:00 | [`02-seeded-defect-red-green.md`](prompts/02-seeded-defect-red-green.md) | clean/red/green results, diff, regression, decision |
-| 3. Evaluate and review | Cards 6–8, 13:25–14:27 | [`03-agentic-eval-and-review.md`](prompts/03-agentic-eval-and-review.md) | eval evidence and independent facilitated verdict |
-| 4. Improve one harness check | Cards 9–10, 15:00–15:45 | [`04-improve-the-harness.md`](prompts/04-improve-the-harness.md) | one change, same-ticket rerun, keep or revert |
-
-At 12:00 update the status board. At 14:27 exchange evidence simultaneously
-with the Track A owner and record what the harness can now stop.
+| 1. Read evidence and approve plan | [`01-read-evidence-and-plan.md`](prompts/01-read-evidence-and-plan.md) | defect statement, cited contracts, approved plan |
+| 2. Seed, reproduce, and repair | [`02-seeded-defect-red-green.md`](prompts/02-seeded-defect-red-green.md) | clean/red/green results, diff, regression, decision |
+| 3. Evaluate and review | [`03-agentic-eval-and-review.md`](prompts/03-agentic-eval-and-review.md) | eval evidence and independent verdict |
+| 4. Improve one harness check | [`04-improve-the-harness.md`](prompts/04-improve-the-harness.md) | one change, same-ticket rerun, keep or revert |
 
 ## Stops
 

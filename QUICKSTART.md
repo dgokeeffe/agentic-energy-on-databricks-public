@@ -1,59 +1,73 @@
 # Workshop quickstart
 
-The workshop runs through GitHub Issues and works in Omni Sandbox with ordinary
-Git, Markdown, and prepared fixtures. Participants do not install a tracker or
-provision Databricks resources. The [facilitator run of show](docs/facilitator/workshop-run-of-show.md)
-is the only clock source.
+Pick one track. Complete it end to end. No track depends on another track, on a
+partner, or on a clock.
 
-## Form a pair
+Work at your own pace. Each track is a numbered sequence of stages; finish the
+current stage and record the decision before opening the next.
 
-Keep one person responsible for the business outcome and one responsible for
-engineering quality. Record both in the [pair record](docs/participant/workshop-pair-record.md).
-A pair owns one change together; these are responsibilities, not separate lanes.
-
-## Select one issue
-
-1. Open the repository's GitHub Issues page.
-2. Select one open issue labelled `workshop-ready`.
-3. Record its number, operator outcome, acceptance points, and stops.
-4. Read [`AGENTS.md`](AGENTS.md), the complete issue,
-   [`nemweb_foundation/`](nemweb_foundation/README.md), and the named starter.
-
-Use the [issue navigator](.agents/skills/issue-navigator/SKILL.md), then follow
-this sequence without skipping a stage:
-
-```text
-understand measurable requirements
-→ propose exact files and deterministic tests
-→ approval by a person who did not draft the plan
-→ branch and implement
-→ deterministic tests
-→ agentic eval
-→ independent adversarial review
-→ pull request with Closes #N
-→ person accepts, sends back, rejects, or stops
-```
-
-The detailed instructions are in the
-[participant playbook](docs/participant/workshop-playbook.md). Start a fresh
-assistant conversation for requirement, implementation, and review stages, and
-carry facts through the issue, plan, pair record, files, and command output.
-
-## Local limits
-
-Participants may inspect `nemweb_foundation/`, `nemweb_app/`, `nemweb_ml/`, and
-`workshop/lakebase/`. They may run local tests and read-only validation. They do
-not deploy, run Databricks jobs, create Lakebase or Unity Catalog resources,
-change grants, enable live NEMWEB, change schedules, push without approval, or
-merge. Prepared fixtures must stay visibly labelled non-live.
-
-Start with:
+## Before you choose
 
 ```bash
 git status --short
 make validate-local
 ```
 
-If a required workspace or preview is unavailable, use the published prepared
-fixture and record the limitation. Never turn an unrun platform step into a
-pass.
+Both should succeed before you start. If `make validate-local` fails, tell the
+facilitator rather than working around it.
+
+## Choose your track
+
+| Track | Choose this if you want to… | Start here |
+| **A — Governed answer** | Turn an operator question into an explainable answer that cites its source and freshness, and that refuses an unsafe question. Metric views, Genie, dashboards. | [`lane_a_business/Instructions.md`](lane_a_business/Instructions.md) |
+| **B — Production fix** | Repair a seeded data defect with a failing test, then prove that both deterministic tests and an agentic evaluation can reject weak work. | [`lane_b_engineering/Instructions.md`](lane_b_engineering/Instructions.md) |
+| **C — App and Lakebase** | Build on the operations app and its writable Postgres state, with your own isolated Lakebase branch and your own deployed app. | [`workshop/track_c_app/Instructions.md`](workshop/track_c_app/Instructions.md) |
+
+Not sure? Track A suits analysts and anyone who works with stakeholders. Track B
+suits engineers who want the test-and-review loop. Track C suits people who want
+to ship a running application.
+
+You may pair with someone if you prefer, on the same track. Nothing requires it.
+
+## What every track shares
+
+All three read from one governed NEMWEB foundation. Do not build a second data
+store.
+
+Fixed contracts, in every track:
+
+- NEM market timestamps are interval-ending **fixed AEST** (UTC+10, no daylight
+  saving). Processing timestamps are timezone-aware **UTC**.
+- Bronze keeps source corrections; Silver selects the latest valid correction.
+- Gold keeps both intervention rows; ordinary analysis uses `is_effective_run`.
+- `actual_generation_mw` is SCADA **output**, not availability. Authoritative
+  target and availability come from the daily T+1 product.
+- Snapshot and prepared fixtures are **non-live evidence**. Never describe them
+  as live.
+
+## Limits
+
+You may inspect [`nemweb_foundation/`](nemweb_foundation/README.md), the app, the
+ML starter and the Lakebase contracts, and run local tests and read-only
+validation.
+
+Without explicit facilitator release, do not deploy the foundation bundle, run
+Databricks jobs, change grants, enable live NEMWEB, change schedules, or merge.
+
+Track C is the exception, and only for its own resources: attendees on Track C
+deploy their own app against their own Lakebase branch. See
+[`miniwiki/decisions/attendee-isolation.md`](miniwiki/decisions/attendee-isolation.md).
+
+Never put credentials, tokens, private workspace URLs, or tenant identifiers into
+Git, a prompt, a log, or a screenshot.
+
+If a platform capability is unavailable, record the step as `not-run` or
+`blocked` and continue with local work. An unrun platform step never becomes a
+pass because a fixture produced output.
+
+## Using an AI assistant
+
+Start a **fresh conversation** for each numbered stage. Carry facts forward
+through the files, the track record, and command output — not through chat
+history. An assistant's summary is a claim; the command, exit code, and diff are
+the evidence.

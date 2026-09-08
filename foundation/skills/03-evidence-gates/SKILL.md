@@ -11,8 +11,8 @@ proof.
 ## Read first
 
 - [`../../Instructions.md`](../../Instructions.md)
-- [NEMWEB runbook data and evidence sections](../../../docs/nemweb-operations.md#4-data-and-analyst-gates)
-- [Migration manifest evidence contract](../../../docs/nemweb-migration-manifest.md#operations-and-evidence-contract-slice-9-2026-09-02)
+- [NEMWEB runbook data and evidence sections](../../deployment-gates.md#4-data-and-analyst-gates)
+- [Migration manifest evidence contract](../../../nemweb_foundation/README.md#operations-and-evidence-contract-slice-9-2026-09-02)
 
 > **Facilitators only:** The authoritative capture and validation programs are
 > `nemweb_foundation/scripts/capture_nemweb_evidence.py` and

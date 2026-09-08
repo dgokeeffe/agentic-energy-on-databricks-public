@@ -5,10 +5,12 @@ description: Research the fixed NEMWEB operator question, approve a measurable b
 
 # NEMWEB research and brief
 
-Use this skill for Track A cards 1–5. Read the
-[playbook](../../../docs/participant/workshop-playbook.md#section-one-specify-and-deliver-the-work),
-[pair record](../../../docs/participant/workshop-pair-record.md), and
-[fallback pack](../../../docs/facilitator/workshop-fallback.md).
+Use this skill for Track A stage 1. Read the
+[quickstart](../../../QUICKSTART.md) and your
+[track record](../../../workshop/track-record-template.md).
+
+When a workspace capability is unavailable, record the step as `not-run` or
+`blocked` and label any substitute **prepared**.
 
 ## Research record
 
@@ -23,7 +25,7 @@ Record:
 - newest source publication and newest Gold publication;
 - reasons the trend could be wrong, including stale data, a late correction,
   timezone error, intervention double counting, or missing context; and
-- what the paired Track B owner must prove about processing time.
+- what must be proven about UTC processing time.
 
 Use the default question unless the facilitator approves another. A human who
 did not draft the brief approves measurable acceptance criteria before the

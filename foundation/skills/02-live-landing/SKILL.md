@@ -11,7 +11,7 @@ Use this skill only after snapshot and publication gates pass.
 
 - [`../../Instructions.md`](../../Instructions.md)
 - [`../../../PRE-REQUISITES.md`](../../../PRE-REQUISITES.md)
-- [NEMWEB runbook section 5](../../../docs/nemweb-operations.md#5-three-cycle-live-proof)
+- [NEMWEB runbook section 5](../../deployment-gates.md#5-three-cycle-live-proof)
 - [`../03-evidence-gates/SKILL.md`](../03-evidence-gates/SKILL.md)
 
 > **Facilitators only:** Live implementation and operational scripts reside in

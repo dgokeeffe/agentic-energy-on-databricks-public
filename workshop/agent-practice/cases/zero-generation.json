@@ -12,8 +12,8 @@
   ],
   "source_refs": [
     "README.md#governed-nemweb-analytics-on-databricks",
-    "docs/nemweb-migration-manifest.md#fixed-data-semantics",
-    "docs/nemweb-migration-manifest.md#report-to-subject-contract"
+    "nemweb_foundation/DATA-CONTRACT.md#fixed-data-semantics",
+    "nemweb_foundation/DATA-CONTRACT.md#report-to-subject-contract"
   ],
   "limitations": [
     "This is a teaching representation, not a runtime ingestion fixture or proof of parser behaviour.",

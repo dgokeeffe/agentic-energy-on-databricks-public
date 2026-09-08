@@ -11,8 +11,8 @@ PRACTICE = ROOT / "workshop/agent-practice"
 LINKS = runpy.run_path(str(ROOT / "scripts/validate-miniwiki.py"))
 SOURCE_REFS = [
     "README.md#governed-nemweb-analytics-on-databricks",
-    "docs/nemweb-migration-manifest.md#fixed-data-semantics",
-    "docs/nemweb-migration-manifest.md#report-to-subject-contract",
+    "nemweb_foundation/DATA-CONTRACT.md#fixed-data-semantics",
+    "nemweb_foundation/DATA-CONTRACT.md#report-to-subject-contract",
 ]
 SKILLS = ("understand-requirement", "plan-change", "agentic-eval", "adversarial-review")
 RECORD_FIELDS = (
@@ -156,14 +156,14 @@ class AgentPracticeTests(unittest.TestCase):
     def test_source_contract_still_supports_prepared_distinction(self):
         # Presence/consistency checks require independent semantic review as well.
         intro = prose("README.md")
-        manifest = prose("docs/nemweb-migration-manifest.md")
+        manifest = prose("nemweb_foundation/DATA-CONTRACT.md")
         self.assertIn("actual_generation_mw", intro)
         self.assertIn("next_day_dispatch at t+1", intro)
         self.assertIn("current reports do not publish five-minute unit availability", manifest)
         self.assertIn("authoritative target and availability belong only in the daily t+1 unit-solution product", manifest)
 
-    def test_pair_record_has_exactly_the_five_learning_fields(self):
-        text = read("docs/participant/workshop-pair-record.md")
+    def test_track_record_has_exactly_the_five_learning_fields(self):
+        text = read("workshop/track-record-template.md")
         rows = [line.split("|")[1].strip() for line in text.splitlines() if line.startswith("| ")]
         for field in RECORD_FIELDS:
             self.assertEqual(rows.count(field), 1, field)
@@ -183,7 +183,7 @@ class AgentPracticeTests(unittest.TestCase):
         self.assertIn("shared-skill or test change outside the original approved plan", plan)
         for name in SKILLS:
             text = read(f".agents/skills/{name}/SKILL.md")
-            self.assertIn("workshop-pair-record.md", text)
+            self.assertIn("track-record-template.md", text)
             self.assertIn("maintenance", text)
 
     def test_eval_distinguishes_reasoning_and_legitimate_no_change_outcomes(self):
@@ -224,23 +224,24 @@ class AgentPracticeTests(unittest.TestCase):
         self.assertIn("not a blinded benchmark", text)
         self.assertIn("do not prove agent behaviour", text)
 
-    def test_playbook_record_and_exercise_preserve_placement_and_review_gates(self):
-        for path in ("docs/participant/workshop-playbook.md", "docs/participant/workshop-pair-record.md", "workshop/agent-practice/README.md"):
+    def test_record_and_exercise_preserve_placement_and_review_gates(self):
+        # The withdrawn playbook's gate vocabulary now lives in the track record and
+        # the exercise README. The "only clock source" requirement is deliberately
+        # absent: see miniwiki/decisions/track-structure.md.
+        for path in ("workshop/track-record-template.md", "workshop/agent-practice/README.md"):
             with self.subTest(path=path):
                 text = prose(path)
-                for concept in ("approved plan", "facilitator", "placement", "rehearsal", "required check", "read-only replay", "later approved task", "not-run"):
+                for concept in ("approved plan", "facilitator", "required check", "read-only replay", "later approved task", "not-run"):
                     self.assertIn(concept, text)
                 self.assertIn("facilitator-prepared output", text)
                 self.assertIn("actual agent output", text)
-        playbook = prose("docs/participant/workshop-playbook.md")
-        self.assertIn("only clock source", playbook)
-        self.assertIn("do not mutate the repository after final review", playbook)
-        self.assertIn("person accepts, sends back, rejects, or stops", playbook)
+        record = prose("workshop/track-record-template.md")
+        self.assertIn("do not mutate the repository after final review", record)
+        self.assertIn("accepts, sends back, rejects, or stops", record)
 
     def test_changed_markdown_links_resolve(self):
         paths = [f".agents/skills/{name}/SKILL.md" for name in SKILLS] + [
-            "docs/participant/workshop-playbook.md",
-            "docs/participant/workshop-pair-record.md",
+            "workshop/track-record-template.md",
             "workshop/agent-practice/README.md",
         ]
         for relative in paths:
