@@ -98,6 +98,10 @@ slot with no market variety needs.
 | Draft | Track | Difficulty | Lakebase | Fixes a real defect |
 |---|---|---|---|---|
 | [`DRAFT-shift-handover.md`](DRAFT-shift-handover.md) | C | core | **central** | no |
+
+Facilitators can rehearse the visible shift-handover comparison with the
+[planned and shoddy-run prompts](shift-handover-facilitator-prompts.md). Keep
+that comparison separate from participant evidence and reset between runs.
 | [`DRAFT-investigation-audit-trail.md`](DRAFT-investigation-audit-trail.md) | C | core | **central** | **yes** — `decision` overwritten in place |
 | [`DRAFT-soft-delete-restore.md`](DRAFT-soft-delete-restore.md) | C | core | **central** | **yes** — hard `DELETE`, unrecoverable |
 | [`DRAFT-status-transitions.md`](DRAFT-status-transitions.md) | C | core | **central** | **yes** — `closed` → `open` silently allowed |

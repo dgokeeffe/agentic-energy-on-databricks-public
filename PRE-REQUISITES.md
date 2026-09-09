@@ -98,12 +98,16 @@ workshop document.
 The facilitator must then run only these validation commands, with the profile
 shown on every workspace-aware command:
 
+Substitute your own Databricks CLI profile name for `<profile>`. This repository
+does not fix a profile name; it only requires that one is always named, so no
+command runs against an implicit default workspace.
+
 ```bash
-databricks auth describe --profile DEFAULT
-(cd nemweb_foundation && databricks bundle validate --strict -t dev --profile DEFAULT)
+databricks auth describe --profile <profile>
+(cd nemweb_foundation && databricks bundle validate --strict -t dev --profile <profile>)
 ```
 
-Stop if `daveok` is absent, unauthenticated, points to an unexpected workspace,
+Stop if the profile is absent, unauthenticated, points to an unexpected workspace,
 or cannot validate the approved isolated development catalog, schema, and
 Volume. Validation does not authorise `bundle deploy`, `jobs run-now`, pipeline
 updates, live NEMWEB access, or schedule changes.
@@ -117,12 +121,12 @@ published prepared substitute where the required path calls for one.
 
 | ID | Administrator decision | Facilitator evidence required | Initial status |
 |---|---|---|---|
-| PF-1 | Approve the SQL warehouse, Unity Catalog permissions, supported metric-view YAML version, and Genie compatibility over Gold. | `daveok` validation result, supported version, named warehouse, and permission check. | Unverified |
+| PF-1 | Approve the SQL warehouse, Unity Catalog permissions, supported metric-view YAML version, and Genie compatibility over Gold. | Named-profile validation result, supported version, named warehouse, and permission check. | Unverified |
 | PF-2 | Confirm Genie One availability and the supported surface for the selected agent and metric view. | Dated target-workspace capture or labelled prepared substitute. | Unverified |
 | PF-3 | Confirm Genie Agent creation, supported assets, citation behaviour, and permissions. | Dated supported-answer and refusal captures with source and owner. | Unverified |
 | PF-4 | Approve one Managed MCP endpoint, its tools, caller identity, authorisation, and audit trail, or approve no MCP. | Named approved endpoint and access limit, or recorded "no MCP" decision. | Unverified |
 | PF-5 | Approve Unity Catalog principals, service principals, app registration and consent, and any per-user Microsoft OAuth. | Identity-flow record with no credentials or tokens. | Unverified |
-| PF-6 | Approve network policy and permitted Managed MCP endpoints. | Named policy decision and connectivity validation using `daveok` where Databricks is involved. | Unverified |
+| PF-6 | Approve network policy and permitted Managed MCP endpoints. | Named policy decision and connectivity validation using the named profile where Databricks is involved. | Unverified |
 | PF-7 | Confirm whether Lakebase autoscaling is available in the target region. | Dated capability result or "not used"; Lakebase is optional. | Unverified |
 | PF-8 | Approve AEMO data use and confirm compliance with applicable BOM feed terms. | Recorded approval and required attribution; otherwise snapshot-only. | Unverified |
 | PF-9 | Approve the coding assistant and repository host, and decide whether source may leave the tenant. | Named tools, data-handling decision, and participant briefing. | Unverified |

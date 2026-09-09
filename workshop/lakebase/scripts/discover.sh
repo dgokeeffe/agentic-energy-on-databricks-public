@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
-: "${PROFILE:?Set PROFILE=DEFAULT explicitly}"
-if [[ "$PROFILE" != "daveok" ]]; then
-  echo "PROFILE=DEFAULT is required" >&2
-  exit 2
-fi
+# An explicit profile is required so no command can run against an implicit
+# default workspace. Which profile is the operator's choice: pinning one name
+# here would hardcode a personal workspace into a public repository.
+: "${PROFILE:?Set PROFILE to your Databricks CLI profile name, e.g. PROFILE=DEFAULT}"
 
 databricks auth describe --profile "$PROFILE"
 databricks postgres -h

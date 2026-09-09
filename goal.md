@@ -85,7 +85,7 @@ flowchart TD
     T13["T13 — Independent review<br/>Security/data, edge cases, and regression"]
     T14["T14 — Remediate findings<br/>One writer, then repeat affected checks"]
 
-    T15["T15 — Verify daveok identity<br/>Expected workspace, CLI version, and variables"]
+    T15["T15 — Verify the named profile identity<br/>Expected workspace, CLI version, and variables"]
     T16["T16 — Strict bundle validation<br/>No deployment yet"]
     T17["T17 — Deploy live_evidence<br/>Schedules paused; no full refresh"]
     T18["T18 — Run context once<br/>Build registration dependencies"]
@@ -581,7 +581,7 @@ Stop and report rather than guessing if:
 - real NEMWEB file structure contradicts the registry or parser contract;
 - the implementation would require changing an existing dataset type in place;
 - a full refresh appears necessary;
-- `daveok` identifies an unexpected workspace;
+- the named profile identifies an unexpected workspace;
 - the target is not isolated;
 - required permissions or serverless capabilities are unavailable;
 - NEMWEB egress is blocked or the public source is unavailable;

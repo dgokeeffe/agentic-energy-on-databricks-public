@@ -25,7 +25,14 @@ from .contracts import NEM_TIMEZONE
 from .delta_lander import COMPLETE_STATUSES
 from .lander import LanderLimits, NemwebClient
 
-REQUIRED_PROFILE = "DEFAULT"
+# No profile name is mandated. The safety property is that a profile is always
+# named explicitly, so no workspace-aware call can fall through to an implicit
+# default. Which workspace that profile points at is the operator's decision, and
+# hardcoding one name here would put a personal workspace in a public repository.
+PROFILE_REQUIRED_MESSAGE = (
+    "workspace-aware capture requires an explicit --profile <name>; "
+    "no implicit default profile is permitted"
+)
 EVIDENCE_SCHEMA_VERSION = 3
 TERMINAL_PIPELINE_STATES = frozenset({"COMPLETED", "FAILED", "CANCELED"})
 TERMINAL_JOB_STATES = frozenset({"TERMINATED", "SKIPPED", "INTERNAL_ERROR"})
@@ -287,8 +294,11 @@ class DatabricksCLI:
     """Small injectable CLI adapter; every workspace call carries a profile."""
 
     def __init__(self, profile: str, runner: Callable[[list[str]], dict[str, Any]] | None = None):
-        if profile != REQUIRED_PROFILE:
-            raise ValueError(f"workspace-aware capture requires profile {REQUIRED_PROFILE}")
+        # Reject only absence, not a particular name. An empty or whitespace
+        # profile is the failure that matters, because the CLI would then use
+        # whatever default the machine happens to carry.
+        if not profile or not profile.strip():
+            raise ValueError(PROFILE_REQUIRED_MESSAGE)
         self.profile = profile
         self._runner = runner or self._run
 

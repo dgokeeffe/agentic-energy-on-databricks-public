@@ -16,7 +16,11 @@ import subprocess
 import time
 from typing import Any, Sequence
 
-PROFILE = "DEFAULT"
+# No profile name is mandated; an explicit one is. See evidence.py.
+PROFILE_REQUIRED_MESSAGE = (
+    "workspace-aware grants require an explicit --profile <name>; "
+    "no implicit default profile is permitted"
+)
 _SAFE_IDENTIFIER = re.compile(r"^[A-Za-z_][A-Za-z0-9_-]*$")
 _SAFE_WAREHOUSE = re.compile(r"^[A-Za-z0-9_-]+$")
 _TERMINAL = {"SUCCEEDED", "FAILED", "CANCELED", "CLOSED"}
@@ -122,11 +126,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--schema", default=os.environ.get("BUNDLE_VAR_schema"))
     parser.add_argument("--volume", default=os.environ.get("BUNDLE_VAR_landing_volume"))
     parser.add_argument("--warehouse-id", default=os.environ.get("BUNDLE_VAR_warehouse_id"))
-    parser.add_argument("--profile", default=PROFILE)
+    parser.add_argument("--profile", required=True, help="Databricks CLI profile name")
     parser.add_argument("--dry-run", action="store_true", help="validate and print SQL without workspace calls")
     args = parser.parse_args(argv)
-    if args.profile != PROFILE:
-        parser.error(f"workspace-aware grants require --profile {PROFILE}")
+    if not args.profile.strip():
+        parser.error(PROFILE_REQUIRED_MESSAGE)
     missing = [name for name in ("catalog", "schema", "volume", "warehouse_id") if not getattr(args, name)]
     if missing:
         parser.error("missing required values (flags or BUNDLE_VAR_*): " + ", ".join(missing))
