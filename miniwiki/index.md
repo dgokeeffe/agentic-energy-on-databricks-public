@@ -53,6 +53,10 @@ installation. The repository-owned workflow is documented in
   — why the Track C app was reframed from "can I trust this number?" to fuel value
   capture, the Open Electricity design system it borrows, and the availability and
   settlement boundaries it must state on screen.
+- [`decisions/two-repositories.md`](decisions/two-repositories.md) — why two
+  repositories exist with no shared history, that the public one is canonical, how
+  the workshop exercises were migrated and renumbered, and why issue numbers quoted
+  in older pages may not resolve.
 - [`decisions/facility-dimension-as-of.md`](decisions/facility-dimension-as-of.md)
   — the facility dimension selected registration rows by wall-clock time, so the
   same Bronze data produced different Silver rows; why 290 tests missed it, why the

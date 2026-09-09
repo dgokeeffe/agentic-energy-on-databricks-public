@@ -48,6 +48,50 @@ initial pipeline, semantic, benchmark and dashboard SQL gates.
 - Keep market notices omitted until a bounded plain-text parser, fixture and
   correction contract are independently proven.
 
+## Session handoff — 2026-09-09: repository split resolved
+
+**Two repositories existed with no shared Git history, and the workshop exercises
+were in the wrong one.** The public repository was started as a clean snapshot
+(`2f15794`), not a fork, so no commit is common to both and no private head SHA
+resolves against it. GitHub issues are repository metadata rather than Git objects,
+so they did not travel with the snapshot: the code moved, the 21 issues did not.
+
+**`…-public` is canonical** — four days newer, and the private repository has none of
+the Track C app, fuel value capture, the self-contained tracks, or the
+facility-dimension fix. Full reasoning, the number mapping, and what was deliberately
+not migrated are in [`decisions/two-repositories.md`](decisions/two-repositories.md).
+
+**Five exercises migrated verbatim, renumbered.** Private #5,#6,#7,#8,#9 became
+public #2,#3,#4,#5,#6, each noting its original number. All 13 workshop labels were
+recreated first. **Numbers are not portable** and the offset is not constant, because
+public #1 is the redesign pull request.
+
+**Private #12 was stale and was rewritten rather than copied.** It asked to build the
+regional operations screen, which exists and has been redesigned twice. Public #7
+instead targets two gaps found by grep: `registration_effective_at` is written by
+`silver_facilities.py` and read by no Gold surface, and
+`registration_enrichment_quality()` is called only from its own test. Both bear on the
+value-capture figures, since `gold_nem_scada_generation_5min` groups by `region_id`
+and `fuel_type` from that dimension. Public #7 carries no `workshop-ready` label,
+because the issue bodies require a facilitator rehearsal first and it has never been
+run.
+
+**Two stale pointers repaired.** `issue-navigator` told an agent to list
+`workshop-ready` issues, which returned nothing on a fresh clone; it now gives the
+exact command, says to stop rather than improvise a ticket on an empty list, and
+states the route is optional. `nemweb_app/README.md` cited four issue numbers that
+did not resolve.
+
+**The participant path never depended on issues.** `QUICKSTART.md` has no reference to
+an issue or `workshop-ready`; the 2026-09-07 restructure already made each track
+self-contained. The migration restores an optional contribution route, it does not
+unblock the workshop.
+
+**Still open.** Whether the five migrated exercises are still the right exercises —
+only #2 was verified as genuinely open, the rest were spot-checked. Whether to archive
+the private repository. And whether its two unmerged branches hold anything absent
+from the public repository; nobody has looked.
+
 ## Session handoff — 2026-09-08 (third): authorised dev run
 
 **The pipeline fix is now proven at runtime, not just statically.** Authorised dev
@@ -241,6 +285,10 @@ evidence and three discarded alternatives are in
 [`decisions/opening-demo.md`](decisions/opening-demo.md).
 
 Six issues now carry `workshop-ready`: #5, #6, #7, #8, #9, #12, spanning
+<!-- Those numbers are PRIVATE-repo numbers. The exercises were migrated to the
+     public repository on 2026-09-09 and renumbered: private #5,#6,#7,#8,#9 became
+     public #2,#3,#4,#5,#6. Private #12 was stale (it asked to build a screen that
+     now exists) and was rewritten as public #7. See the 2026-09-09 handoff. -->
 pipeline, operations, dashboard, Genie and app areas. Before this the label was
 on zero issues, so the documented participant selection path in
 [`../QUICKSTART.md`](../QUICKSTART.md) returned an empty list.

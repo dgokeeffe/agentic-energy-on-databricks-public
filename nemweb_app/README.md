@@ -23,13 +23,22 @@ Every Postgres value is a bind parameter. Integration mode is supported only beh
 
 ## Participant ticket entry points
 
+Issue numbers below are for this repository. They were renumbered when the
+exercises were migrated from the private `agentic-energy-on-databricks` repository,
+which shares no Git history with this one. Check `gh issue list --label
+workshop-ready` rather than trusting a number quoted in prose.
+
 | Issue                     | Start with                                                                                                                    | Named deterministic checks                                                                   |
 | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| #12 regional operations   | `config/queries/latest_region_status.sql`, `client/src/components/RegionalOperationsShell.tsx`                                | `RegionalOperationsShell.test.tsx`, `regionStatusRepository.test.ts`                         |
+| #7 attribution freshness  | `client/src/components/SourceFreshness.tsx`, `config/queries/latest_fuel_generation.sql`                                      | `RegionalOperationsShell.test.tsx`, `fuelCapture.test.ts`                                    |
 | value capture             | `config/queries/latest_fuel_generation.sql`, `client/src/domain/fuelCapture.ts`, `client/src/components/FuelValueCapture.tsx` | `fuelCapture.test.ts`, `RegionalOperationsShell.test.tsx`                                    |
-| #13 investigation journal | `server/db/schema.ts`, `server/db/investigations.ts`, `InvestigationPanel.tsx`                                                | `server/db/investigations.test.ts`, `workshop/lakebase/tests/test_migrations.py`             |
-| #14 governed Genie        | `nemweb_foundation/genie/nemweb_space.json`, `server/server.ts`                                                               | `nemweb_foundation/tests/nemweb/test_genie_assets.py`; add app tests with the implementation |
-| #18 integrated journey    | the #12–#14 files plus `nemweb_ml/sql/gold_nem_predictions.sql`                                                               | `tests/smoke.spec.ts` and the ticket-specific suites above                                   |
+| investigation journal     | `server/db/schema.ts`, `server/db/investigations.ts`, `InvestigationPanel.tsx`                                                | `server/db/investigations.test.ts`, `workshop/lakebase/tests/test_migrations.py`             |
+| governed Genie            | `nemweb_foundation/genie/nemweb_space.json`, `server/server.ts`                                                               | `nemweb_foundation/tests/nemweb/test_genie_assets.py`; add app tests with the implementation |
+| integrated journey        | the rows above plus `nemweb_ml/sql/gold_nem_predictions.sql`                                                                   | `tests/smoke.spec.ts` and the suites above                                                   |
+
+The last three rows have no issue in this repository. They existed as advanced,
+not-yet-rehearsed tickets in the private repository and were not migrated; the
+files remain the correct entry points if a facilitator raises them here.
 
 ```bash
 npm ci --include=dev
@@ -116,5 +125,5 @@ value-capture section degrades while price and freshness reporting continue.
 Fuel capture is currently proven only against the prepared local fixture.
 
 Investigation creation is not yet idempotent across an uncertain network retry.
-Issue #13 owns that database/API contract; this UI prevents no server-side
-duplicate by itself.
+The investigation journal's database/API contract owns that problem; this UI
+prevents no server-side duplicate by itself.
