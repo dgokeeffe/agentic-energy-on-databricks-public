@@ -1,7 +1,12 @@
 PYTHON ?= python3
-PROFILE ?=
 
-.PHONY: miniwiki test foundation-test foundation-snapshot modern-apis build app-install app-typegen app-test app-dev-mock ticket-verify ml-test lakebase-test links safety bundle-validate facilitator-lakebase-preflight facilitator-lakebase-smoke validate-local validate-readonly
+# The workspace profile, passed explicitly to every workspace-aware command
+# below. It is a variable rather than a hardcoded name because a target
+# workspace need not have a profile called daveok; a sandbox commonly has only
+# DEFAULT. Override per invocation: make bundle-validate PROFILE=daveok
+PROFILE ?= DEFAULT
+
+.PHONY: miniwiki test foundation-test foundation-snapshot modern-apis build app-install app-typegen app-test app-dev-mock ticket-verify ml-test lakebase-test links safety bundle-validate facilitator-lakebase-preflight facilitator-lakebase-smoke validate-local validate-readonly deploy-plan deploy-all deploy-foundation deploy-app
 
 miniwiki:
 	$(PYTHON) scripts/validate-miniwiki.py
@@ -56,7 +61,7 @@ lakebase-test:
 # target sources the operator's local .env (see env.example). Without it the
 # first required variable fails validation before the bundle is reached.
 bundle-validate:
-	@test "$(PROFILE)" = "daveok" || (echo 'PROFILE=daveok is required' >&2; exit 2)
+	@test -n "$(PROFILE)" || (echo 'PROFILE is required' >&2; exit 2)
 	@test -f .env || (echo 'Missing .env. Copy env.example to .env and set every BUNDLE_VAR_ value.' >&2; exit 2)
 	set -a; . ./.env; set +a; \
 	  for v in resource_prefix catalog schema app_serving_schema landing_volume warehouse_id participant_group facilitator_group \
@@ -70,14 +75,32 @@ bundle-validate:
 validate-local: miniwiki links safety test foundation-snapshot modern-apis build app-test
 
 facilitator-lakebase-preflight:
-	@test "$(PROFILE)" = "daveok" || (echo 'PROFILE=daveok is required' >&2; exit 2)
+	@test -n "$(PROFILE)" || (echo 'PROFILE is required' >&2; exit 2)
 	PROFILE=$(PROFILE) bash workshop/lakebase/scripts/discover.sh
 
 facilitator-lakebase-smoke:
-	@test "$(PROFILE)" = "daveok" || (echo 'PROFILE=daveok is required' >&2; exit 2)
+	@test -n "$(PROFILE)" || (echo 'PROFILE is required' >&2; exit 2)
 	uv run --extra test $(PYTHON) -m pytest workshop/lakebase/tests -q
 
 validate-readonly: validate-local
-	@test "$(PROFILE)" = "daveok" || (echo 'PROFILE=daveok is required' >&2; exit 2)
+	@test -n "$(PROFILE)" || (echo 'PROFILE is required' >&2; exit 2)
 	$(MAKE) bundle-validate PROFILE=$(PROFILE)
 	cd nemweb_app && databricks apps validate --profile $(PROFILE)
+
+# Workspace-mutating targets. Every one delegates to scripts/deploy-workshop.sh
+# so no mutating command string lives in this file, and each requires explicit
+# human authorisation in the current task. None of them unpauses a schedule or
+# enables live NEMWEB; both remain separate decisions.
+#
+# deploy-plan changes nothing and is the safe way to preview the sequence.
+deploy-plan:
+	PROFILE=$(PROFILE) bash scripts/deploy-workshop.sh --dry-run
+
+deploy-all:
+	PROFILE=$(PROFILE) bash scripts/deploy-workshop.sh
+
+deploy-foundation:
+	STAGES='schemas foundation coldstart serving' PROFILE=$(PROFILE) bash scripts/deploy-workshop.sh
+
+deploy-app:
+	STAGES='lakebase app verify' PROFILE=$(PROFILE) bash scripts/deploy-workshop.sh

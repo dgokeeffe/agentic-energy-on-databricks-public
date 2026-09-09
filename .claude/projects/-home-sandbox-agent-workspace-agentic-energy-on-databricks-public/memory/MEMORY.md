@@ -1,0 +1,2 @@
+- [Workspace deployment constraints](workspace-deployment-constraints.md) — Default Storage blocks API catalog creation; use edp_entdata_exp_dev_landing, DEFAULT profile, no gh on this box
+- [MINUTES trigger CLI warning is stale](minutes-trigger-cli-warning-is-stale.md) — the Jobs API accepts MINUTES; don't "fix" the YAML, and deploy.sh's --strict can't run

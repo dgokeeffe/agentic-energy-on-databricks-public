@@ -22,7 +22,10 @@ def test_no_tracked_retired_foundation_paths_or_content_references():
 
 def test_app_analytics_identifier_is_fixed_to_the_regular_serving_table():
     query = (ROOT / "nemweb_app/config/queries/latest_region_status.sql").read_text()
-    table = "agentic_energy_workshop.agentic_energy_workshop_d4_serving.gold_nem_app_region_status"
+    table = (
+        "edp_entdata_exp_dev_landing.agentic_energy_workshop_d4_serving"
+        ".gold_nem_app_region_status"
+    )
     assert f"FROM {table}" in query
     assert "FROM daveok." not in query
     assert "IDENTIFIER(" not in query
@@ -44,7 +47,7 @@ def test_app_fuel_generation_read_is_fixed_and_separately_granted():
     """
     query = (ROOT / "nemweb_app/config/queries/latest_fuel_generation.sql").read_text()
     table = (
-        "agentic_energy_workshop.agentic_energy_workshop_d4_serving"
+        "edp_entdata_exp_dev_landing.agentic_energy_workshop_d4_serving"
         ".gold_nem_scada_generation_5min"
     )
     assert f"FROM {table}" in query

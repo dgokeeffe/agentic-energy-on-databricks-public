@@ -27,6 +27,57 @@ The Track C app was redesigned around fuel value capture; see
 Its remaining dependency is a facilitator grant on
 `gold_nem_scada_generation_5min` in the app serving schema.
 
+### 2026-09-09 — foundation, Lakebase branch and App deployed to an Azure dev workspace
+
+The foundation bundle, the `dev-<slug>` Lakebase branch, and the per-attendee App
+were deployed to the approved Azure `australiaeast` workspace, and the deployment
+sequence was captured in
+[`../scripts/deploy-workshop.sh`](../scripts/deploy-workshop.sh)
+(`make deploy-plan` for a dry run). Three constraints changed how the documented
+path works, and all three are environmental rather than repository defects.
+
+**The catalog must be created by a human in the UI first.** The account has
+Default Storage enabled, so `databricks catalogs create`, `CREATE CATALOG`, and
+`CREATE CATALOG … MANAGED LOCATION` all fail with *"Please use the UI to create a
+catalog with Default Storage."* This deployment therefore used an existing
+catalog where the engineering group already holds `ALL_PRIVILEGES` and `MANAGE`,
+and the app's two reviewed SQL reads plus its two `uc_securable` grants were
+repointed to it. The identifiers stay fixed in reviewed SQL; no caller can choose
+an object.
+
+**`nemweb_foundation/scripts/deploy.sh` cannot run as written.** It hardcodes
+`--strict`, and CLI v1.7.0 warns that `trigger.periodic.unit: MINUTES` is an
+invalid enum. Reading the job back from the Jobs API after deployment returns
+`{'interval': 5, 'unit': 'MINUTES'}` stored verbatim, so the warning is stale
+tooling and the deliberate five-minute cadence is correct. The deployment script
+validates non-strict and deploys, rather than weakening a real check or editing a
+documented cadence. Pin an older CLI or relax `--strict` in `deploy.sh` to fix it
+properly.
+
+**`PROFILE` is now a variable defaulting to `DEFAULT`.** A target workspace need
+not have a profile named `daveok`; this one has only `DEFAULT`. Every
+workspace-aware command still passes the profile explicitly, so no implicit
+profile is used, but the four `Makefile` guards now require *a* named profile
+rather than one specific name. `tests/test_makefile_safety.py` was updated to
+match and gained a guard asserting the deployment script cannot unpause a
+schedule, enable live NEMWEB, drop a schema, delete a branch, or touch Git.
+
+**Evidence.** Cold start ran context → critical → semantics, each `SUCCESS`, then
+a redeploy created the Genie space and dashboard. The app-serving job published
+both serving tables (2 and 22 snapshot rows). App reports `RUNNING` with compute
+`ACTIVE`; `SELECT` on both tables resolved to the app service principal. The
+script was re-run twice end-to-end: it skipped all three cold-start jobs, left
+the Lakebase branch untouched, and resource counts held at one app, two branches,
+six jobs. Root suite 35 passed, Lakebase 11 passed, app 52 passed, safety 375
+files, miniwiki 16 pages, `git diff --check` clean.
+
+**Still uncertain.** Both schedules remain `PAUSED`, `nemweb_mode` is `snapshot`,
+and `allow_live_nemweb` is `false`, so no live five-minute cadence is proven and
+the serving rows are non-live snapshot evidence. `databricks apps logs` and an
+authenticated `200` from the app URL were not captured: the CLI requires OAuth
+and this session authenticated with a PAT, so the app states above come from the
+Apps API. The Playwright smoke suite was not run against the deployed URL.
+
 ## Next safe action
 
 Run an independent repository review and the complete pre-deployment command set

@@ -18,6 +18,6 @@ SELECT
   actual_generation_mw,
   facility_count,
   partially_enriched_facility_count
-FROM agentic_energy_workshop.agentic_energy_workshop_d4_serving.gold_nem_scada_generation_5min
+FROM edp_entdata_exp_dev_landing.agentic_energy_workshop_d4_serving.gold_nem_scada_generation_5min
 ORDER BY interval_end DESC, region_id, fuel_type
 LIMIT 1000

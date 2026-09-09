@@ -88,7 +88,7 @@ resources:
         - name: region-status-table
           uc_securable:
             securable_type: TABLE
-            securable_full_name: agentic_energy_workshop.agentic_energy_workshop_d4_serving.gold_nem_app_region_status
+            securable_full_name: edp_entdata_exp_dev_landing.agentic_energy_workshop_d4_serving.gold_nem_app_region_status
             permission: SELECT
         # Second, separate grant for the fuel value-capture read. It is declared
         # explicitly rather than widened to the schema so the app's privileges stay
@@ -101,7 +101,7 @@ resources:
         - name: fuel-generation-table
           uc_securable:
             securable_type: TABLE
-            securable_full_name: agentic_energy_workshop.agentic_energy_workshop_d4_serving.gold_nem_scada_generation_5min
+            securable_full_name: edp_entdata_exp_dev_landing.agentic_energy_workshop_d4_serving.gold_nem_scada_generation_5min
             permission: SELECT
         # CAN_CONNECT_AND_CREATE lets the app's service principal create and
         # therefore own app_write on its own branch. Deploy the app BEFORE
