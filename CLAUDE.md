@@ -21,6 +21,9 @@ before acting; do not infer workshop steps from a chat summary.
    clone and does not depend on a machine-level skill installation.
 6. Read the current Git status before editing. Preserve unrelated and
    uncommitted changes.
+7. Before contributing a change back, read [`CONTRIBUTING.md`](CONTRIBUTING.md).
+   Contribution is by fork and pull request; this repository grants no write
+   access to contributors.
 
 ## Keyword routing
 
@@ -29,7 +32,9 @@ before acting; do not infer workshop steps from a chat summary.
 | start, quickstart, participant, track | [`QUICKSTART.md`](QUICKSTART.md) and [`workshop/track-record-template.md`](workshop/track-record-template.md) | Route to exactly one self-contained track. Do not reintroduce cross-track pairing or a fixed clock. |
 | prerequisite, setup, access, profile, preflight, PF-1–PF-10 | [`PRE-REQUISITES.md`](PRE-REQUISITES.md) | Separate administrator, facilitator, and participant actions; never guess a workspace capability. |
 | issue, workshop-ready, participant | [`.agents/skills/issue-navigator/SKILL.md`](.agents/skills/issue-navigator/SKILL.md) and [`QUICKSTART.md`](QUICKSTART.md) | Optional. A track is completed from its own `Instructions.md`; a GitHub issue is only needed when the work is contributed back. |
-| requirement, plan, implement, test, eval, review, pull request | [`.agents/skills/understand-requirement/SKILL.md`](.agents/skills/understand-requirement/SKILL.md), [`.agents/skills/plan-change/SKILL.md`](.agents/skills/plan-change/SKILL.md), and [`.agents/skills/implement-test/SKILL.md`](.agents/skills/implement-test/SKILL.md) | Follow requirement → plan → human approval → implementation → tests → eval → independent review → pull request → human disposition. |
+| requirement, plan, implement, test, eval, review, pull request | [`.agents/skills/understand-requirement/SKILL.md`](.agents/skills/understand-requirement/SKILL.md), [`.agents/skills/plan-change/SKILL.md`](.agents/skills/plan-change/SKILL.md), [`.agents/skills/implement-test/SKILL.md`](.agents/skills/implement-test/SKILL.md), and [`CONTRIBUTING.md`](CONTRIBUTING.md) | Follow requirement → plan → human approval → implementation → tests → eval → independent review → pull request → human disposition. Push to a fork, never to `origin/main`. |
+| fork, contribute, write access, collaborator, push denied, 403 | [`CONTRIBUTING.md`](CONTRIBUTING.md) and the sandbox Git section of [`PRE-REQUISITES.md`](PRE-REQUISITES.md) | Contribution is by fork and pull request. A denied push is expected, not a fault to debug; do not request or grant write access to work around it. |
+| sandbox, credential helper, gh, device flow, permission prompt | the sandbox Git section of [`PRE-REQUISITES.md`](PRE-REQUISITES.md) | The sandbox token is read scoped and the sandbox is ephemeral. Device-flow login is interactive, so ask the human to run it. Never widen agent permissions in a committed file. |
 | NEMWEB, foundation, Bronze, Silver, Gold, lineage | [`foundation/AGENTS.md`](foundation/AGENTS.md), [`foundation/Instructions.md`](foundation/Instructions.md), and [`nemweb_foundation/README.md`](nemweb_foundation/README.md) | Use the read-only shared foundation; do not create another data store. |
 | facilitator, deploy, gates, evidence | [`foundation/deployment-gates.md`](foundation/deployment-gates.md) and [`foundation/Instructions.md`](foundation/Instructions.md) | Follow the gate sequence. When a capability is unavailable, record `not-run` or `blocked` and label substitutes prepared. |
 | isolation, attendee, Lakebase branch, app slug | [`miniwiki/decisions/attendee-isolation.md`](miniwiki/decisions/attendee-isolation.md) and [`workshop/lakebase/scripts/provision-attendee-branches.sh`](workshop/lakebase/scripts/provision-attendee-branches.sh) | One branch and one app per attendee, both from `attendee_slug`. Mind the 20-concurrent-compute limit per project. |
@@ -38,6 +43,11 @@ before acting; do not infer workshop steps from a chat summary.
 
 ## Repository workflow
 
+- Contributors do not have write access to this repository. Fork it, push the
+  branch to the fork, and open a pull request; see
+  [`CONTRIBUTING.md`](CONTRIBUTING.md). Never assume a direct push will work.
+- `main` is protected. Force-pushes and deletion are refused, and changes arrive
+  by pull request. Do not attempt to work around this.
 - Use Git branches and pull requests for implementation review.
 - Keep durable design decisions and session continuity in [`miniwiki/`](miniwiki/index.md).
 - Put the current objective, evidence, uncertainty, and next action in the

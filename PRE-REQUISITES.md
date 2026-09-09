@@ -79,6 +79,65 @@ python3 scripts/validate-miniwiki.py
 Each pair also confirms that the selected issue is labelled `workshop-ready`
 and names deterministic tests. Do not edit before the exact plan is approved.
 
+## Git in a Databricks sandbox
+
+Read this before debugging a failed push. Everything here is expected
+behaviour, not a fault.
+
+A Databricks sandbox or cluster configures a Git credential helper that fetches
+a workspace token. That token is usually **read scoped**: cloning and fetching
+work, and pushing fails with
+
+```text
+remote: Permission to <owner>/<repo>.git denied to <user>.
+fatal: ... The requested URL returned error: 403
+```
+
+The 403 names your own username. That is not an identity problem and adding a
+collaborator does not fix it — the token simply has no write scope.
+
+Two consequences:
+
+- Contribution is by fork and pull request. See
+  [`CONTRIBUTING.md`](CONTRIBUTING.md). You do not need write access to this
+  repository, and you should not request it.
+- `main` is protected. Force-pushes and deletion are refused.
+
+If you do need to push to your own fork from a sandbox, install the GitHub CLI
+into your user path and authenticate with the device flow. Neither step needs
+root:
+
+```bash
+GH_VERSION=2.63.2
+curl -fsSL -o /tmp/gh.tar.gz "https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_amd64.tar.gz"
+tar xzf /tmp/gh.tar.gz -C /tmp
+mkdir -p ~/.local/bin
+cp -f "/tmp/gh_${GH_VERSION}_linux_amd64/bin/gh" ~/.local/bin/gh
+chmod +x ~/.local/bin/gh
+rm -rf /tmp/gh.tar.gz "/tmp/gh_${GH_VERSION}_linux_amd64"
+gh --version
+```
+
+Then authenticate. This step is interactive: it prints a code for you to enter
+in a browser, so an agent cannot complete it for you.
+
+```bash
+gh auth login --hostname github.com --git-protocol https --web
+gh auth setup-git
+```
+
+A sandbox is ephemeral. Both steps are lost when the sandbox is rebuilt, and
+neither belongs in a committed file. Never paste a token into a prompt, a
+document, or shell history.
+
+### Agent permission prompts
+
+An assistant working in a sandbox is separately gated by its own harness and
+will ask before running many commands. That gate reads the command, not this
+repository, so no instruction file removes it. Approve each action, or set an
+allowlist in your own ignored `.claude/settings.local.json`. Do not widen
+permissions in a committed file on behalf of other participants.
+
 ## Facilitator profile and bundle validation
 
 First copy the placeholder file to the ignored local environment file and
