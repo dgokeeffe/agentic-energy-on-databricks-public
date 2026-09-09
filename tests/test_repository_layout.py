@@ -86,6 +86,46 @@ def test_app_mock_smoke_does_not_start_workspace_plugins():
     assert "VITE_DATA_MODE=mock npx vite" in makefile
 
 
+def test_no_script_mandates_one_hardcoded_databricks_profile_name():
+    """The guardrail is an explicit profile, not a particular profile.
+
+    miniwiki/guardrails.md: "Use an explicitly named Databricks profile; never
+    select a workspace implicitly." Equality checks against one hardcoded name go
+    further than that and cause real breakage: they embed one operator's
+    workspace in a public repository, and they make every script unusable on a
+    machine whose CLI has no profile of that name.
+
+    This has already regressed once, renamed from "daveok" to "DEFAULT" rather
+    than removed, so it is asserted rather than trusted. Runnable examples in
+    prose may still name a profile to stay copy-pasteable; executable guards may
+    not.
+    """
+    scripts = [
+        *(ROOT / "nemweb_foundation/scripts").glob("*.py"),
+        *(ROOT / "workshop/lakebase/scripts").glob("*.py"),
+        *(ROOT / "workshop/lakebase/scripts").glob("*.sh"),
+        ROOT / "nemweb_foundation/agentic_energy/nemweb/evidence.py",
+    ]
+    offenders = []
+    for script in scripts:
+        if not script.is_file():
+            continue
+        for number, line in enumerate(script.read_text().splitlines(), start=1):
+            stripped = line.strip()
+            if stripped.startswith("#"):
+                continue
+            # Python equality guard, e.g. `if args.profile != "DEFAULT":`
+            python_guard = "profile" in stripped and "!=" in stripped and '"' in stripped
+            # Shell equality guard, e.g. `if [[ "$PROFILE" != "daveok" ]]`
+            shell_guard = "$PROFILE" in stripped and "!=" in stripped
+            if python_guard or shell_guard:
+                offenders.append(f"{script.relative_to(ROOT)}:{number}: {stripped}")
+    assert not offenders, (
+        "scripts must require an explicitly named profile without mandating which "
+        "name:\n" + "\n".join(offenders)
+    )
+
+
 def test_app_analytics_query_parameters_are_referentially_stable():
     app = (ROOT / "nemweb_app/client/src/App.tsx").read_text()
     assert "const EMPTY_QUERY_PARAMETERS" in app

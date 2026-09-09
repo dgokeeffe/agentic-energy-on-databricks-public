@@ -26,7 +26,11 @@ BENCHMARKS = ROOT / "genie" / "benchmark_questions.json"
 GENIE_SPACE = ROOT / "genie" / "nemweb_space.json"
 DASHBOARD = ROOT / "dashboards" / "nemweb_overview.lvdash.json"
 TERMINAL_STATES = {"SUCCEEDED", "FAILED", "CANCELED", "CLOSED"}
-REQUIRED_PROFILE = "DEFAULT"
+# No profile name is mandated; an explicit one is. See evidence.py.
+PROFILE_REQUIRED_MESSAGE = (
+    "workspace-aware validation requires an explicit --profile <name>; "
+    "no implicit default profile is permitted"
+)
 SAFE_IDENTIFIER = re.compile(r"^[A-Za-z_][A-Za-z0-9_-]*$")
 REQUIRED_TOPICS = {
     "effective-intervention-uniqueness",
@@ -203,13 +207,13 @@ def main() -> int:
     parser.add_argument("--catalog")
     parser.add_argument("--schema")
     parser.add_argument("--warehouse-id")
-    parser.add_argument("--profile", default=REQUIRED_PROFILE)
+    parser.add_argument("--profile", required=True, help="Databricks CLI profile name")
     parser.add_argument("--timeout-seconds", type=int, default=300)
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
 
-    if args.profile != REQUIRED_PROFILE:
-        parser.error(f"workspace-aware validation requires --profile {REQUIRED_PROFILE}")
+    if not args.profile.strip():
+        parser.error(PROFILE_REQUIRED_MESSAGE)
 
     assets = validate_assets()
     print(

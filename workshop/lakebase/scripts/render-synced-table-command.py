@@ -15,10 +15,15 @@ ROOT = Path(__file__).resolve().parents[1]
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--resources", type=Path, required=True)
-    parser.add_argument("--profile", required=True)
+    # Required, but not pinned to a name. The guardrail in
+    # miniwiki/guardrails.md is "use an explicitly named Databricks profile;
+    # never select a workspace implicitly" — which argparse's required=True
+    # already enforces. Comparing against one hardcoded name added no safety and
+    # made the script unusable on any machine without that profile.
+    parser.add_argument("--profile", required=True, help="Databricks CLI profile name")
     args = parser.parse_args()
-    if args.profile != "DEFAULT":
-        parser.error("--profile DEFAULT is required")
+    if not args.profile.strip():
+        parser.error("--profile requires a non-empty Databricks CLI profile name")
 
     resources = json.loads(args.resources.read_text())
     required = {

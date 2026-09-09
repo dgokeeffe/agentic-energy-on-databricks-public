@@ -17,7 +17,7 @@ from pathlib import Path
 from agentic_energy.nemweb.evidence import (
     DatabricksCLI,
     EvidenceRow,
-    REQUIRED_PROFILE,
+    PROFILE_REQUIRED_MESSAGE,
     capture_live_evidence,
     evidence_document,
     render_markdown,
@@ -54,7 +54,9 @@ def _row_from_dict(value: dict) -> EvidenceRow:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--profile", default=REQUIRED_PROFILE)
+    # Required with no default. A default here would let a workspace-aware
+    # capture run against whichever workspace the machine happens to point at.
+    parser.add_argument("--profile", required=True, help="Databricks CLI profile name")
     parser.add_argument("--warehouse-id", required=True)
     parser.add_argument("--catalog", required=True)
     parser.add_argument("--schema", required=True)
@@ -67,8 +69,8 @@ def main() -> int:
     parser.add_argument("--output-markdown", type=Path, required=True)
     parser.add_argument("--append", action="store_true", help="append to an existing evidence pack")
     args = parser.parse_args()
-    if args.profile != REQUIRED_PROFILE:
-        parser.error(f"workspace-aware capture requires --profile {REQUIRED_PROFILE}")
+    if not args.profile.strip():
+        parser.error(PROFILE_REQUIRED_MESSAGE)
     if args.timeout_seconds <= 0:
         parser.error("--timeout-seconds must be positive")
     if args.output_json.exists() and not args.append:
