@@ -7,6 +7,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / "scripts" / "grant-workshop-access.py"
+# An explicit profile is part of every valid invocation. The repository mandates
+# that one is named, not which one, so this fixture uses an arbitrary name.
 BASE = [
     sys.executable,
     str(SCRIPT),
@@ -18,8 +20,13 @@ BASE = [
     "landing",
     "--warehouse-id",
     "abc123",
+    "--profile",
+    "any-operator-profile",
     "--dry-run",
 ]
+
+# Same arguments without a profile, for the omission case.
+BASE_WITHOUT_PROFILE = [argument for argument in BASE if argument not in {"--profile", "any-operator-profile"}]
 
 
 def test_grant_script_dry_run_has_complete_idempotent_uc_chain() -> None:
@@ -46,11 +53,34 @@ def test_grant_script_rejects_unsafe_principal_and_implicit_profile() -> None:
     assert unsafe.returncode != 0
     assert "principal" in unsafe.stderr
 
-    wrong_profile = subprocess.run(
-        [*BASE, "--profile", "daveok", "operator"],
+    # Omitting --profile must fail, because the CLI would otherwise fall through
+    # to whichever default profile the machine carries. This is the safety
+    # property; the profile's name is not.
+    implicit = subprocess.run(
+        [*BASE_WITHOUT_PROFILE, "operator"], capture_output=True, text=True, check=False
+    )
+    assert implicit.returncode != 0
+    assert "--profile" in implicit.stderr
+
+    # An empty or whitespace profile is the same failure spelled differently.
+    blank = subprocess.run(
+        [*BASE_WITHOUT_PROFILE, "--profile", "   ", "operator"],
         capture_output=True,
         text=True,
         check=False,
     )
-    assert wrong_profile.returncode != 0
-    assert "--profile DEFAULT" in wrong_profile.stderr
+    assert blank.returncode != 0
+    assert "--profile" in blank.stderr
+
+
+def test_grant_script_accepts_any_explicitly_named_profile() -> None:
+    # No profile name is privileged. Two unrelated names must both work, so the
+    # repository cannot drift back to mandating one operator's workspace.
+    for profile in ("DEFAULT", "some-other-workspace"):
+        result = subprocess.run(
+            [*BASE_WITHOUT_PROFILE, "--profile", profile, "operator@example.com"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert result.returncode == 0, result.stderr

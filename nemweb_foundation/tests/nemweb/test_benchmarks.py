@@ -86,7 +86,11 @@ def test_result_contract_checks_terminal_result_columns_and_counts() -> None:
 
 
 def test_static_asset_validator_reconciles_all_files() -> None:
-    assert validator.REQUIRED_PROFILE == "DEFAULT"
+    # The validator no longer pins a profile name. It carries the explicit-profile
+    # requirement as an error message instead, so no operator's workspace name is
+    # embedded in this repository.
+    assert not hasattr(validator, "REQUIRED_PROFILE")
+    assert "explicit --profile" in validator.PROFILE_REQUIRED_MESSAGE
     result = validator.validate_assets()
     assert len(result["benchmarks"]) == 6
     assert len(result["dashboard_sql"]) == 6
