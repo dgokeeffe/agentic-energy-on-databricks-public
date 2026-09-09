@@ -1,7 +1,10 @@
 PYTHON ?= python3
 PROFILE ?= DEFAULT
 
-.PHONY: miniwiki test foundation-test foundation-snapshot modern-apis build app-install app-typegen app-test app-dev-mock ticket-verify ml-test lakebase-test links safety bundle-validate bundle-validate-live-evidence facilitator-lakebase-preflight facilitator-lakebase-smoke validate-local validate-readonly
+.PHONY: setup miniwiki test foundation-test foundation-snapshot modern-apis build app-install app-typegen app-test app-dev-mock ticket-verify ml-test lakebase-test links safety bundle-validate bundle-validate-live-evidence facilitator-lakebase-preflight facilitator-lakebase-smoke validate-local validate-readonly
+
+setup:
+	bash scripts/setup-dev.sh
 
 miniwiki:
 	$(PYTHON) scripts/validate-miniwiki.py
