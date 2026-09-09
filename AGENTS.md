@@ -19,7 +19,10 @@ before acting; do not infer workshop steps from a chat summary.
 5. Before miniwiki or handoff work, read the repository-owned
    [miniwiki skill](.agents/skills/miniwiki/SKILL.md). It works from a fresh
    clone and does not depend on a machine-level skill installation.
-6. Read the current Git status before editing. Preserve unrelated and
+6. In a fresh or disposable sandbox, run `make setup` before development. It
+   verifies or installs the development tools and synchronises Python and Node
+   dependencies. Authentication is deliberately manual.
+7. Read the current Git status before editing. Preserve unrelated and
    uncommitted changes.
 
 ## Keyword routing

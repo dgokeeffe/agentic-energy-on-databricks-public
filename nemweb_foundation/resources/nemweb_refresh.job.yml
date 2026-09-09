@@ -35,9 +35,11 @@ resources:
       # continuous setting.
       trigger:
         pause_status: PAUSED
-        periodic:
-          interval: 5
-          unit: MINUTES
+        # Use Quartz rather than the periodic unit enum: the Jobs API accepts
+        # MINUTES, but some Databricks CLI schemas reject that value during
+        # bundle validation.
+        quartz_cron_expression: "0 0/5 * * * ?"
+        timezone_id: Australia/Brisbane
       permissions:
         - level: CAN_MANAGE_RUN
           group_name: ${var.participant_group}

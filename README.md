@@ -55,7 +55,16 @@ Use the current files linked from `QUICKSTART.md` for participant work.
 
 ## Local validation and snapshot
 
-Requires Python 3.10+ and `uv`.
+Requires Python 3.10+ and `uv`. In a fresh or disposable sandbox, run the
+idempotent setup target first. It verifies or installs `uv`, `gh`, and Node,
+then synchronises the Python and Node dependencies. It does not authenticate to
+GitHub or Databricks.
+
+```bash
+make setup
+```
+
+Validation:
 
 ```bash
 python3 scripts/validate-miniwiki.py
