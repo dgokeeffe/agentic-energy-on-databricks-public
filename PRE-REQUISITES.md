@@ -100,8 +100,16 @@ shown on every workspace-aware command:
 
 ```bash
 databricks auth describe --profile daveok
-(cd nemweb_foundation && databricks bundle validate --strict -t dev --profile daveok)
+(cd nemweb_foundation && databricks bundle validate -t dev --profile daveok)
 ```
+
+The foundation bundle is validated without `--strict`. Databricks CLI v1.7.0
+reports `invalid value "MINUTES" for enum field` for the deliberate five-minute
+`trigger.periodic.unit` in `nemweb_refresh`, and `--strict` turns that warning
+into an error. `MINUTES` is valid: the Python SDK enum
+(`PeriodicTriggerConfigurationTimeUnit`) includes it, the REST API reference lists
+it, and a deployed job reads it back verbatim. The CLI's bundle schema is stale.
+Real validation errors still fail the command.
 
 Stop if `daveok` is absent, unauthenticated, points to an unexpected workspace,
 or cannot validate the approved isolated development catalog, schema, and

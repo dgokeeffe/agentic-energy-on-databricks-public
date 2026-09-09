@@ -249,8 +249,13 @@ python3 scripts/validate-miniwiki.py
 uv run --extra test python -m pytest
 rm -rf dist && uv build --wheel --out-dir dist
 git diff --check
-databricks bundle validate --strict -t dev --profile daveok
+databricks bundle validate -t dev --profile daveok
 ```
+
+The foundation bundle omits `--strict`: CLI v1.7.0 raises a provably false
+warning on the deliberate `MINUTES` periodic-trigger unit, and `--strict` would
+promote it to an error. See `nemweb_foundation/scripts/deploy.sh` for the
+evidence. The app bundle still validates cleanly with `--strict`.
 
 Also validate that:
 
