@@ -32,7 +32,7 @@ Its remaining dependency is a facilitator grant on
 Run an independent repository review and the complete pre-deployment command set
 in [`../foundation/deployment-gates.md`](../foundation/deployment-gates.md). Resolve every
 blocking finding before an explicitly authorised dev deployment with the
-`daveok` profile and an isolated schema. Keep both schedules paused through the
+`DEFAULT` profile and an isolated schema. Keep both schedules paused through the
 initial pipeline, semantic, benchmark and dashboard SQL gates.
 
 ## Open threads
@@ -95,7 +95,7 @@ from the public repository; nobody has looked.
 ## Session handoff — 2026-09-08 (third): authorised dev run
 
 **The pipeline fix is now proven at runtime, not just statically.** Authorised dev
-deployment against `agentic_energy_workshop_d4` with the `daveok` profile. Cold-start
+deployment against `agentic_energy_workshop_d4` with the `DEFAULT` profile. Cold-start
 order followed: context, critical, semantics, app-serving. Both schedules stayed
 PAUSED and `nemweb.source_mode` stayed `snapshot` throughout; `allow_live_nemweb`
 stayed false. No live NEMWEB fetch occurred, so Gate 6 remains untouched and open.
@@ -321,7 +321,7 @@ repository, so that bundle had never validated. `env.example` now documents all
 conflicting clock were removed with `git rm`; the three `docs/coda-*` files are
 legitimate redirect stubs and were left alone.
 
-**Evidence.** `make bundle-validate PROFILE=daveok` exits 0 with both bundles
+**Evidence.** `make bundle-validate PROFILE=DEFAULT` exits 0 with both bundles
 reporting `Validation OK!`. Root and foundation suites 282 passed, 52 subtests.
 Links valid across 105 tracked files, miniwiki 11 pages, safety 379 files.
 `make foundation-snapshot` manifest SHA-256 `785e7c6f…` unchanged by the edits.
@@ -334,6 +334,32 @@ be thickened before the 10:18 inspection, since business-facing issues #6, #9 an
 
 **Next question.** Rehearse the demo narration, then decide whether the staged
 deletions and three repairs are committed as one change.
+
+## Session handoff — 2026-09-09 (Track C app)
+
+The Track C app is mid-change and **nothing is committed** (88 changed files on
+`main`, two agents' work interleaved). Full continuation notes, verified state,
+remaining tasks and hazards are in
+[`features/track-c-exploratory-investigation.md`](features/track-c-exploratory-investigation.md).
+
+Read that page before touching `nemweb_app/`. Two things a fresh session will
+otherwise get wrong: another agent is concurrently editing
+`RegionalOperationsShell.tsx` and `JourneyHeader.tsx`, so `git checkout --` on a
+shared file destroys its work; and `make app-dev-mock` does not run because the
+Vite config uses `middlewareMode`, so use `vite build` + `vite preview` with
+`VITE_DATA_MODE=mock` set at build time.
+
+Current checks: `tsc` clean, 82 vitest passing, 3 Playwright passing.
+
+The requester has settled four decisions: a **fresh git worktree** for app work, a
+prepared analysis **computed from on-screen evidence**, agent commits limited to
+**`nemweb_app/` and `miniwiki/`**, and four further tasks in scope (Track C
+instructions and exercises, section consolidation, the stale DRAFT decision page,
+and fixing `make app-dev-mock`).
+
+Next action: commit the app work in this checkout, then create the worktree — in
+that order, because a worktree from `HEAD` would otherwise start without any of it.
+Then fix `make app-dev-mock` before the remaining visual work.
 
 ## Session handoff — 2026-09-02
 

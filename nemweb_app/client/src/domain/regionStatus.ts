@@ -1,4 +1,5 @@
 import type { FuelGenerationRow } from './fuelCapture';
+import type { UnitDispatchRow } from './facilityMap';
 
 export type DataMode = 'mock' | 'integration';
 
@@ -45,6 +46,14 @@ export type QueryState =
        * still reporting governed price and freshness.
        */
       fuelRows: FuelGenerationRow[] | null;
+      /**
+       * Per-unit output for the generator map, or null when unavailable.
+       *
+       * Null for the same reason as fuelRows: the map needs a third Unity Catalog
+       * grant, so a deployment without it must lose the map alone rather than the
+       * whole screen.
+       */
+      unitRows: UnitDispatchRow[] | null;
     };
 
 const SOURCE_STALE_AFTER_MS = 15 * 60 * 1000;
@@ -57,7 +66,8 @@ export function classifyRows(
   rows: RegionStatus[],
   mode: DataMode,
   nowMs = Date.now(),
-  fuelRows: FuelGenerationRow[] | null = null
+  fuelRows: FuelGenerationRow[] | null = null,
+  unitRows: UnitDispatchRow[] | null = null
 ): QueryState {
   if (rows.length === 0) return { kind: 'empty' };
 
@@ -68,5 +78,15 @@ export function classifyRows(
   const predictionStale = latestRows.some(
     (row) => row.predictionSourceFreshness === 'STALE' || row.predictionMissingFeatureStatus === 'STALE'
   );
-  return { kind: 'ready', rows, mode, stale, predictionStale, partial, evaluatedAtMs: nowMs, fuelRows };
+  return {
+    kind: 'ready',
+    rows,
+    mode,
+    stale,
+    predictionStale,
+    partial,
+    evaluatedAtMs: nowMs,
+    fuelRows,
+    unitRows,
+  };
 }

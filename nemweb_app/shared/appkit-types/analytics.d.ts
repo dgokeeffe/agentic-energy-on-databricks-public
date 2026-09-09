@@ -7,65 +7,24 @@ declare module "@databricks/appkit-ui/react" {
   interface QueryRegistry {
     latest_fuel_generation: {
         name: "latest_fuel_generation";
-        parameters: Record<string, never>;
-        result: Array<{
-          /** @sqlType TIMESTAMP */
-          interval_end: string;
-          /** @sqlType STRING */
-          region_id: string;
-          /** @sqlType STRING */
-          fuel_type: string;
-          /** Signed sum of per-DUID SCADA actual MW for the region/fuel group; storage/load values may be negative. */
-          actual_generation_mw: number;
-          /** @sqlType BIGINT */
-          facility_count: number;
-          /** Count of source facilities without both governed region and fuel enrichment; non-zero values are visible quality context. */
-          partially_enriched_facility_count: number;
-        }>;
+        parameters: {
+          /** STRING - use sql.string() */
+          fuel_generation_table: SQLStringMarker;
+        };
+        result: unknown;
       };
     latest_region_status: {
         name: "latest_region_status";
+        parameters: {
+          /** STRING - use sql.string() */
+          region_status_table: SQLStringMarker;
+        };
+        result: unknown;
+      };
+    latest_unit_dispatch: {
+        name: "latest_unit_dispatch";
         parameters: Record<string, never>;
-        result: Array<{
-          /** @sqlType STRING */
-          region_id: string;
-          /** @sqlType TIMESTAMP */
-          interval_end: string;
-          /** @sqlType INT */
-          intervention: number;
-          /** @sqlType DOUBLE */
-          rrp_aud_per_mwh: number;
-          /** @sqlType DOUBLE */
-          total_demand_mw: number;
-          /** @sqlType BIGINT */
-          price_source_run_no: number;
-          /** @sqlType BIGINT */
-          demand_source_run_no: number;
-          /** @sqlType TIMESTAMP */
-          source_interval_watermark: string;
-          /** @sqlType TIMESTAMP */
-          source_publication_at: string;
-          /** @sqlType TIMESTAMP */
-          gold_published_at: string;
-          /** @sqlType BIGINT */
-          market_wide_binding_constraint_count: number;
-          /** @sqlType BIGINT */
-          market_wide_interconnector_count: number;
-          /** @sqlType DOUBLE */
-          market_wide_interconnector_source_sign_flow_mw: number;
-          /** @sqlType DOUBLE */
-          prediction_score: number;
-          /** @sqlType STRING */
-          prediction_model_version: string;
-          /** @sqlType TIMESTAMP */
-          prediction_feature_time: string;
-          /** @sqlType TIMESTAMP */
-          prediction_scored_at: string;
-          /** @sqlType STRING */
-          prediction_source_freshness: string;
-          /** @sqlType STRING */
-          prediction_missing_feature_status: string;
-        }>;
+        result: unknown;
       };
   }
 }

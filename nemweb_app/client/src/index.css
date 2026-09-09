@@ -1,48 +1,74 @@
 @import '@databricks/appkit-ui/styles.css';
 
 /*
- * Workshop theme adapted from Open Electricity (https://github.com/opennem/openelectricity),
- * MIT licensed, © 2023-2026 Open Electricity.
+ * Workshop theme: a control-room surface over an Open Electricity fuel vocabulary.
  *
- * Borrowed: the warm-neutral palette, the fuel-technology colour system, the
- * 10px-root rem scale, and the wide-tracked uppercase subheading treatment.
+ * Two sources, deliberately separated:
+ *
+ * 1. Shell and surface tokens follow the GridSense Intelligence Hub control room
+ *    — cool neutrals, a single high-chroma red accent, and a real dark mode.
+ *    These are the tokens that decide whether the screen reads as an operations
+ *    surface or as a report.
+ *
+ * 2. Fuel-technology tokens remain Open Electricity
+ *    (https://github.com/opennem/openelectricity), MIT licensed,
+ *    © 2023-2026 Open Electricity. They are unchanged and must stay that way:
+ *    they are the shared vocabulary that lets the fuel table, the capture chart,
+ *    and the generator map agree on what "brown coal" looks like. Recolouring
+ *    them to match a shell palette would desynchronise three surfaces to gain
+ *    nothing.
+ *
+ * The 10px-root rem scale is also retained from Open Electricity. Roughly 900
+ * lines of rules below are written against it, so switching to a 16px root to
+ * match GridSense would silently rescale every existing surface.
  *
  * Not borrowed: the typefaces. Open Electricity self-hosts DM Sans, Space
- * Grotesk, and DM Mono; we deliberately ship no font binaries and make no
- * third-party font request, so these stacks fall back to system faces. This
- * costs some of the source identity by design.
+ * Grotesk, and DM Mono, and GridSense requests Inter. We ship no font binaries
+ * and make no third-party font request, so these stacks fall back to system
+ * faces. This costs some of both identities by design.
  *
  * The fuel tokens are a display vocabulary, not a data contract. The AEMO fuel
  * field cannot distinguish CCGT from OCGT, so no such token is offered here —
  * see client/src/domain/fuelCapture.ts.
  *
- * This palette is light-only. AppKit ships
+ * Dark mode is opt-in by class, never by media query. AppKit ships
  * `@media (prefers-color-scheme: dark) { :root:not(.light) { ... } }`, which wins
- * on specificity over a bare `:root` and rendered the theme as near-black with
- * unreadable text for any reviewer whose OS was in dark mode. index.html sets
- * class="light" to opt out; the `:root:not(.light)` selector below repeats the
- * tokens at equal specificity so the theme still holds if that class is ever
- * dropped. Both are deliberate.
+ * on specificity over a bare `:root`; before this app opted out explicitly, that
+ * block rendered the light theme as near-black with unreadable text. The theme
+ * is therefore driven by an explicit `light` or `dark` class on <html>, set by
+ * client/src/lib/theme.ts, and `:root:not(.light):not(.dark)` below repeats the
+ * light tokens at equal specificity so an unclassed document still resolves to a
+ * legible theme rather than AppKit's fallback.
  */
 
 :root,
-:root:not(.light),
-:root[class~='dark'] {
+:root.light,
+:root:not(.light):not(.dark) {
   color-scheme: light;
 
-  /* Open Electricity neutrals and accent. */
+  /* Control-room shell, light. */
   --oe-white: #ffffff;
   --oe-black: #000000;
-  --oe-red: #c74523;
-  --oe-dark-red: #963f29;
-  --oe-dark-grey: #353535;
-  --oe-mid-grey: #6a6a6a;
-  --oe-mid-warm-grey: #c6c6c6;
-  --oe-warm-grey: #f1f0ed;
-  --oe-light-warm-grey: #faf9f6;
-  --oe-error-red: #fa6060;
-  --oe-success-green: #70d26e;
+  --oe-red: #ff3621;
+  --oe-dark-red: #c0392b;
+  --oe-dark-grey: #1a1a2e;
+  --oe-mid-grey: #6b7280;
+  --oe-mid-warm-grey: #e8eaf0;
+  --oe-warm-grey: #eef0f5;
+  --oe-light-warm-grey: #f5f6fa;
+  --oe-error-red: #c0392b;
+  --oe-success-green: #1b8a4a;
   --oe-alert: #eb1f70;
+
+  /* Shell elevation and focus, used by the journey and map surfaces. */
+  --shell-shadow: 0 1px 2px rgb(16 24 40 / 6%), 0 1px 3px rgb(16 24 40 / 10%);
+  --shell-shadow-raised: 0 4px 12px rgb(16 24 40 / 8%), 0 2px 4px rgb(16 24 40 / 6%);
+  --map-canvas: #eef1f7;
+  --map-region-fill: #e3e7f0;
+  --map-region-stroke: #cfd5e4;
+  --ticker-surface: #11151c;
+  --ticker-border: #262d38;
+  --ticker-text: #e6edf3;
 
   /* Open Electricity fuel technologies. */
   --fuel-coal_black: #121212;
@@ -89,9 +115,82 @@
   --chart-4: var(--fuel-solar_utility);
   --chart-5: var(--fuel-battery_discharging);
 
-  --font-sans: 'DM Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-sans:
+    Inter, 'DM Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-display: 'Space Grotesk', var(--font-sans);
   --font-mono: 'DM Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/*
+ * Dark mode, ported from the GridSense control room.
+ *
+ * Shell tokens are re-pointed, and the four darkest fuel tokens are lifted.
+ *
+ * An earlier version of this block deliberately left every fuel token alone, on
+ * the reasoning that the screen must not change which colour means "gas" when
+ * the operator dims the room. That was half right. Hue must stay stable, but
+ * Open Electricity calibrated these against a near-white page: `coal_black` is
+ * #121212, which on a #161b22 card is invisible. The top-producers chart rendered
+ * as black bars on black.
+ *
+ * So each lift below preserves the hue and raises only lightness, enough to clear
+ * the card. `gas`, `solar_utility`, `distillate`, `hydro`, `battery_charging` and
+ * `unknown` are already bright enough and are left untouched.
+ */
+:root.dark {
+  color-scheme: dark;
+
+  /* Hue preserved, lightness raised to clear a dark card. */
+  --fuel-coal_black: #6e6e6e;
+  --fuel-coal_brown: #a9713c;
+  --fuel-wind: #4aa946;
+  --fuel-battery_discharging: #6274e8;
+  --fuel-bioenergy_biomass: #2ba8a8;
+
+  --oe-white: #161b22;
+  --oe-black: #ffffff;
+  --oe-red: #ff3621;
+  --oe-dark-red: #f87171;
+  --oe-dark-grey: #e6edf3;
+  --oe-mid-grey: #8b949e;
+  --oe-mid-warm-grey: #30363d;
+  --oe-warm-grey: #1c222b;
+  --oe-light-warm-grey: #0d1117;
+  --oe-error-red: #f87171;
+  --oe-success-green: #3fb950;
+
+  --shell-shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 1px 3px rgb(0 0 0 / 30%);
+  --shell-shadow-raised: 0 4px 14px rgb(0 0 0 / 45%), 0 2px 6px rgb(0 0 0 / 35%);
+  --map-canvas: #11161d;
+  --map-region-fill: #1a212b;
+  --map-region-stroke: #2b333f;
+  --ticker-surface: #05070a;
+  --ticker-border: #1b2129;
+  --ticker-text: #e6edf3;
+
+  --background: var(--oe-light-warm-grey);
+  --foreground: var(--oe-dark-grey);
+  --card: var(--oe-white);
+  --card-foreground: var(--oe-dark-grey);
+  --popover: var(--oe-white);
+  --popover-foreground: var(--oe-dark-grey);
+  --primary: var(--oe-dark-grey);
+  --primary-foreground: var(--oe-light-warm-grey);
+  --secondary: var(--oe-warm-grey);
+  --secondary-foreground: var(--oe-dark-grey);
+  --muted: var(--oe-warm-grey);
+  --muted-foreground: var(--oe-mid-grey);
+  --accent: var(--oe-warm-grey);
+  --accent-foreground: var(--oe-dark-grey);
+  --destructive: var(--oe-error-red);
+  --destructive-foreground: var(--oe-white);
+  --success: var(--oe-success-green);
+  --success-foreground: #06240f;
+  --warning: #d29922;
+  --warning-foreground: #1a1200;
+  --border: var(--oe-mid-warm-grey);
+  --input: var(--oe-mid-warm-grey);
+  --ring: var(--oe-red);
 }
 
 /* Open Electricity's 1rem = 10px root, so the rem sizes below read directly. */
@@ -721,31 +820,151 @@ tr[data-focused='true'] {
 
 /* ------------------------------------------------------------------- banners */
 
-.state-banner {
+/*
+ * Data-quality notices.
+ *
+ * Replaces three stacked full-width banners, one of which was filled with the
+ * solar-fuel yellow. Reusing a fuel token as an alert colour was the actual bug:
+ * it made "this read is unavailable" look like a chart series. These are compact
+ * inline chips in a single wrapping row, so four simultaneous notices cost one
+ * line rather than four bands across the page.
+ *
+ * Only a live stale source is styled as an alert. Everything else is muted,
+ * because an absent grant or a prepared fixture is a state to report, not an
+ * alarm to raise.
+ */
+.notice-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  list-style: none;
   margin: 0;
-  padding: 1.2rem 1.6rem;
-  border-radius: var(--radius);
-  font-size: 1.4rem;
-  border: 1px solid transparent;
+  padding: 0;
 }
 
-.state-banner-danger {
-  background: color-mix(in srgb, var(--oe-error-red) 14%, var(--oe-white));
-  border-color: color-mix(in srgb, var(--oe-error-red) 45%, var(--oe-white));
+.notice {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.8rem 1.2rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--secondary);
+  color: var(--oe-mid-grey);
+  font-size: 1.2rem;
+  line-height: 1.45;
+}
+
+.notice strong {
+  color: var(--oe-dark-grey);
+  font-weight: 600;
+}
+
+.notice code {
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+}
+
+.notice-alert {
+  border-color: color-mix(in srgb, var(--oe-error-red) 45%, var(--border));
+  background: color-mix(in srgb, var(--oe-error-red) 8%, var(--card));
   color: var(--oe-dark-red);
 }
 
-.state-banner-warning {
-  background: color-mix(in srgb, var(--fuel-solar_utility) 18%, var(--oe-white));
-  border-color: color-mix(in srgb, var(--fuel-solar_utility) 55%, var(--oe-white));
-  color: #6b4a00;
+.notice-alert strong {
+  color: var(--oe-dark-red);
 }
 
-/* Same information as the danger banner, without the alarm. Used where the state
-   is an expected property of a prepared fixture rather than a live anomaly. */
-.state-banner-info {
-  background: var(--oe-warm-grey);
-  border-color: var(--oe-mid-warm-grey);
+/* ------------------------------------------------------------------- panels */
+
+/*
+ * Two-up chart panels. Collapses to one column below 1023px, where a 12-bar
+ * horizontal chart at half width is unreadable.
+ */
+.panel-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2.4rem;
+  align-items: start;
+}
+
+.panel {
+  padding: 2.4rem 2.8rem;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) + 4px);
+  background: var(--card);
+  box-shadow: var(--shell-shadow);
+}
+
+.panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.6rem;
+  margin-bottom: 1.6rem;
+}
+
+.panel-title {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  line-height: 1.15;
+  letter-spacing: -0.04rem;
+  margin: 0;
+}
+
+.panel-note {
+  margin: 0.6rem 0 0;
+  font-size: 1.2rem;
+  line-height: 1.5;
+  color: var(--oe-mid-grey);
+  max-width: 52ch;
+}
+
+.panel-figure {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.2rem;
+  margin: 0;
+  flex-shrink: 0;
+  font-size: 2.2rem;
+  font-weight: 600;
+  color: var(--oe-dark-grey);
+  text-align: right;
+}
+
+.panel-figure small {
+  font-family: var(--font-sans);
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: var(--oe-mid-grey);
+  letter-spacing: 0;
+}
+
+.panel-empty {
+  margin: 0;
+  padding: 2.4rem 2rem;
+  border-radius: var(--radius);
+  border: 1px dashed var(--border);
+  background: var(--secondary);
+  font-size: 1.3rem;
+  line-height: 1.55;
+  color: var(--oe-mid-grey);
+  text-align: center;
+}
+
+.panel-empty code {
+  font-family: var(--font-mono);
+  font-size: 1.2rem;
+  color: var(--oe-dark-grey);
+}
+
+.panel-boundary {
+  margin: 1.6rem 0 0;
+  padding-top: 1.4rem;
+  border-top: 1px solid var(--border);
+  font-size: 1.1rem;
+  line-height: 1.55;
   color: var(--oe-mid-grey);
 }
 
@@ -902,12 +1121,537 @@ tr[data-focused='true'] {
   color: var(--oe-dark-red);
 }
 
+/* --------------------------------------------------------------- theme toggle */
+
+.theme-toggle {
+  display: inline-grid;
+  place-items: center;
+  width: 3.2rem;
+  height: 3.2rem;
+  border-radius: 0.8rem;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--oe-mid-grey);
+  cursor: pointer;
+  transition:
+    color 120ms ease,
+    background 120ms ease,
+    border-color 120ms ease;
+}
+
+.theme-toggle:hover {
+  color: var(--oe-dark-grey);
+  border-color: color-mix(in srgb, var(--oe-red) 40%, var(--border));
+}
+
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* -------------------------------------------------------------- journey header */
+
+.journey-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  gap: 2.4rem 3.2rem;
+  padding: 2.8rem 3.2rem;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) + 4px);
+  background:
+    radial-gradient(
+      120% 150% at 100% 0%,
+      color-mix(in srgb, var(--oe-red) 8%, var(--card)) 0%,
+      transparent 60%
+    ),
+    var(--card);
+  box-shadow: var(--shell-shadow);
+}
+
+.journey-title {
+  font-family: var(--font-display);
+  font-size: 2.6rem;
+  line-height: 1.12;
+  letter-spacing: -0.052rem;
+  margin: 0 0 1.2rem;
+  max-width: 26ch;
+}
+
+.journey-body {
+  font-size: 1.5rem;
+  color: var(--oe-mid-grey);
+  margin: 0;
+  max-width: 62ch;
+}
+
+.journey-body strong {
+  color: var(--oe-dark-grey);
+  font-weight: 600;
+}
+
+.journey-outcome {
+  display: block;
+  margin-top: 0.6rem;
+}
+
+.journey-outcome strong {
+  color: var(--oe-red);
+}
+
+.journey-side {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  align-items: flex-start;
+}
+
+.journey-provenance {
+  padding: 1.6rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--secondary);
+  font-size: 1.2rem;
+  color: var(--oe-mid-grey);
+}
+
+.journey-provenance-title {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--oe-dark-grey);
+  margin: 0 0 0.6rem;
+}
+
+.journey-provenance p {
+  margin: 0;
+  line-height: 1.55;
+}
+
+.journey-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.journey-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 1.1rem;
+  border-radius: 999px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.02rem;
+}
+
+.journey-badge-live {
+  background: color-mix(in srgb, var(--oe-success-green) 14%, transparent);
+  color: color-mix(in srgb, var(--oe-success-green) 88%, var(--oe-dark-grey));
+}
+
+.journey-badge-stale {
+  background: color-mix(in srgb, var(--warning) 16%, transparent);
+  color: color-mix(in srgb, var(--warning) 82%, var(--oe-dark-grey));
+}
+
+.journey-badge-prepared {
+  background: var(--secondary);
+  color: var(--oe-mid-grey);
+  border: 1px solid var(--border);
+}
+
+/* Steady, not animated: a pulse next to a stale figure reads as liveness. */
+.live-dot {
+  display: inline-block;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 999px;
+  background: var(--oe-success-green);
+}
+
+.journey-steps {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.8rem;
+  list-style: none;
+  margin: 0;
+  padding: 1.6rem 0 0;
+  border-top: 1px solid var(--border);
+}
+
+.journey-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  padding: 1rem 1.2rem;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+}
+
+.journey-step-current {
+  border-color: color-mix(in srgb, var(--oe-red) 35%, var(--border));
+  background: color-mix(in srgb, var(--oe-red) 6%, transparent);
+}
+
+.journey-step-n {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 999px;
+  background: var(--secondary);
+  color: var(--oe-mid-grey);
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.journey-step-current .journey-step-n {
+  background: var(--oe-red);
+  color: #ffffff;
+}
+
+.journey-step-done .journey-step-n {
+  background: color-mix(in srgb, var(--oe-success-green) 18%, transparent);
+  color: color-mix(in srgb, var(--oe-success-green) 88%, var(--oe-dark-grey));
+}
+
+.journey-step-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.journey-step-text strong {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--oe-dark-grey);
+}
+
+.journey-step-text small {
+  font-size: 1.1rem;
+  color: var(--oe-mid-grey);
+  line-height: 1.4;
+}
+
+/* ------------------------------------------------------------- generator map */
+
+.map-card {
+  padding: 2.8rem 3.2rem;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) + 4px);
+  background: var(--card);
+  box-shadow: var(--shell-shadow);
+}
+
+.map-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 2.4rem;
+  margin-bottom: 2rem;
+}
+
+.map-summary {
+  margin: 0.8rem 0 0;
+  font-size: 1.4rem;
+  color: var(--oe-mid-grey);
+  max-width: 68ch;
+}
+
+.map-unavailable {
+  margin: 0;
+  padding: 2rem;
+  border-radius: var(--radius);
+  border: 1px dashed var(--border);
+  background: var(--secondary);
+  font-size: 1.4rem;
+  color: var(--oe-mid-grey);
+}
+
+.map-unavailable code {
+  font-family: var(--font-mono);
+  font-size: 1.3rem;
+  color: var(--oe-dark-grey);
+}
+
+.map-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 30rem;
+  gap: 2.4rem;
+  align-items: start;
+}
+
+.map-canvas-wrap {
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--map-canvas);
+  overflow: hidden;
+}
+
+.map-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.map-region-name {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: 0.12rem;
+  fill: var(--oe-mid-grey);
+  text-anchor: middle;
+}
+
+.map-region-total {
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  fill: var(--oe-mid-grey);
+  text-anchor: middle;
+}
+
+.map-dot {
+  transition:
+    fill-opacity 120ms ease,
+    stroke-width 120ms ease;
+}
+
+.map-dot-focused {
+  stroke: var(--oe-dark-grey);
+  stroke-width: 2.2;
+  fill-opacity: 0.92;
+}
+
+.map-hit {
+  cursor: pointer;
+}
+
+.map-hit:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
+}
+
+.map-aside {
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+}
+
+.map-detail {
+  padding: 1.8rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--secondary);
+}
+
+.map-detail-empty {
+  color: var(--oe-mid-grey);
+  font-size: 1.3rem;
+}
+
+.map-detail-empty p {
+  margin: 0 0 1.2rem;
+  line-height: 1.5;
+}
+
+.map-detail-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.8rem;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.12rem;
+  text-transform: uppercase;
+  color: var(--oe-mid-grey);
+}
+
+.map-detail-name {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  line-height: 1.2;
+  margin: 0 0 0.4rem;
+  color: var(--oe-dark-grey);
+}
+
+.map-detail-output {
+  font-size: 2.4rem;
+  font-weight: 600;
+  margin: 0 0 0.6rem;
+  color: var(--oe-dark-grey);
+}
+
+.map-detail-fuel {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0 0 1.4rem;
+  font-size: 1.3rem;
+  color: var(--oe-mid-grey);
+}
+
+.map-detail-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  margin: 0 0 1.4rem;
+}
+
+.map-detail-grid dt {
+  font-size: 1.1rem;
+  letter-spacing: 0.06rem;
+  text-transform: uppercase;
+  color: var(--oe-mid-grey);
+}
+
+.map-detail-grid dd {
+  margin: 0.2rem 0 0;
+  font-size: 1.4rem;
+  color: var(--oe-dark-grey);
+}
+
+.map-detail-duids {
+  font-size: 1.2rem;
+  word-break: break-word;
+}
+
+.map-detail-boundary {
+  margin: 0 0 1.4rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--border);
+  font-size: 1.1rem;
+  line-height: 1.5;
+  color: var(--oe-mid-grey);
+}
+
+.map-clear {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: var(--oe-mid-grey);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  padding: 0.6rem 1.2rem;
+  cursor: pointer;
+}
+
+.map-clear:hover {
+  color: var(--oe-dark-grey);
+  border-color: color-mix(in srgb, var(--oe-red) 40%, var(--border));
+}
+
+.map-clear:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.map-legend {
+  padding: 1.6rem 1.8rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+.map-legend-title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.12rem;
+  text-transform: uppercase;
+  color: var(--oe-mid-grey);
+  margin: 0 0 1rem;
+}
+
+.map-legend ul {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  list-style: none;
+  margin: 0 0 1.2rem;
+  padding: 0;
+}
+
+.map-legend li {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-size: 1.2rem;
+  color: var(--oe-dark-grey);
+}
+
+.map-legend-note {
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.5;
+  color: var(--oe-mid-grey);
+}
+
+.map-coverage {
+  margin: 2rem 0 0;
+  padding-top: 1.6rem;
+  border-top: 1px solid var(--border);
+  font-size: 1.2rem;
+  line-height: 1.6;
+  color: var(--oe-mid-grey);
+}
+
 /* ------------------------------------------------------------------ responsive */
 
 @media (max-width: 1023px) {
   .hero {
     grid-template-columns: minmax(0, 1fr);
     padding: 2.4rem;
+  }
+
+  .journey-card {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 2.4rem;
+  }
+
+  .journey-title {
+    font-size: 2.2rem;
+  }
+
+  .journey-steps {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .map-card {
+    padding: 2.4rem;
+  }
+
+  .map-head {
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+
+  .map-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .panel-pair {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.6rem;
+  }
+
+  .panel {
+    padding: 2rem;
+  }
+
+  .panel-head {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .panel-figure {
+    align-items: flex-start;
+    text-align: left;
   }
 
   .hero h1 {

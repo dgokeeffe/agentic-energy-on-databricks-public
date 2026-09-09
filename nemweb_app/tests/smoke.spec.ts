@@ -26,7 +26,12 @@ test('prepared value-capture journey keeps region focus and journal context alig
   await expect(page.getByText('Regional time-weighted price')).toBeVisible();
 
   // A charging battery is a distinct fuel with negative energy and no capture rate.
-  await expect(page.getByText('Battery charging')).toBeVisible();
+  // Scoped to the value-capture card. The generator map's legend now also names
+  // the fuel vocabulary, so an unscoped locator matches both. The assertion is
+  // unchanged in substance: a charging battery is still a distinct fuel here.
+  await expect(
+    page.locator('#value-capture').getByText('Battery charging')
+  ).toBeVisible();
   await expect(page.getByText('Not comparable').first()).toBeVisible();
 
   // Staleness is stated for the fixture without the live-mode alarm.
@@ -36,7 +41,11 @@ test('prepared value-capture journey keeps region focus and journal context alig
   await page.getByRole('combobox', { name: 'Region' }).click();
   await page.getByRole('option', { name: 'VIC1' }).click();
   await expect(page.getByRole('heading', { name: 'What each fuel earned in VIC1' })).toBeVisible();
-  await expect(page.getByText('Brown coal')).toBeVisible();
+  // Scoped for the same reason as the Battery charging assertion above: the fuel
+  // vocabulary now also appears in the generator map's legend. Scoping makes the
+  // assertion stricter, not weaker — it must be brown coal in VIC1's value
+  // capture, not brown coal anywhere on the page.
+  await expect(page.locator('#value-capture').getByText('Brown coal')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Source and freshness · VIC1' })).toBeVisible();
 
   const vicLatest = page.getByRole('row', { name: /VIC1 01 July 2026, 12:25 AEST/ });
@@ -50,18 +59,24 @@ test('prepared value-capture journey keeps region focus and journal context alig
   await expect(page.getByRole('region', { name: 'Market-wide context' })).toBeVisible();
   await expect(page.getByText(/No regional allocation or directional interpretation/)).toBeVisible();
 
-  const cta = page.getByRole('button', { name: 'Open investigation journal' });
+  // The page CTA was renamed from "Open investigation journal" to "Investigate
+  // with Genie". Same element, same trigger, same focus-return contract; only the
+  // label changed, so the locator follows it.
+  const cta = page.getByRole('button', { name: 'Investigate with Genie' });
   await cta.focus();
   await cta.press('Enter');
   await expect(page.getByRole('dialog')).toBeVisible();
   // Scoped to the dialog: the call-to-action names the same region and interval.
   await expect(page.getByRole('dialog').getByText(/VIC1 at 01 July 2026, 12:25 AEST/)).toBeVisible();
-  await expect(page.getByLabel('Decision')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Record investigation' })).toBeVisible();
+  // The journal's field is labelled "Investigation note", not "Decision".
+  await expect(page.getByRole('dialog').getByLabel('Investigation note')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Save investigation' })).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(cta).toBeFocused();
 
-  const navTrigger = page.getByRole('button', { name: 'Investigate' });
+  // exact: true so this resolves the nav trigger rather than also matching the
+  // page CTA's "Investigate with Genie".
+  const navTrigger = page.getByRole('button', { name: 'Investigate', exact: true });
   await navTrigger.focus();
   await navTrigger.press('Enter');
   await expect(page.getByRole('dialog')).toBeVisible();
@@ -95,7 +110,7 @@ test('mobile layout keeps focus controls and journal usable without page overflo
     await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1)
   ).toBe(true);
   await expect(page.getByRole('combobox', { name: 'Region' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Investigate' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Investigate', exact: true })).toBeVisible();
 
   await page.getByRole('combobox', { name: 'Region' }).click();
   await page.getByRole('option', { name: 'VIC1' }).click();
@@ -104,9 +119,9 @@ test('mobile layout keeps focus controls and journal usable without page overflo
     'true'
   );
 
-  await page.getByRole('button', { name: 'Investigate' }).click();
+  await page.getByRole('button', { name: 'Investigate', exact: true }).click();
   await expect(page.getByRole('dialog')).toBeVisible();
-  await expect(page.getByLabel('Decision')).toBeVisible();
+  await expect(page.getByRole('dialog').getByLabel('Investigation note')).toBeVisible();
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1)
   ).toBe(true);

@@ -1,0 +1,350 @@
+[
+  {
+    "intervalEnd": "2026-07-01T12:25:00+10:00",
+    "duid": "BW01",
+    "actualGenerationMw": 640.2,
+    "regionId": "NSW1",
+    "fuelType": "Black coal",
+    "registeredCapacityMw": 660,
+    "dimensionMatchStatus": "MATCHED"
+  },
+  {
+    "intervalEnd": "2026-07-01T12:25:00+10:00",
+    "duid": "BW02",
+    "actualGenerationMw": 618.7,
+    "regionId": "NSW1",
+    "fuelType": "Black coal",
+    "registeredCapacityMw": 660,
+    "dimensionMatchStatus": "MATCHED"
+  },
+  {
+    "intervalEnd": "2026-07-01T12:25:00+10:00",
+    "duid": "BW03",
+    "actualGenerationMw": 605.1,
+    "regionId": "NSW1",
+    "fuelType": "Black coal",
+    "registeredCapacityMw": 660,
+    "dimensionMatchStatus": "MATCHED"
+  },
+  {
+    "intervalEnd": "2026-07-01T12:25:00+10:00",
+    "duid": "BW04",
+    "actualGenerationMw": 0,
+    "regionId": "NSW1",
+    "fuelType": "Black coal",
+    "registeredCapacityMw": 660,
+    "dimensionMatchStatus": "MATCHED"
+  },
+  {
+    "intervalEnd": "2026-07-01T12:25:00+10:00",
+    "duid": "ER01",
+    "actualGenerationMw": 542.8,
+    "regionId": "NSW1",
+    "fuelType": "Black coal",
+    "registeredCapacityMw": 720,
+    "dimensionMatchStatus": "MATCHED"
+  },
+  {
+    "intervalEnd": "2026-07-01T12:25:00+10:00",
+    "duid": "ER02",
+    "actualGenerationMw": 531.4,
+    "regionId": "NSW1",
+    "fuelType": "Black coal",
+    "registeredCapacityMw": 720,
+    "dimensionMatchStatus": "MATCHED"
+  },
+  {
+    "intervalEnd": "2026-07-01T12:25:00+10:00",
+    "duid": "ER03",
+    "actualGenerationMw": 498.6,
+    "regionId": "NSW1",
+    "fuelType": "Black coal",
+    "registeredCapacityMw": 720,
+    "dimensionMatchStatus": "MATCHED"
+  },
+  {
+    "intervalEnd": "2026-07-01T12:25:00+10:00",
+    "duid": "ER04",
+    "actualGenerationMw": 512.0,
+    "regionId": "NSW1",
+    "fuelType": "Black coal",
+    "registeredCapacityMw": 720,
+    "dimensionMatchStatus": "MATCHED"
+  },
+  {
+    "intervalEnd": "2026-07-01T12:25:00+10:00",
+    "duid": "LIMOSF11",
+    "actualGenerationMw": 198.4,
+    "regionId": "NSW1",
+    "fuelType": "Solar",
+    "registeredCapacityMw": 220,
+    "dimensionMatchStatus": "MATCHED"
+  },
+  {
+    "intervalEnd": "2026-07-01T12:25:00+10:00",
+    "duid": "LIMOSF21",
+    "actualGenerationMw": 181.9,
+    "regionId": "NSW1",
+    "fuelType": "Solar",
+    "registeredCapacityMw": 200,
+    "dimensionMatchStatus": "MATCHED"
+  },
+
+  {
+    "intervalEnd": "2026-07-01T12:25:00+10:00",
+    "duid": "LYA1",
+    "actualGenerationMw": 495.3,
+    "regionId": "VIC1",
+    "fuelType": "Brown coal",
+    "registeredCapacityMw": 560,
+    "dimensionMatchStatus": "MATCHED"
+  },
+  {
+    "intervalEnd": "2026-07-01T12:25:00+10:00",
+    "duid": "LYA2",
+    "actualGenerationMw": 488.1,
+    "regionId": "VIC1",
+    "fuelType": "Brown coal",
+    "registeredCapacityMw": 560,
+    "dimensionMatchStatus": "MATCHED"
+  },
+  {
+    "intervalEnd": "2026-07-01T12:25:00+10:00",
+    "duid": "LYA3",
+    "actualGenerationMw": 502.7,
+    "regionId": "VIC1",
+    "fuelType": "Brown coal",
+    "registeredCapacityMw": 560,
+    "dimensionMatchStatus": "MATCHED"
+  },
+  {
+    "intervalEnd": "2026-07-01T12:25:00+10:00",
+    "duid": "LYA4",
+    "actualGenerationMw": 471.5,
+    "regionId": "VIC1",
+    "fuelType": "Brown coal",
+    "registeredCapacityMw": 560,
+    "dimensionMatchStatus": "MATCHED"
+  },
+  {
+    "intervalEnd": "2026-07-01T12:25:00+10:00",
+    "duid": "MURRAY",
+    "actualGenerationMw": 214.6,
+    "regionId": "VIC1",
+    "fuelType": "Hydro",
+    "registeredCapacityMw": 950,
+    "dimensionMatchStatus": "MATCHED"
+  },
+  {
+    "intervalEnd": "2026-07-01T12:25:00+10:00",
+    "duid": "BANN1",
+    "actualGenerationMw": 74.2,
+    "regionId": "VIC1",
+    "fuelType": "Solar",
+    "registeredCapacityMw": 88,
+    "dimensionMatchStatus": "MATCHED"
+  },
+
+  {
+    "intervalEnd": "2026-07-01T12:25:00+10:00",
+    "duid": "GSTONE1",
+    "actualGenerationMw": 246.8,
+    "regionId": "QLD1",
+    "fuelType": "Black coal",
+    "registeredCapacityMw": 280,
+    "dimensionMatchStatus": "MATCHED"
+  },
+  {
+    "intervalEnd": "2026-07-01T12:25:00+10:00",
+    "duid": "GSTONE2",
+    "actualGenerationMw": 238.4,
+    "regionId": "QLD1",
+    "fuelType": "Black coal",
+    "registeredCapacityMw": 280,
+    "dimensionMatchStatus": "MATCHED"
+  },
+  {
+    "intervalEnd": "2026-07-01T12:25:00+10:00",
+    "duid": "GSTONE3",
+    "actualGenerationMw": 251.1,
+    "regionId": "QLD1",
+    "fuelType": "Black coal",
+    "registeredCapacityMw": 280,
+    "dimensionMatchStatus": "MATCHED"
+  },
+  {
+    "intervalEnd": "2026-07-01T12:25:00+10:00",
+    "duid": "GSTONE4",
+    "actualGenerationMw": 0,
+    "regionId": "QLD1",
+    "fuelType": "Black coal",
+    "registeredCapacityMw": 280,
+    "dimensionMatchStatus": "MATCHED"
+  },
+  {
+    "intervalEnd": "2026-07-01T12:25:00+10:00",
+    "duid": "CALL_B_1",
+    "actualGenerationMw": 342.9,
+    "regionId": "QLD1",
+    "fuelType": "Black coal",
+    "registeredCapacityMw": 350,
+    "dimensionMatchStatus": "MATCHED"
+  },
+  {
+    "intervalEnd": "2026-07-01T12:25:00+10:00",
+    "duid": "CALL_B_2",
+    "actualGenerationMw": 338.2,
+    "regionId": "QLD1",
+    "fuelType": "Black coal",
+    "registeredCapacityMw": 350,
+    "dimensionMatchStatus": "MATCHED"
+  },
+  {
+    "intervalEnd": "2026-07-01T12:25:00+10:00",
+    "duid": "CLERMSF1",
+    "actualGenerationMw": 61.3,
+    "regionId": "QLD1",
+    "fuelType": "Solar",
+    "registeredCapacityMw": 75,
+    "dimensionMatchStatus": "MATCHED"
+  },
+  {
+    "intervalEnd": "2026-07-01T12:25:00+10:00",
+    "duid": "BARCSF1",
+    "actualGenerationMw": 18.7,
+    "regionId": "QLD1",
+    "fuelType": "Solar",
+    "registeredCapacityMw": 20,
+    "dimensionMatchStatus": "MATCHED"
+  },
+  {
+    "intervalEnd": "2026-07-01T12:25:00+10:00",
+    "duid": "BARRON-2",
+    "actualGenerationMw": 28.4,
+    "regionId": "QLD1",
+    "fuelType": "Hydro",
+    "registeredCapacityMw": 30,
+    "dimensionMatchStatus": "MATCHED"
+  },
+  {
+    "intervalEnd": "2026-07-01T12:25:00+10:00",
+    "duid": "BAKING1",
+    "actualGenerationMw": 12.1,
+    "regionId": "QLD1",
+    "fuelType": "Natural Gas (Pipeline)",
+    "registeredCapacityMw": 16,
+    "dimensionMatchStatus": "MATCHED"
+  },
+
+  {
+    "intervalEnd": "2026-07-01T12:25:00+10:00",
+    "duid": "HDWF1",
+    "actualGenerationMw": 82.4,
+    "regionId": "SA1",
+    "fuelType": "Wind",
+    "registeredCapacityMw": 102,
+    "dimensionMatchStatus": "MATCHED"
+  },
+  {
+    "intervalEnd": "2026-07-01T12:25:00+10:00",
+    "duid": "HDWF2",
+    "actualGenerationMw": 79.1,
+    "regionId": "SA1",
+    "fuelType": "Wind",
+    "registeredCapacityMw": 102,
+    "dimensionMatchStatus": "MATCHED"
+  },
+  {
+    "intervalEnd": "2026-07-01T12:25:00+10:00",
+    "duid": "HDWF3",
+    "actualGenerationMw": 88.6,
+    "regionId": "SA1",
+    "fuelType": "Wind",
+    "registeredCapacityMw": 109,
+    "dimensionMatchStatus": "MATCHED"
+  },
+  {
+    "intervalEnd": "2026-07-01T12:25:00+10:00",
+    "duid": "HPR1",
+    "actualGenerationMw": -48.2,
+    "regionId": "SA1",
+    "fuelType": "Battery Storage",
+    "registeredCapacityMw": 150,
+    "dimensionMatchStatus": "MATCHED"
+  },
+  {
+    "intervalEnd": "2026-07-01T12:25:00+10:00",
+    "duid": "DALNTH1",
+    "actualGenerationMw": -21.6,
+    "regionId": "SA1",
+    "fuelType": "Battery Storage",
+    "registeredCapacityMw": 30,
+    "dimensionMatchStatus": "MATCHED"
+  },
+  {
+    "intervalEnd": "2026-07-01T12:25:00+10:00",
+    "duid": "TORRB1",
+    "actualGenerationMw": 0,
+    "regionId": "SA1",
+    "fuelType": "Natural Gas (Pipeline)",
+    "registeredCapacityMw": 120,
+    "dimensionMatchStatus": "MATCHED"
+  },
+
+  {
+    "intervalEnd": "2026-07-01T12:25:00+10:00",
+    "duid": "BASTYAN",
+    "actualGenerationMw": 68.9,
+    "regionId": "TAS1",
+    "fuelType": "Hydro",
+    "registeredCapacityMw": 79,
+    "dimensionMatchStatus": "MATCHED"
+  },
+  {
+    "intervalEnd": "2026-07-01T12:25:00+10:00",
+    "duid": "BBTHREE1",
+    "actualGenerationMw": 34.2,
+    "regionId": "TAS1",
+    "fuelType": "Natural Gas (Pipeline)",
+    "registeredCapacityMw": 41,
+    "dimensionMatchStatus": "MATCHED"
+  },
+
+  {
+    "intervalEnd": "2026-07-01T12:25:00+10:00",
+    "duid": "NOCOORD1",
+    "actualGenerationMw": 41.5,
+    "regionId": "NSW1",
+    "fuelType": "Wind",
+    "registeredCapacityMw": 50,
+    "dimensionMatchStatus": "UNMATCHED"
+  },
+
+  {
+    "intervalEnd": "2026-07-01T12:20:00+10:00",
+    "duid": "BW01",
+    "actualGenerationMw": 651.8,
+    "regionId": "NSW1",
+    "fuelType": "Black coal",
+    "registeredCapacityMw": 660,
+    "dimensionMatchStatus": "MATCHED"
+  },
+  {
+    "intervalEnd": "2026-07-01T12:20:00+10:00",
+    "duid": "LYA1",
+    "actualGenerationMw": 501.2,
+    "regionId": "VIC1",
+    "fuelType": "Brown coal",
+    "registeredCapacityMw": 560,
+    "dimensionMatchStatus": "MATCHED"
+  },
+  {
+    "intervalEnd": "2026-07-01T12:20:00+10:00",
+    "duid": "HPR1",
+    "actualGenerationMw": -12.4,
+    "regionId": "SA1",
+    "fuelType": "Battery Storage",
+    "registeredCapacityMw": 150,
+    "dimensionMatchStatus": "MATCHED"
+  }
+]

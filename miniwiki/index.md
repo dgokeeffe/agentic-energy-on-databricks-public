@@ -24,6 +24,11 @@ installation. The repository-owned workflow is documented in
 - [`features/full-nemweb-lakeflow.md`](features/full-nemweb-lakeflow.md) — the
   ordered migration from NEMWEB landing through five-minute Gold data and the
   downstream Genie/AI/BI analyst experience.
+- [`features/track-c-exploratory-investigation.md`](features/track-c-exploratory-investigation.md)
+  — the Track C app reframed as an exploratory analyst workflow (Observe → Ask
+  Genie → Review evidence and uncertainty → Save investigation → Follow up), the
+  prepared Genie-analysis prototype, and the live two-agent collision in this
+  checkout. **Read before editing `nemweb_app/`.**
 - [`features/price-spike-detector.md`](features/price-spike-detector.md) — a
   downstream analytics idea that depends on the NEMWEB Gold contracts.
 - [`features/genie-miniwiki-integration.md`](features/genie-miniwiki-integration.md)

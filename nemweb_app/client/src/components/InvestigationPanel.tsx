@@ -18,6 +18,7 @@ import { formatMarketTime } from '../domain/time';
 export function InvestigationPanel({ row }: { row: RegionStatus }) {
   const [decision, setDecision] = useState('');
   const [status, setStatus] = useState('');
+  const [analysisShown, setAnalysisShown] = useState(false);
   const saving = status === 'Saving…';
 
   async function submit(event: React.FormEvent) {
@@ -45,20 +46,37 @@ export function InvestigationPanel({ row }: { row: RegionStatus }) {
   return (
     <Card className="investigation-card">
       <CardHeader>
-        <CardTitle>Investigation journal</CardTitle>
+        <CardTitle>Investigate this observation</CardTitle>
         <CardDescription>
-          Record an analyst decision against {row.regionId} at {formatMarketTime(row.intervalEnd)}. Identity is supplied
-          by the trusted AppKit request context, never by this form.
+          Ask for a prepared analysis of {row.regionId} at {formatMarketTime(row.intervalEnd)}, then edit and save the
+          follow-up note. This is snapshot evidence, not a live market recommendation.
         </CardDescription>
       </CardHeader>
       <form onSubmit={(event) => void submit(event)}>
         <CardContent className="investigation-form">
-          <Label htmlFor="decision">Decision</Label>
+          <Button type="button" variant="outline" onClick={() => {
+            setAnalysisShown(true);
+            setDecision(
+              `Prepared analysis for ${row.regionId}: review the observed price and generation evidence for this interval. ` +
+                'The data does not establish availability, curtailment, causation, or a bid recommendation. Follow up by checking the corrected source record and freshness.'
+            );
+          }}>
+            {analysisShown ? 'Refresh prepared analysis' : 'Ask Genie for a prepared analysis'}
+          </Button>
+          {analysisShown && (
+            <Alert>
+              <AlertDescription>
+                Prepared Genie-style analysis: the selected interval is suitable for investigation, but this evidence
+                does not establish availability, curtailment, causation, or a trading recommendation.
+              </AlertDescription>
+            </Alert>
+          )}
+          <Label htmlFor="decision">Investigation note</Label>
           <Textarea
             id="decision"
             value={decision}
             onChange={(event) => setDecision(event.target.value)}
-            placeholder="Record the observation, decision, and follow-up owner…"
+            placeholder="Review the analysis, record what the evidence shows, and note any follow-up…"
             required
             rows={5}
           />
@@ -69,9 +87,9 @@ export function InvestigationPanel({ row }: { row: RegionStatus }) {
           )}
         </CardContent>
         <CardFooter className="investigation-footer">
-          <p>Writes only to app-owned Lakebase state; the synced analytics source remains read-only.</p>
+          <p>Save the reviewed investigation to app-owned Lakebase state; the synced analytics source remains read-only.</p>
           <Button type="submit" disabled={saving || decision.trim().length === 0}>
-            {saving ? 'Saving…' : 'Record investigation'}
+            {saving ? 'Saving…' : 'Save investigation'}
           </Button>
         </CardFooter>
       </form>

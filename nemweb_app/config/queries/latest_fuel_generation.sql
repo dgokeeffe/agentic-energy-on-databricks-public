@@ -1,4 +1,5 @@
 -- AppKit Analytics read path for five-minute generation by region and fuel.
+-- @param fuel_generation_table STRING = agentic_energy_workshop.agentic_energy_workshop_d4_serving.gold_nem_scada_generation_5min
 --
 -- Keeping the identifier in reviewed SQL prevents callers from selecting another
 -- object, exactly as latest_region_status.sql does. This is the only generation
@@ -18,6 +19,6 @@ SELECT
   actual_generation_mw,
   facility_count,
   partially_enriched_facility_count
-FROM agentic_energy_workshop.agentic_energy_workshop_d4_serving.gold_nem_scada_generation_5min
+FROM IDENTIFIER(:fuel_generation_table)
 ORDER BY interval_end DESC, region_id, fuel_type
 LIMIT 1000

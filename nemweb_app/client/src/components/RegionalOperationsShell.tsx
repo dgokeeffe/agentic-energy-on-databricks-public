@@ -1,5 +1,4 @@
 import {
-  Badge,
   Button,
   Card,
   CardContent,
@@ -20,8 +19,8 @@ import {
   TableHeader,
   TableRow,
 } from '@databricks/appkit-ui/react';
-import { ArrowRightLeft, Banknote, Gauge, NotebookPen, TrendingDown, Zap } from 'lucide-react';
-import { useMemo, useRef, useState } from 'react';
+import { ArrowRightLeft, Banknote, Gauge, Moon, NotebookPen, Sun, TrendingDown, Zap } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { isSourceStale, type QueryState, type RegionStatus } from '../domain/regionStatus';
 import {
   capturedRegions,
@@ -35,7 +34,12 @@ import {
   type RegionPriceRow,
 } from '../domain/fuelCapture';
 import { formatMarketTime } from '../domain/time';
+import { applyTheme, preferredTheme, type Theme } from '../lib/theme';
 import { AppPurpose } from './AppPurpose';
+import { JourneyHeader } from './JourneyHeader';
+import { NemGeneratorMap } from './NemGeneratorMap';
+import { GenerationByFuelChart } from './GenerationByFuelChart';
+import { TopProducersChart } from './TopProducersChart';
 import { FuelValueCapture } from './FuelValueCapture';
 import { InvestigationPanel } from './InvestigationPanel';
 import { QueryStateMessage } from './QueryState';
@@ -82,6 +86,32 @@ function KpiCard({
         <p>{detail}</p>
       </CardContent>
     </Card>
+  );
+}
+
+/**
+ * Light/dark switch.
+ *
+ * Separate from the theme module so the module stays free of React and can be
+ * called once before first paint without mounting a component.
+ */
+function ThemeToggle() {
+  const [theme, setTheme] = useState<Theme>(() => preferredTheme());
+
+  useEffect(() => {
+    applyTheme(theme);
+  }, [theme]);
+
+  const next: Theme = theme === 'dark' ? 'light' : 'dark';
+  return (
+    <button
+      type="button"
+      className="theme-toggle"
+      aria-label={next === 'dark' ? 'Switch to dark theme' : 'Switch to light theme'}
+      onClick={() => setTheme(next)}
+    >
+      {theme === 'dark' ? <Sun size={15} aria-hidden="true" /> : <Moon size={15} aria-hidden="true" />}
+    </button>
   );
 }
 
@@ -183,23 +213,16 @@ function ReadyRegionalOperations({ state }: { state: ReadyState }) {
                 Investigate
               </Button>
             </SheetTrigger>
+            <ThemeToggle />
           </nav>
         </div>
       </div>
 
       <main className="app-shell">
+        <JourneyHeader activeStep={2} provenanceLabel={modeLabel} stale={state.stale} />
+
         <header id="overview" className="hero">
           <div className="hero-copy">
-            <div className="status-row">
-              <Badge variant="outline" className="mode-badge">
-                {modeLabel}
-              </Badge>
-              <Badge variant={state.stale ? 'destructive' : 'secondary'}>
-                {state.stale ? 'Stale source' : 'Source current'}
-              </Badge>
-              {state.fuelRows === null && <Badge variant="outline">Generation read unavailable</Badge>}
-              {state.predictionStale && <Badge variant="destructive">Prediction inputs stale</Badge>}
-            </div>
             <p className="eyebrow">Wholesale value capture · {selectedRegion}</p>
             {capture && weakest ? (
               <>
@@ -289,32 +312,53 @@ function ReadyRegionalOperations({ state }: { state: ReadyState }) {
           />
         </section>
 
-        {/* In integration mode staleness is actionable, so it is an alert. Against a
-            prepared fixture it is an expected property of the fixture rather than an
-            anomaly, so the same fact is stated without the alarm. The wording and the
-            "not current" instruction are identical in both modes; only the emphasis
-            changes. */}
-        {state.stale && (
-          <p
-            className={`state-banner ${state.mode === 'mock' ? 'state-banner-info' : 'state-banner-danger'}`}
-            role={state.mode === 'mock' ? 'status' : 'alert'}
-          >
-            {state.mode === 'mock'
-              ? 'Stale source, as expected for a prepared fixture: the newest represented market interval is more than 15 minutes old. Do not treat these values as current.'
-              : 'Stale source: the newest represented market interval is more than 15 minutes old. Do not treat these values as current.'}
-          </p>
+        {/* One notice row rather than up to three stacked full-width banners.
+            Staleness against a prepared fixture is an expected property of the
+            fixture, so it is stated without the alarm styling that a live
+            deployment warrants; the instruction not to treat the values as
+            current is identical in both modes. */}
+        {(state.stale || state.fuelRows === null || state.unitRows === null || state.predictionStale) && (
+          <ul className="notice-row" aria-label="Data quality notices">
+            {state.stale && (
+              <li
+                className={state.mode === 'mock' ? 'notice notice-muted' : 'notice notice-alert'}
+                role={state.mode === 'mock' ? 'status' : 'alert'}
+              >
+                <strong>Stale source</strong>
+                {state.mode === 'mock' ? ', as expected for a prepared fixture' : ''}: the newest
+                represented market interval is more than 15 minutes old. Do not treat these values as
+                current.
+              </li>
+            )}
+            {/* The diagnostic, not just the symptom: a deployer needs to know it
+                is a grant, not an outage. */}
+            {state.fuelRows === null && (
+              <li className="notice notice-muted" role="status">
+                <strong>Generation read unavailable</strong> — in a deployed workspace this normally
+                means the app&apos;s service principal lacks SELECT on the governed generation tables.
+              </li>
+            )}
+            {state.unitRows === null && (
+              <li className="notice notice-muted" role="status">
+                <strong>Per-unit read unavailable</strong> — the map and unit ranking need SELECT on{' '}
+                <code>gold_nem_unit_dispatch_5min</code>, granted separately from price and demand.
+              </li>
+            )}
+            {state.predictionStale && (
+              <li className="notice notice-muted" role="status">
+                <strong>Prediction inputs stale</strong> — governed market price and demand freshness
+                is reported separately.
+              </li>
+            )}
+          </ul>
         )}
-        {state.fuelRows === null && (
-          <p className="state-banner state-banner-warning" role="status">
-            The generation read is unavailable, so no fuel-level capture is shown. In a deployed workspace this normally
-            means the app&apos;s service principal lacks SELECT on the governed generation tables.
-          </p>
-        )}
-        {state.predictionStale && (
-          <p className="state-banner state-banner-warning" role="status">
-            Prediction inputs are stale. Governed market price and demand freshness is reported separately.
-          </p>
-        )}
+
+        <div className="panel-pair">
+          <GenerationByFuelChart rows={state.fuelRows} regionId={selectedRegion} />
+          <TopProducersChart rows={state.unitRows} />
+        </div>
+
+        <NemGeneratorMap rows={state.unitRows} />
 
         <FuelValueCapture
           capture={capture}
@@ -419,10 +463,10 @@ function ReadyRegionalOperations({ state }: { state: ReadyState }) {
           <CardContent>
             <div>
               <p className="section-kicker">Analyst workflow</p>
-              <h2>Record what you concluded while the evidence is visible</h2>
+              <h2>Investigate the observation with Genie</h2>
               <p>
-                Open the journal for {focusedRow.regionId} at {formatMarketTime(focusedRow.intervalEnd)}. Identity comes
-                from the trusted application context.
+                Ask for a prepared analysis of {focusedRow.regionId} at {formatMarketTime(focusedRow.intervalEnd)}, then
+                review and save the follow-up note. Identity comes from the trusted application context.
               </p>
             </div>
             <SheetTrigger asChild>
@@ -433,7 +477,7 @@ function ReadyRegionalOperations({ state }: { state: ReadyState }) {
                 }}
               >
                 <NotebookPen aria-hidden="true" />
-                Open investigation journal
+                Investigate with Genie
               </Button>
             </SheetTrigger>
           </CardContent>
@@ -468,8 +512,8 @@ function ReadyRegionalOperations({ state }: { state: ReadyState }) {
         }}
       >
         <SheetHeader className="sr-only">
-          <SheetTitle>Investigation journal</SheetTitle>
-          <SheetDescription>Record a governed analyst decision for the selected region and interval.</SheetDescription>
+          <SheetTitle>Investigation assistant</SheetTitle>
+          <SheetDescription>Review a prepared analysis and save an investigation for the selected region and interval.</SheetDescription>
         </SheetHeader>
         <InvestigationPanel row={focusedRow} />
       </SheetContent>
