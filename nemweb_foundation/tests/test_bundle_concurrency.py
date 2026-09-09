@@ -62,6 +62,23 @@ def test_deploy_script_requires_the_sp_only_for_workshop():
     assert 'if [ "$TARGET" = "workshop" ]; then' in before
 
 
+def test_live_evidence_deploy_cannot_be_shadowed_by_development_environment_values():
+    script = (REPO_ROOT / "scripts" / "deploy.sh").read_text()
+    for name in (
+        "BUNDLE_VAR_resource_prefix",
+        "BUNDLE_VAR_schema",
+        "BUNDLE_VAR_landing_schema",
+        "BUNDLE_VAR_landing_volume",
+        "BUNDLE_VAR_app_serving_schema",
+        "BUNDLE_VAR_nemweb_mode",
+        "BUNDLE_VAR_allow_live_nemweb",
+    ):
+        assert f"unset {name}" in script or name in script.split("unset ", 1)[1]
+    assert script.index("live_evidence ${suffix} must differ") < script.index(
+        "unset BUNDLE_VAR_resource_prefix"
+    )
+
+
 def test_writing_jobs_are_single_run_and_queued(jobs):
     expected = {
         "agentic_energy_local_fixture",
@@ -96,9 +113,9 @@ def test_legacy_output_and_lander_cycle_are_keyed_by_unique_run_id(jobs):
     output = legacy_parameters[legacy_parameters.index("--output") + 1]
     assert output.endswith("/legacy-fixture/runs/{{job.run_id}}")
 
-    lander_parameters = jobs["nemweb_lander"]["tasks"][0]["python_wheel_task"][
-        "parameters"
-    ]
+    lander_task = jobs["nemweb_lander"]["tasks"][0]
+    assert lander_task["spark_python_task"]["python_file"] == "../scripts/land_nemweb_delta.py"
+    lander_parameters = lander_task["spark_python_task"]["parameters"]
     assert lander_parameters[lander_parameters.index("--cycle-id") + 1] == (
         "{{job.run_id}}"
     )

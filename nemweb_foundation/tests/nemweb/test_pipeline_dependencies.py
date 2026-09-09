@@ -107,6 +107,18 @@ def test_dependency_graph_has_one_auto_loader_source_and_no_unresolved_reads() -
     assert all(name.startswith("_raw_nem_") for name in bronze_dependencies)
 
 
+def test_app_critical_bronze_uses_delta_association_bridge():
+    io_source = (PIPELINE / "io.py").read_text()
+    delta_source = (ROOT / "agentic_energy/nemweb/delta_lander.py").read_text()
+    assert "successful_run_records(" in io_source
+    assert "landing_nem_run_records" in delta_source
+    assert "COMPLETE_NEW_DATA" in delta_source and "COMPLETE_NO_NEW_SOURCE" in delta_source
+    for filename in ("bronze_dispatchis.py", "bronze_scada.py", "bronze_registration.py"):
+        source = (PIPELINE / filename).read_text()
+        assert "subject_key=" in source
+        assert "_COLUMNS =" not in source
+
+
 def test_pipeline_sources_do_not_hide_critical_files_or_perform_side_effects() -> None:
     resource = (ROOT / "resources" / "nemweb.pipeline.yml").read_text()
     for source in EXPLICIT_SOURCES:

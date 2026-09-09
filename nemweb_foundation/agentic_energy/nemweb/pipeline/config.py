@@ -20,6 +20,8 @@ class PipelineConfig:
     source_mode: str
     landing_path: str
     market_timezone: str
+    landing_catalog: str
+    landing_schema: str
 
     @classmethod
     def from_spark(cls, spark_session) -> "PipelineConfig":
@@ -46,4 +48,10 @@ class PipelineConfig:
                 "NEM market timestamps must use fixed AEST semantics "
                 "(Australia/Brisbane)"
             )
-        return cls(source_mode, landing_path, market_timezone)
+        try:
+            landing_catalog = spark_session.conf.get("nemweb.landing_catalog")
+            landing_schema = spark_session.conf.get("nemweb.landing_schema")
+        except (KeyError, TypeError):  # compatibility for focused local config fakes
+            parts = landing_parent_path.split("/")
+            landing_catalog, landing_schema = parts[2], parts[3]
+        return cls(source_mode, landing_path, market_timezone, landing_catalog, landing_schema)

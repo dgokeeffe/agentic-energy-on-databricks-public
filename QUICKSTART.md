@@ -3,8 +3,9 @@
 Pick one track. Complete it end to end. No track depends on another track, on a
 partner, or on a clock.
 
-Work at your own pace. Each track is a numbered sequence of stages; finish the
-current stage and record the decision before opening the next.
+Work at your own pace. Each track is a numbered sequence of stages; explore the
+current stage, record what you learned, and choose whether to continue, revise,
+or ask for help before opening the next.
 
 ## Before you choose
 
@@ -61,9 +62,9 @@ deploy their own app against their own Lakebase branch. See
 Never put credentials, tokens, private workspace URLs, or tenant identifiers into
 Git, a prompt, a log, or a screenshot.
 
-If a platform capability is unavailable, record the step as `not-run` or
-`blocked` and continue with local work. An unrun platform step never becomes a
-pass because a fixture produced output.
+If a platform capability is unavailable, use the prepared or snapshot path and
+label the evidence clearly. An unavailable live capability should be visible in
+the record, but it does not prevent you from exploring the workflow locally.
 
 ## Using an AI assistant
 

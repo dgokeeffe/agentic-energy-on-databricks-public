@@ -5,10 +5,10 @@ TBLPROPERTIES (
   'delta.enableChangeDataFeed' = 'true',
   'delta.enableRowTracking' = 'true',
   'quality' = 'gold',
-  'data.classification' = 'prepared_non_live'
+  'data.classification' = 'mode_explicit'
 )
 AS
-SELECT *
+SELECT *, CAST(:source_mode AS STRING) AS source_mode
 FROM IDENTIFIER(:catalog || '.' || :schema || '.gold_nem_app_region_status')
 WHERE FALSE;
 
@@ -30,7 +30,10 @@ SELECT assert_true(
 );
 
 MERGE INTO IDENTIFIER(:catalog || '.' || :app_serving_schema || '.gold_nem_app_region_status') AS target
-USING IDENTIFIER(:catalog || '.' || :schema || '.gold_nem_app_region_status') AS source
+USING (
+  SELECT *, CAST(:source_mode AS STRING) AS source_mode
+  FROM IDENTIFIER(:catalog || '.' || :schema || '.gold_nem_app_region_status')
+) AS source
 ON target.serving_key = source.serving_key
 WHEN MATCHED THEN UPDATE SET *
 WHEN NOT MATCHED THEN INSERT *

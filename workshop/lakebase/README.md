@@ -29,9 +29,9 @@ Lakebase CDF is a schema-level Public Preview. Current Databricks CLI releases e
 The checked-in scripts are dry-run or offline verification tools:
 
 ```bash
-PROFILE=daveok bash workshop/lakebase/scripts/discover.sh
+PROFILE=DEFAULT bash workshop/lakebase/scripts/discover.sh
 python3 workshop/lakebase/scripts/render-synced-table-command.py \
-  --resources /path/to/non-secret-resources.json --profile daveok
+  --resources /path/to/non-secret-resources.json --profile DEFAULT
 python3 workshop/lakebase/scripts/verify-synced-table.py source.json synced.json
 python3 workshop/lakebase/scripts/verify-lakebase-cdf.py \
   workshop/lakebase/fixtures/investigation-cdf.jsonl

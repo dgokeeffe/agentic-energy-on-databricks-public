@@ -30,22 +30,21 @@ Live mode requires both deployment-controlled values:
 - `allow_live_nemweb=true`.
 
 Participants cannot override the lander parameters. Every workspace-aware
-command uses `--profile daveok`.
+command uses `--profile DEFAULT`.
 
 ## Safe sequence
 
 1. Confirm the accepted snapshot, SQL, metric, Genie, and dashboard gates.
 2. Validate the live configuration strictly, review the target summary, and
    confirm the live and snapshot sibling roots remain separate.
-3. With explicit authorisation, deploy the live settings and temporarily
-   unpause only the five-minute job.
-4. Observe three scheduled cycles. Do not manually manufacture a cycle or
-   source row when AEMO publishes nothing new.
-5. Capture each exact update with the evidence skill.
-6. Pause the job immediately after the third cycle.
-7. Restore `nemweb_mode=snapshot` and `allow_live_nemweb=false`, validate, and
-   redeploy after authorisation.
-8. Record the final paused state and restored defaults.
+3. With explicit authorisation, deploy only the isolated `live_evidence` target.
+   Keep both schedules paused.
+4. Run the context Job once, then run three critical cycles manually at
+   approximately five-minute start intervals. Do not manufacture a source row
+   when AEMO publishes nothing new.
+5. Capture each exact update and both app-serving outcomes with the evidence skill.
+6. Confirm both schedules remain paused after the third cycle.
+7. Record the final paused state and target-scoped live settings.
 
 On failure, pause first, preserve raw archives and manifests, and follow the
 runbook rollback. Do not destroy the bundle, delete a schema or Volume, or use a

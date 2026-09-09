@@ -660,9 +660,11 @@ class NemwebClient:
         )
 
 
-_CURRENT_SOURCES = (
-    ("dispatchis", "https://www.nemweb.com.au/REPORTS/CURRENT/DispatchIS_Reports/", "PUBLIC_DISPATCHIS_"),
+_GENERATION_CURRENT_SOURCES = (
     ("dispatch_scada", "https://www.nemweb.com.au/REPORTS/CURRENT/Dispatch_SCADA/", "PUBLIC_DISPATCHSCADA_"),
+)
+_REGIONAL_CURRENT_SOURCES = (
+    ("dispatchis", "https://www.nemweb.com.au/REPORTS/CURRENT/DispatchIS_Reports/", "PUBLIC_DISPATCHIS_"),
 )
 _CONTEXT_CURRENT_SOURCES = (
     ("next_day_dispatch", "https://www.nemweb.com.au/REPORTS/CURRENT/Next_Day_Dispatch/", "PUBLIC_NEXT_DAY_DISPATCH_"),
@@ -708,7 +710,17 @@ def _discover_live(
     scope: str, client: NemwebClient, *, critical_lookback_hours: int = 2,
     context_lookback_days: int = 7,
 ) -> tuple[list[ArchiveInput], tuple[str, ...]]:
-    sources = _CURRENT_SOURCES if scope == "critical" else _CONTEXT_CURRENT_SOURCES
+    # The app's first critical slice needs only five-minute SCADA. Regional
+    # dispatch remains available as an explicit separate scope, so a missing
+    # PRICE/REGIONSUM archive cannot block unit and fuel-generation publication.
+    # Context is registration only; bids, trading, settlement, and T+1 remain
+    # outside this app-first path.
+    if scope == "critical":
+        sources = _GENERATION_CURRENT_SOURCES
+    elif scope == "regional":
+        sources = _REGIONAL_CURRENT_SOURCES
+    else:
+        sources = ()
     archives: list[ArchiveInput] = []
     required: list[str] = []
     for family, listing, prefix in sources:
@@ -747,8 +759,6 @@ def _discover_live(
             ("registration", "DUDETAILSUMMARY", ("PARTICIPANT_REGISTRATION", "DUDETAILSUMMARY", "7")),
             ("registration", "DUALLOC", ("PARTICIPANT_REGISTRATION", "DUALLOC", "1")),
             ("registration", "GENUNITS", ("PARTICIPANT_REGISTRATION", "GENUNITS", "3")),
-            ("settlement", "SETFCASREGIONRECOVERY", ("SETTLEMENTS", "FCASREGIONRECOVERY", "6")),
-            ("settlement", "SETIRSURPLUS", ("SETTLEMENTS", "IRSURPLUS", "6")),
         )
         for family, table, expected in monthly:
             prefix = f"PUBLIC_ARCHIVE%23{table}%23"
@@ -771,7 +781,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--mode", choices=("snapshot", "live"), required=True)
-    parser.add_argument("--scope", choices=("critical", "context"), default="critical")
+    parser.add_argument("--scope", choices=("critical", "context", "regional"), default="critical")
     parser.add_argument("--volume-path", required=True)
     parser.add_argument("--critical-lookback-hours", type=int, default=2)
     parser.add_argument("--context-lookback-days", type=int, default=7)

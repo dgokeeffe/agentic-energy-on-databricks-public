@@ -26,7 +26,7 @@ BENCHMARKS = ROOT / "genie" / "benchmark_questions.json"
 GENIE_SPACE = ROOT / "genie" / "nemweb_space.json"
 DASHBOARD = ROOT / "dashboards" / "nemweb_overview.lvdash.json"
 TERMINAL_STATES = {"SUCCEEDED", "FAILED", "CANCELED", "CLOSED"}
-REQUIRED_PROFILE = "daveok"
+REQUIRED_PROFILE = "DEFAULT"
 SAFE_IDENTIFIER = re.compile(r"^[A-Za-z_][A-Za-z0-9_-]*$")
 REQUIRED_TOPICS = {
     "effective-intervention-uniqueness",

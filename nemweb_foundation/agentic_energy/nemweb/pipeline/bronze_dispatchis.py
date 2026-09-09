@@ -14,62 +14,7 @@ from agentic_energy.nemweb.pipeline.io import (
     section_stream,
 )
 
-_PRICE_COLUMNS = (
-    ("SETTLEMENTDATE", "settlementdate", "timestamp"),
-    ("RUNNO", "source_run_no", "long"),
-    ("REGIONID", "region_id", "string"),
-    ("DISPATCHINTERVAL", "dispatch_interval", "int"),
-    ("INTERVENTION", "intervention", "int"),
-    ("RRP", "rrp_aud_per_mwh", "double"),
-    ("EEP", "energy_excess_price_aud_per_mwh", "double"),
-    ("ROP", "regional_override_price_aud_per_mwh", "double"),
-    ("APCFLAG", "administered_price_cap_flag", "int"),
-    ("MARKETSUSPENDEDFLAG", "market_suspended_flag", "int"),
-    ("LASTCHANGED", "source_last_changed", "timestamp"),
-)
-_REGION_SUM_COLUMNS = (
-    ("SETTLEMENTDATE", "settlementdate", "timestamp"),
-    ("RUNNO", "source_run_no", "long"),
-    ("REGIONID", "region_id", "string"),
-    ("DISPATCHINTERVAL", "dispatch_interval", "int"),
-    ("INTERVENTION", "intervention", "int"),
-    ("TOTALDEMAND", "total_demand_mw", "double"),
-    ("AVAILABLEGENERATION", "available_generation_mw", "double"),
-    ("AVAILABLELOAD", "available_load_mw", "double"),
-    ("DEMANDFORECAST", "demand_forecast_mw", "double"),
-    ("DISPATCHABLEGENERATION", "dispatchable_generation_mw", "double"),
-    ("DISPATCHABLELOAD", "dispatchable_load_mw", "double"),
-    ("NETINTERCHANGE", "net_interchange_mw", "double"),
-    ("LASTCHANGED", "source_last_changed", "timestamp"),
-)
-_CONSTRAINT_COLUMNS = (
-    ("SETTLEMENTDATE", "settlementdate", "timestamp"),
-    ("RUNNO", "source_run_no", "long"),
-    ("CONSTRAINTID", "constraint_id", "string"),
-    ("DISPATCHINTERVAL", "dispatch_interval", "int"),
-    ("INTERVENTION", "intervention", "int"),
-    ("RHS", "rhs", "double"),
-    ("LHS", "lhs", "double"),
-    ("MARGINALVALUE", "marginal_value", "double"),
-    ("VIOLATIONDEGREE", "violation_degree", "double"),
-    ("LASTCHANGED", "source_last_changed", "timestamp"),
-)
-_INTERCONNECTOR_COLUMNS = (
-    ("SETTLEMENTDATE", "settlementdate", "timestamp"),
-    ("RUNNO", "source_run_no", "long"),
-    ("INTERCONNECTORID", "interconnector_id", "string"),
-    ("DISPATCHINTERVAL", "dispatch_interval", "int"),
-    ("INTERVENTION", "intervention", "int"),
-    ("METEREDMWFLOW", "metered_mw_flow", "double"),
-    ("MWFLOW", "mw_flow", "double"),
-    ("MWLOSSES", "mw_losses", "double"),
-    ("MARGINALVALUE", "marginal_value", "double"),
-    ("VIOLATIONDEGREE", "violation_degree", "double"),
-    ("EXPORTLIMIT", "export_limit_mw", "double"),
-    ("IMPORTLIMIT", "import_limit_mw", "double"),
-    ("MARGINALLOSS", "marginal_loss", "double"),
-    ("LASTCHANGED", "source_last_changed", "timestamp"),
-)
+# Typed projections for all four sections are owned by source_registry.
 
 _PRICE_VALID = (
     f"{COMMON_VALIDITY_SQL} AND interval_end IS NOT NULL AND region_id IS NOT NULL "
@@ -94,10 +39,7 @@ _INTERCONNECTOR_VALID = (
 def raw_nem_dispatch_price():
     return section_stream(
         spark,
-        report_family="dispatchis",
-        section_group="DISPATCH",
-        section_name="PRICE",
-        columns=_PRICE_COLUMNS,
+        subject_key="dispatch_price",
     )
 
 
@@ -124,10 +66,7 @@ def quarantine_nem_dispatch_price():
 def raw_nem_dispatch_region_sum():
     return section_stream(
         spark,
-        report_family="dispatchis",
-        section_group="DISPATCH",
-        section_name="REGIONSUM",
-        columns=_REGION_SUM_COLUMNS,
+        subject_key="dispatch_region_sum",
     )
 
 
@@ -154,10 +93,7 @@ def quarantine_nem_dispatch_region_sum():
 def raw_nem_dispatch_constraint():
     return section_stream(
         spark,
-        report_family="dispatchis",
-        section_group="DISPATCH",
-        section_name="CONSTRAINT",
-        columns=_CONSTRAINT_COLUMNS,
+        subject_key="dispatch_constraint",
     )
 
 
@@ -184,10 +120,7 @@ def quarantine_nem_dispatch_constraint():
 def raw_nem_dispatch_interconnector_res():
     return section_stream(
         spark,
-        report_family="dispatchis",
-        section_group="DISPATCH",
-        section_name="INTERCONNECTORRES",
-        columns=_INTERCONNECTOR_COLUMNS,
+        subject_key="dispatch_interconnector_res",
     )
 
 

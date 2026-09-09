@@ -14,6 +14,10 @@ from pyspark.sql import functions as F
     "valid_gold_scada_generation_key",
     "interval_end IS NOT NULL AND region_id IS NOT NULL AND fuel_type IS NOT NULL",
 )
+@dp.expect_or_fail(
+    "valid_scada_enrichment_counts",
+    "facility_count > 0 AND partially_enriched_facility_count BETWEEN 0 AND facility_count",
+)
 def gold_nem_scada_generation_5min():
     scada = spark.read.table("silver_nem_dispatch_unit_scada").alias("s")
     facilities = spark.read.table("silver_nem_facility_dimension").alias("f")

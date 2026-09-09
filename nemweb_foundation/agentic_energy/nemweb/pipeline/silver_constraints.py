@@ -4,6 +4,7 @@ from pyspark import pipelines as dp
 from pyspark.sql import functions as F
 
 from agentic_energy.nemweb.pipeline.silver_common import latest_correction, with_effective_run
+from agentic_energy.nemweb.source_registry import get_subject_by_key
 
 _KEY = ("interval_end", "constraint_id", "intervention")
 
@@ -15,7 +16,8 @@ _KEY = ("interval_end", "constraint_id", "intervention")
 )
 @dp.expect_or_drop("valid_constraint_key", "interval_end IS NOT NULL AND constraint_id IS NOT NULL AND intervention IS NOT NULL")
 def silver_nem_dispatch_constraint():
-    latest = latest_correction(spark.read.table("bronze_nem_dispatch_constraint"), _KEY)
+    latest = latest_correction(spark.read.table("bronze_nem_dispatch_constraint"), _KEY,
+                               correction_order=get_subject_by_key("dispatch_constraint").correction_order)
     derived = latest.withColumn(
         "is_binding", F.coalesce(F.col("marginal_value") != F.lit(0.0), F.lit(False))
     ).select(

@@ -41,6 +41,7 @@ class ParsedRecord:
     row_number: int
     values: Mapping[str, Any]
     unknown_columns: tuple[str, ...] = ()
+    selected_encoding: str = "utf-8-sig"
 
     @property
     def section_key(self) -> tuple[str, str, str]:

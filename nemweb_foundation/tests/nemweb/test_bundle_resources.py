@@ -46,7 +46,14 @@ def test_required_nemweb_bundle_variables_are_parameterised():
     # token. A window under 3 days makes the required listing look empty and
     # fails the whole context cycle (observed against live NEMWEB 2026-09-02).
     assert int(variables["context_lookback_days"]["default"]) >= 3
-    assert _yaml("databricks.yml")["targets"]["live_evidence"]["mode"] == "development"
+    bundle = _yaml("databricks.yml")
+    target = bundle["targets"]["live_evidence"]
+    assert target["mode"] == "development"
+    for key in ("resource_prefix", "schema", "landing_schema", "landing_volume", "app_serving_schema"):
+        assert target["variables"][key] == "${var.live_evidence_" + key + "}"
+        assert "default" not in variables["live_evidence_" + key]
+    assert target["variables"]["nemweb_mode"] == "live"
+    assert target["variables"]["allow_live_nemweb"] == "true"
 
 
 def test_managed_landing_volume_is_governed_and_parameterised():
@@ -169,28 +176,15 @@ def test_five_minute_refresh_selects_only_critical_datasets():
     job = _job("resources/nemweb_refresh.job.yml", "nemweb_refresh")
     task = next(t for t in job["tasks"] if t["task_key"] == "publish_medallion")
     selection = task["pipeline_task"]["refresh_selection"]
-    # Refreshing all 29 datasets made a cycle take ~11 minutes, so five-minute
-    # triggers queued and landing timed out. The five-minute update must cover
-    # every critical Gold subject and nothing slow.
-    for required in (
-        "gold_nem_region_dispatch_5min",
+    # The first app slice depends only on per-unit SCADA and its registration
+    # enrichment. Unrelated regional and slower domains cannot block it.
+    assert selection == [
+        "bronze_nem_dispatch_unit_scada",
+        "silver_nem_dispatch_unit_scada",
+        "silver_nem_facility_dimension",
         "gold_nem_unit_dispatch_5min",
         "gold_nem_scada_generation_5min",
-        "gold_nem_binding_constraints_5min",
-        "gold_nem_interconnector_flows_5min",
-        "silver_nem_facility_dimension",
-        "gold_nem_app_region_status",
-    ):
-        assert required in selection, required
-    for excluded in (
-        "gold_nem_bid_stack",
-        "silver_nem_bid_period_offer",
-        "gold_nem_trading_price",
-        "gold_nem_settlement_fcas_recovery",
-        "gold_nem_unit_dispatch_availability_t1",
-        "gold_nem_dispatch_price_daily",
-    ):
-        assert excluded not in selection, excluded
+    ]
     assert task["pipeline_task"]["full_refresh"] is False
     assert "full_refresh_selection" not in task["pipeline_task"]
 
@@ -256,7 +250,11 @@ def test_lander_is_bounded_unscheduled_and_uses_unique_cycle_id():
     assert land_task["timeout_seconds"] == 1200
     assert land_task["timeout_seconds"] < task["timeout_seconds"]
     assert task["max_retries"] == 0
-    parameters = task["python_wheel_task"]["parameters"]
+    assert task["spark_python_task"]["python_file"] == "../scripts/land_nemweb_delta.py"
+    spark_script = (ROOT / "scripts/land_nemweb_delta.py").read_text()
+    assert "raise SystemExit(main())" not in spark_script
+    assert 'raise RuntimeError(f"NEMWEB Delta landing failed' in spark_script
+    parameters = task["spark_python_task"]["parameters"]
     assert parameters[parameters.index("--cycle-id") + 1] == "{{job.run_id}}"
     assert "${var.max_files_per_cycle}" in parameters
     assert "${var.network_timeout_seconds}" in parameters

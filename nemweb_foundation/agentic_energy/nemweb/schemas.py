@@ -182,6 +182,27 @@ SCHEMAS: tuple[SectionSchema, ...] = (
     )),
 )
 
+# App-critical schemas are derived from the central registry. The historical
+# declarations above remain only as a source-compatible migration guard until
+# unrelated subjects are split from this module; they are replaced here before
+# any parser lookup is built.
+from .source_registry import APP_CRITICAL_SUBJECTS
+
+_APP_IDENTITIES = {(s.report_family, *s.section_identity) for s in APP_CRITICAL_SUBJECTS}
+_APP_SCHEMAS = tuple(
+    SectionSchema(
+        subject.report_family,
+        subject.section_group,
+        subject.section_name,
+        subject.section_version,
+        tuple(Field(f.source_name, f.parser_kind, f.required) for f in subject.fields),
+    )
+    for subject in APP_CRITICAL_SUBJECTS
+)
+SCHEMAS = _APP_SCHEMAS + tuple(
+    schema for schema in SCHEMAS
+    if (schema.report_family, *schema.key) not in _APP_IDENTITIES
+)
 _REGISTRY = {(schema.report_family, *schema.key): schema for schema in SCHEMAS}
 
 # Header fingerprints are from the public Current samples inspected on

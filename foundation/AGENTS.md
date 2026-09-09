@@ -14,5 +14,5 @@ entry point is [`../QUICKSTART.md`](../QUICKSTART.md).
 | evidence | [`skills/03-evidence-gates/SKILL.md`](skills/03-evidence-gates/SKILL.md) | Capture exact IDs and fail closed. |
 
 Before a workspace command, read [`../PRE-REQUISITES.md`](../PRE-REQUISITES.md).
-Every workspace-aware command uses `--profile daveok`. Guidance is not approval
+Every workspace-aware command uses `--profile DEFAULT`. Guidance is not approval
 to deploy, run a job, access live data, provision Lakebase, or change a schedule.

@@ -28,7 +28,7 @@ ID, and exact pipeline update ID. Poll that update to `COMPLETED`, `FAILED`, or
 use task timestamps and proceed only when exactly one update matches. Never
 select an unproven latest update.
 
-Capture, for each of the five critical subjects:
+Capture, for each of the five critical source-to-Gold subjects:
 
 - source filename, publication time, source interval, and checksum signature;
 - landed, Bronze, Silver, and Gold counts and watermarks;
@@ -36,7 +36,10 @@ Capture, for each of the five critical subjects:
 - exact-update expectation metrics and failures;
 - source-to-Gold and landed-to-Gold processing lags; and
 - binding-constraint evidence at or before Bronze when a new interval has no
-  binding row.
+  binding row;
+- the Delta landing terminal status, parser rejects, and Bronze quarantine count;
+- correction selection plus intervention/effective-run checks; and
+- both isolated app-serving row/key reconciliations and SQL task outcomes.
 
 The five subjects are regional price/demand, unit actual output, SCADA by
 region/fuel, binding constraints, and interconnector flow.

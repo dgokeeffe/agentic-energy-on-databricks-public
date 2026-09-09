@@ -13,39 +13,7 @@ from agentic_energy.nemweb.pipeline.io import (
     section_stream,
 )
 
-_GENUNITS_COLUMNS = (
-    ("GENSETID", "genset_id", "string"),
-    ("STATIONID", "station_id", "string"),
-    ("REGISTEREDCAPACITY", "registered_capacity_mw", "double"),
-    ("MAXCAPACITY", "maximum_capacity_mw", "double"),
-    ("GENSETTYPE", "genset_type", "string"),
-    ("GENSETNAME", "genset_name", "string"),
-    ("DISPATCHTYPE", "dispatch_type", "string"),
-    ("CO2E_ENERGY_SOURCE", "fuel_type_raw", "string"),
-    ("CO2E_EMISSIONS_FACTOR", "co2e_emissions_factor", "double"),
-    ("LASTCHANGED", "source_last_changed", "timestamp"),
-)
-_DUDETAIL_COLUMNS = (
-    ("DUID", "duid", "string"),
-    ("START_DATE", "start_date", "timestamp"),
-    ("END_DATE", "end_date", "timestamp"),
-    ("REGIONID", "region_id", "string"),
-    ("STATIONID", "station_id", "string"),
-    ("DISPATCHTYPE", "dispatch_type", "string"),
-    ("SCHEDULE_TYPE", "schedule_type", "string"),
-    ("PARTICIPANTID", "participant_id", "string"),
-    ("CONNECTIONPOINTID", "connection_point_id", "string"),
-    ("TRANSMISSIONLOSSFACTOR", "transmission_loss_factor", "double"),
-    ("DISTRIBUTIONLOSSFACTOR", "distribution_loss_factor", "double"),
-    ("LASTCHANGED", "source_last_changed", "timestamp"),
-)
-_DUALLOC_COLUMNS = (
-    ("EFFECTIVEDATE", "effective_at", "timestamp"),
-    ("VERSIONNO", "source_version_no", "long"),
-    ("DUID", "duid", "string"),
-    ("GENSETID", "genset_id", "string"),
-    ("LASTCHANGED", "source_last_changed", "timestamp"),
-)
+# Typed projections for all three tables are owned by source_registry.
 _GENUNITS_VALID = f"{COMMON_VALIDITY_SQL} AND genset_id IS NOT NULL"
 _DUDETAIL_VALID = f"{COMMON_VALIDITY_SQL} AND duid IS NOT NULL AND start_date IS NOT NULL AND region_id IS NOT NULL"
 _DUALLOC_VALID = f"{COMMON_VALIDITY_SQL} AND duid IS NOT NULL AND genset_id IS NOT NULL AND effective_at IS NOT NULL"
@@ -55,10 +23,7 @@ _DUALLOC_VALID = f"{COMMON_VALIDITY_SQL} AND duid IS NOT NULL AND genset_id IS N
 def raw_nem_genunits():
     return section_stream(
         spark,
-        report_family="registration",
-        section_group="PARTICIPANT_REGISTRATION",
-        section_name="GENUNITS",
-        columns=_GENUNITS_COLUMNS,
+        subject_key="genunits",
     )
 
 
@@ -77,10 +42,7 @@ def quarantine_nem_genunits():
 def raw_nem_dudetail():
     return section_stream(
         spark,
-        report_family="registration",
-        section_group="PARTICIPANT_REGISTRATION",
-        section_name="DUDETAILSUMMARY",
-        columns=_DUDETAIL_COLUMNS,
+        subject_key="dudetail",
     )
 
 
@@ -99,10 +61,7 @@ def quarantine_nem_dudetail():
 def raw_nem_dualloc():
     return section_stream(
         spark,
-        report_family="registration",
-        section_group="PARTICIPANT_REGISTRATION",
-        section_name="DUALLOC",
-        columns=_DUALLOC_COLUMNS,
+        subject_key="dualloc",
     )
 
 

@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import io
 import json
+import zipfile
 from pathlib import Path
 
 from agentic_energy.nemweb.parser import parse_zip_bytes
@@ -65,3 +67,31 @@ def test_malformed_footer_is_preserved_and_reported() -> None:
     result = parse_zip_bytes(_case("malformed_footer"), "dispatch_scada")
     assert result.controls[0].kind == "F"
     assert result.issues[0].code == "MALFORMED_FOOTER"
+
+
+def _zip(name: str, payload: bytes) -> bytes:
+    output = io.BytesIO()
+    with zipfile.ZipFile(output, "w", zipfile.ZIP_DEFLATED) as archive:
+        archive.writestr(name, payload)
+    return output.getvalue()
+
+
+def test_one_nested_zip_and_explicit_cp1252_encoding_are_supported() -> None:
+    csv_bytes = (
+        "I,DISPATCH,UNIT_SCADA,1,SETTLEMENTDATE,DUID,SCADAVALUE,LASTCHANGED\n"
+        "D,DISPATCH,UNIT_SCADA,1,2024/01/01 00:05:00,UNITÉ,-2.5,2024/01/01 00:04:00\n"
+    ).encode("cp1252")
+    result = parse_zip_bytes(_zip("outer.zip", _zip("rows.CSV", csv_bytes)), "dispatch_scada")
+    assert result.records[0].selected_encoding == "cp1252"
+    assert result.records[0].csv_member == "outer.zip!rows.CSV"
+    assert result.records[0].values["SCADAVALUE"] == -2.5
+
+
+def test_nested_zip_depth_and_binary_control_bytes_are_rejected() -> None:
+    import pytest
+    from agentic_energy.nemweb.contracts import ContractError
+    from agentic_energy.nemweb.parser import UnsafeArchiveError
+    with pytest.raises(UnsafeArchiveError, match="depth"):
+        parse_zip_bytes(_zip("one.zip", _zip("two.zip", _zip("x.CSV", b"F,END\n"))), "dispatchis")
+    with pytest.raises(ContractError, match="control bytes"):
+        parse_zip_bytes(_zip("x.CSV", b"I,DISPATCH,UNIT_SCADA,1,DUID\x00\n"), "dispatch_scada")

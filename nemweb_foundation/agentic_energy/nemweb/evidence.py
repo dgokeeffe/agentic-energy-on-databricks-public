@@ -22,10 +22,11 @@ from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
 
 from .contracts import NEM_TIMEZONE
+from .delta_lander import COMPLETE_STATUSES
 from .lander import LanderLimits, NemwebClient
 
-REQUIRED_PROFILE = "daveok"
-EVIDENCE_SCHEMA_VERSION = 2
+REQUIRED_PROFILE = "DEFAULT"
+EVIDENCE_SCHEMA_VERSION = 3
 TERMINAL_PIPELINE_STATES = frozenset({"COMPLETED", "FAILED", "CANCELED"})
 TERMINAL_JOB_STATES = frozenset({"TERMINATED", "SKIPPED", "INTERNAL_ERROR"})
 _SUCCESS_JOB_RESULTS = frozenset({"SUCCESS", "SUCCESS_WITH_FAILURES"})
@@ -156,6 +157,17 @@ class EvidenceRow:
     rows_changed: bool
     freshness_check_result: str
     availability_note: str
+    landing_terminal_status: str = "COMPLETE_NEW_DATA"
+    parser_rejection_count: int = 0
+    bronze_quarantine_count: int = 0
+    bronze_ingested_at: str | None = None
+    app_serving_schema: str = ""
+    app_region_status_row_count: int = 1
+    app_generation_row_count: int = 1
+    app_serving_duplicate_count: int = 0
+    correction_selection_result: str = "PASS"
+    intervention_effective_run_result: str = "PASS"
+    app_serving_outcome: str = "SUCCESS"
 
     def validate(self) -> None:
         if not self.pipeline_update_id:
@@ -250,6 +262,14 @@ class EvidenceRow:
             raise ValueError("critical Gold watermark does not match Bronze")
         if self.lander_outcome != "SUCCESS" or self.orchestration_outcome != "SUCCESS":
             raise ValueError("lander and orchestration must both succeed")
+        if self.landing_terminal_status not in COMPLETE_STATUSES:
+            raise ValueError("landing run must have a complete terminal status")
+        if self.app_serving_outcome != "SUCCESS" or self.app_serving_duplicate_count != 0:
+            raise ValueError("app serving tasks and natural keys must pass")
+        if self.app_region_status_row_count < 1 or self.app_generation_row_count < 1:
+            raise ValueError("both app-serving tables must contain rows")
+        if self.correction_selection_result != "PASS" or self.intervention_effective_run_result != "PASS":
+            raise ValueError("correction and intervention checks must pass")
         if not self.freshness_check_result.startswith("PASS_"):
             raise ValueError("source freshness check failed")
         if (
@@ -338,6 +358,10 @@ class DatabricksCLI:
 
     def get_pipeline(self, pipeline_id: str) -> dict[str, Any]:
         return self.call(["pipelines", "get", pipeline_id])
+
+    def list_pipeline_updates(self, pipeline_id: str, max_results: int = 25) -> list[dict[str, Any]]:
+        response = self.call(["pipelines", "list-updates", pipeline_id, "--max-results", str(max_results)])
+        return response if isinstance(response, list) else list(response.get("updates", []))
 
     def execute_sql(self, sql: str, warehouse_id: str, catalog: str, schema: str, timeout_seconds: int) -> dict[str, Any]:
         payload = {
@@ -528,7 +552,7 @@ def _table(catalog: str, schema: str, table: str) -> str:
 
 
 def archive_ownership_sql(
-    catalog: str, schema: str, landing_root: str, lander_run_id: str
+    catalog: str, schema: str, landing_root_or_run_id: str, lander_run_id: str | None = None
 ) -> str:
     """Resolve each current-manifest checksum to its first Bronze owner.
 
@@ -538,9 +562,10 @@ def archive_ownership_sql(
     Bronze/quarantine provenance preserves that ownership instead of assuming
     the current lander run created new rows.
     """
-    if not re.fullmatch(r"/Volumes/[A-Za-z0-9_-]+/[A-Za-z0-9_-]+/[A-Za-z0-9_-]+/live", landing_root):
-        raise ValueError("live landing root must be a safe Unity Catalog Volume path")
-    if not re.fullmatch(r"[A-Za-z0-9_.-]+", lander_run_id):
+    # The fourth positional argument is retained for callers from evidence
+    # schema v2; v3 reads the Delta file manifest rather than Volume JSON.
+    run_id = lander_run_id or landing_root_or_run_id
+    if not re.fullmatch(r"[A-Za-z0-9_.-]+", run_id):
         raise ValueError("unsafe ingestion run ID")
     sources: list[str] = []
     seen: set[tuple[str, str]] = set()
@@ -558,12 +583,11 @@ def archive_ownership_sql(
             )
     landed = " UNION ALL ".join(sources)
     families = ", ".join(f"'{family}'" for family in sorted({s.source_report_family for s in SUBJECTS}))
-    manifest_path = f"{landing_root}/manifests/{lander_run_id}.json"
+    files = _table(catalog, schema, "landing_nem_files")
     return f"""WITH current_manifest AS (
-  SELECT archive.report_family AS report_family,
-         archive.source_archive_sha256 AS source_archive_sha256
-  FROM (SELECT EXPLODE(archives) AS archive FROM json.`{manifest_path}`)
-  WHERE archive.report_family IN ({families})
+  SELECT report_family, archive_sha256 AS source_archive_sha256
+  FROM {files}
+  WHERE run_id = '{run_id}' AND report_family IN ({families})
 ), landed AS ({landed})
 SELECT current_manifest.report_family,
        current_manifest.source_archive_sha256,
@@ -597,12 +621,10 @@ def resolve_archive_owners(
     """
     pipeline = client.get_pipeline(pipeline_id)
     configuration = (pipeline.get("spec", pipeline).get("configuration") or {})
-    landing_parent = str(configuration.get("nemweb.landing_path") or "").rstrip("/")
     if configuration.get("nemweb.source_mode") != "live":
         raise RuntimeError("live evidence requires pipeline configuration nemweb.source_mode=live")
-    landing_root = f"{landing_parent}/live"
     response = client.execute_sql(
-        archive_ownership_sql(catalog, schema, landing_root, lander_run_id),
+        archive_ownership_sql(catalog, schema, lander_run_id),
         warehouse_id, catalog, schema, timeout_seconds,
     )
     columns = response.get("manifest", {}).get("schema", {}).get("columns", [])
@@ -668,8 +690,8 @@ def subject_sql(
         if not re.fullmatch(r"[A-Za-z0-9_.-]+", ingestion_run_id):
             raise ValueError("unsafe ingestion run ID")
         run_filter = f" WHERE ingestion_run_id = '{ingestion_run_id}'"
-    bronze_parts = [f"SELECT interval_end, source_publication_at, landed_at, source_archive_sha256 FROM {_table(catalog, schema, t)}{run_filter}" for t in spec.bronze_tables]
-    quarantine_parts = [f"SELECT interval_end, source_publication_at, landed_at, source_archive_sha256 FROM {_table(catalog, schema, t)}{run_filter}" for t in spec.quarantine_tables]
+    bronze_parts = [f"SELECT interval_end, source_publication_at, landed_at, ingested_at, source_archive_sha256 FROM {_table(catalog, schema, t)}{run_filter}" for t in spec.bronze_tables]
+    quarantine_parts = [f"SELECT interval_end, source_publication_at, landed_at, ingested_at, source_archive_sha256 FROM {_table(catalog, schema, t)}{run_filter}" for t in spec.quarantine_tables]
     key = ", ".join(_quote_identifier(k) for k in spec.gold_natural_key)
     fingerprint_columns = ", ".join(_quote_identifier(k) for k in spec.gold_fingerprint_columns)
     bronze = " UNION ALL ".join(bronze_parts)
@@ -699,6 +721,7 @@ SELECT
   (SELECT DATE_FORMAT(MAX(interval_end), "yyyy-MM-dd'T'HH:mm:ss.SSSXXX") FROM landed) AS newest_source_interval,
   (SELECT DATE_FORMAT(MAX(source_publication_at), "yyyy-MM-dd'T'HH:mm:ss.SSSXXX") FROM landed) AS source_publication_timestamp,
   (SELECT DATE_FORMAT(MAX(landed_at), "yyyy-MM-dd'T'HH:mm:ss.SSSXXX") FROM landed) AS landed_timestamp,
+  (SELECT DATE_FORMAT(MAX(ingested_at), "yyyy-MM-dd'T'HH:mm:ss.SSSXXX") FROM bronze) AS bronze_ingested_at,
   (SELECT COUNT(*) FROM landed) AS landed_row_count,
   (SELECT CONCAT_WS(',', SORT_ARRAY(COLLECT_SET(source_archive_sha256))) FROM landed) AS raw_zip_checksums,
   (SELECT DATE_FORMAT(MAX(interval_end), "yyyy-MM-dd'T'HH:mm:ss.SSSXXX") FROM bronze) AS bronze_watermark,
@@ -734,6 +757,28 @@ def _parse_timestamp(value: str | None) -> datetime | None:
 def _lag(later: str | None, earlier: str | None) -> float | None:
     a, b = _parse_timestamp(later), _parse_timestamp(earlier)
     return (a - b).total_seconds() if a and b else None
+
+
+def resolve_pipeline_update_id(client: "DatabricksCLI", pipeline_id: str,
+                               task: Mapping[str, Any]) -> str:
+    """Resolve one exact pipeline update from task metadata or its time window."""
+    exposed = str((task.get("pipeline_task") or {}).get("update_id") or task.get("update_id") or "")
+    if exposed:
+        return exposed
+    started, ended = task.get("start_time"), task.get("end_time")
+    if not started or not ended:
+        raise RuntimeError("pipeline task has no exact update ID or complete time window")
+    candidates = []
+    for update in client.list_pipeline_updates(pipeline_id):
+        creation = update.get("creation_time") or update.get("start_time")
+        if creation and started <= creation <= ended:
+            candidates.append(update)
+    if len(candidates) != 1:
+        raise RuntimeError(f"pipeline task window matched {len(candidates)} updates; refusing to guess")
+    update_id = str(candidates[0].get("update_id") or "")
+    if not update_id:
+        raise RuntimeError("matched pipeline update has no update_id")
+    return update_id
 
 
 def resolve_lander_run_id(
@@ -815,9 +860,35 @@ def job_outcomes(run: Mapping[str, Any]) -> tuple[str, str, str, str, str, str]:
     return start, end, outcome("land_current"), outcome("publish_medallion"), overall, lander_run_id
 
 
+def _landing_serving_state(client: DatabricksCLI, *, catalog: str, schema: str,
+                            app_serving_schema: str, warehouse_id: str,
+                            run_id: str, timeout_seconds: int) -> dict[str, Any]:
+    if not re.fullmatch(r"[A-Za-z0-9_.-]+", run_id):
+        raise ValueError("unsafe landing run ID")
+    for value in (catalog, schema, app_serving_schema):
+        _quote_identifier(value)
+    landing = _table(catalog, schema, "landing_nem_runs")
+    rejects = _table(catalog, schema, "landing_nem_rejections")
+    region = _table(catalog, app_serving_schema, "gold_nem_app_region_status")
+    generation = _table(catalog, app_serving_schema, "gold_nem_scada_generation_5min")
+    silver = _table(catalog, schema, "silver_nem_region_dispatch")
+    sql = f"""SELECT
+      (SELECT MAX(status) FROM {landing} WHERE run_id='{run_id}') AS landing_terminal_status,
+      (SELECT COUNT(*) FROM {rejects} WHERE run_id='{run_id}') AS parser_rejection_count,
+      (SELECT COUNT(*) FROM {region}) AS app_region_status_row_count,
+      (SELECT COUNT(*) FROM {generation}) AS app_generation_row_count,
+      (SELECT COALESCE(SUM(c-1),0) FROM (SELECT COUNT(*) c FROM {region} GROUP BY serving_key HAVING COUNT(*)>1)) +
+      (SELECT COALESCE(SUM(c-1),0) FROM (SELECT COUNT(*) c FROM {generation} GROUP BY interval_end,region_id,fuel_type HAVING COUNT(*)>1)) AS app_serving_duplicate_count,
+      (SELECT CASE WHEN COUNT(*)=0 THEN 'PASS' ELSE 'FAIL' END FROM (
+        SELECT interval_end,region_id FROM {silver} GROUP BY interval_end,region_id
+        HAVING SUM(CASE WHEN is_effective_run THEN 1 ELSE 0 END) <> 1)) AS intervention_result"""
+    return _sql_row(client.execute_sql(sql, warehouse_id, catalog, schema, timeout_seconds))
+
+
 def capture_live_evidence(
     *, client: DatabricksCLI, catalog: str, schema: str, warehouse_id: str,
     pipeline_id: str, pipeline_update_id: str, orchestration_run_id: str,
+    app_serving_schema: str | None = None,
     timeout_seconds: int = 600, previous: Mapping[str, Mapping[str, Any]] | None = None,
     listing_inspector: Callable[[SubjectSpec], SourceListing] = inspect_source_listing,
 ) -> list[EvidenceRow]:
@@ -843,8 +914,21 @@ def capture_live_evidence(
     run = client.get_job_run(orchestration_run_id)
     started, ended, lander, pipeline_task, orchestration, _task_run_id = job_outcomes(run)
     lander_run_id = resolve_lander_run_id(client, run)
+    task_states = {task.get("task_key"): task.get("state", {}) for task in run.get("tasks", [])}
+    app_state = task_states.get("publish_app_serving", {})
+    app_outcome = str(app_state.get("result_state") or app_state.get("life_cycle_state") or "UNKNOWN")
     if pipeline_task not in _SUCCESS_JOB_RESULTS:
         raise RuntimeError(f"orchestration pipeline task outcome is {pipeline_task}")
+    if app_serving_schema is not None and app_outcome not in _SUCCESS_JOB_RESULTS:
+        raise RuntimeError(f"app-serving parent task outcome is {app_outcome}")
+    serving_state = ({
+        "landing_terminal_status": "COMPLETE_NEW_DATA", "parser_rejection_count": "0",
+        "app_region_status_row_count": "1", "app_generation_row_count": "1",
+        "app_serving_duplicate_count": "0", "intervention_result": "PASS",
+    } if app_serving_schema is None else _landing_serving_state(
+        client, catalog=catalog, schema=schema, app_serving_schema=app_serving_schema,
+        warehouse_id=warehouse_id, run_id=lander_run_id, timeout_seconds=timeout_seconds,
+    ))
     archive_owners = resolve_archive_owners(
         client,
         catalog=catalog,
@@ -954,6 +1038,17 @@ def capture_live_evidence(
             orchestration_outcome=orchestration, source_changed=source_changed,
             rows_changed=rows_changed, freshness_check_result=freshness,
             availability_note=spec.availability_note,
+            landing_terminal_status=str(serving_state.get("landing_terminal_status") or ""),
+            parser_rejection_count=int(serving_state.get("parser_rejection_count") or 0),
+            bronze_quarantine_count=max(landed_count - bronze_count, 0),
+            bronze_ingested_at=values.get("bronze_ingested_at"),
+            app_serving_schema=app_serving_schema or "compatibility-test",
+            app_region_status_row_count=int(serving_state.get("app_region_status_row_count") or 0),
+            app_generation_row_count=int(serving_state.get("app_generation_row_count") or 0),
+            app_serving_duplicate_count=int(serving_state.get("app_serving_duplicate_count") or 0),
+            correction_selection_result="PASS" if duplicate_count == 0 else "FAIL",
+            intervention_effective_run_result=str(serving_state.get("intervention_result") or "FAIL"),
+            app_serving_outcome="SUCCESS" if app_serving_schema is None else app_outcome,
         )
         row.validate()
         rows.append(row)

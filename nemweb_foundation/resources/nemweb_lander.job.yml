@@ -1,5 +1,5 @@
 # Modified from the reference NEMWEB file-lander resource; see NOTICE.md.
-# This bounded wheel task is invoked by orchestration jobs and has no schedule of its own.
+# This bounded Spark Python task is invoked by orchestration jobs and has no schedule of its own.
 resources:
   jobs:
     nemweb_lander:
@@ -38,19 +38,14 @@ resources:
         - task_key: land_nemweb_files
           environment_key: default
           max_retries: 0
-          # Outer safety bound only. This one Job serves both scopes, and a task
-          # timeout cannot be overridden by a run_job_task caller, so the tight
-          # five-minute bound is enforced on the CALLING task in
-          # nemweb_refresh.job.yml instead. The daily context scope legitimately
-          # needs longer: a single 600s bound made the context run TIMEDOUT
-          # (lander run 93562901524477, 2026-09-02) while downloading monthly
-          # MMSDM registration and daily bid archives.
+          # Outer safety bound only. This one Job serves both five-minute SCADA
+          # and monthly registration scopes, and a task timeout cannot be
+          # overridden by a run_job_task caller. The tighter cycle bound remains
+          # on the calling task in nemweb_refresh.job.yml.
           timeout_seconds: 3600
-          python_wheel_task:
-            package_name: agentic-energy-on-databricks
-            entry_point: main
+          spark_python_task:
+            python_file: ../scripts/land_nemweb_delta.py
             parameters:
-              - land
               - --mode
               - "{{job.parameters.mode}}"
               - --scope
@@ -58,6 +53,10 @@ resources:
               # Shared managed Volume parent. The lander appends the validated
               # mode, writing to <landing_path>/snapshot or <landing_path>/live.
               # It never writes raw/parsed/manifests directly at the parent.
+              - --catalog
+              - ${var.catalog}
+              - --schema
+              - ${var.schema}
               - --volume-path
               - ${var.landing_path}
               - --critical-lookback-hours

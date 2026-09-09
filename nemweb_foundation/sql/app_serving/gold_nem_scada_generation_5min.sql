@@ -17,10 +17,10 @@ TBLPROPERTIES (
   'grain' = 'five_minutes',
   'source.timezone' = 'AEST',
   'availability' = 'not_published_in_current',
-  'data.classification' = 'prepared_non_live'
+  'data.classification' = 'mode_explicit'
 )
 AS
-SELECT *
+SELECT *, CAST(:source_mode AS STRING) AS source_mode
 FROM IDENTIFIER(:catalog || '.' || :schema || '.gold_nem_scada_generation_5min')
 WHERE FALSE;
 
@@ -48,7 +48,10 @@ SELECT assert_true(
 );
 
 MERGE INTO IDENTIFIER(:catalog || '.' || :app_serving_schema || '.gold_nem_scada_generation_5min') AS target
-USING IDENTIFIER(:catalog || '.' || :schema || '.gold_nem_scada_generation_5min') AS source
+USING (
+  SELECT *, CAST(:source_mode AS STRING) AS source_mode
+  FROM IDENTIFIER(:catalog || '.' || :schema || '.gold_nem_scada_generation_5min')
+) AS source
 ON target.interval_end = source.interval_end
    AND target.region_id = source.region_id
    AND target.fuel_type = source.fuel_type

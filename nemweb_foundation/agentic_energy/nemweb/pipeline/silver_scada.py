@@ -4,6 +4,7 @@ from pyspark import pipelines as dp
 from pyspark.sql import functions as F
 
 from agentic_energy.nemweb.pipeline.silver_common import latest_correction
+from agentic_energy.nemweb.source_registry import get_subject_by_key
 
 
 @dp.materialized_view(
@@ -16,6 +17,7 @@ def silver_nem_dispatch_unit_scada():
     return latest_correction(
         spark.read.table("bronze_nem_dispatch_unit_scada"),
         ("interval_end", "duid"),
+        correction_order=get_subject_by_key("dispatch_unit_scada").correction_order,
     ).select(
         "interval_end", "duid", "actual_generation_mw", "source_last_changed",
         "report_version", "source_publication_at", "ingested_at",

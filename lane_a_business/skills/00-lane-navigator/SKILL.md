@@ -29,5 +29,5 @@ shared governed foundation; do not create a second data store.
 
 A named product is not proof that it is available. Check preflight and
 facilitator release before workspace use. When a capability is unavailable,
-record the step as `not-run` or `blocked` and label any substitute **prepared**.
-Stop rather than invent a capability, live row, citation, or approval.
+use the prepared path and label the substitute **prepared** or **snapshot**.
+Keep exploring, but never invent a capability, live row, citation, or approval.

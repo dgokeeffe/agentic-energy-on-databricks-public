@@ -216,6 +216,28 @@ def test_selected_silver_values_reconcile_and_unknown_facility_survives() -> Non
     assert effective_region["total_demand_mw"] == 7001.5
 
 
+def test_every_correction_selected_scada_duid_reaches_both_gold_contracts() -> None:
+    products, _ = _snapshot_products()
+    selected_scada = latest_by_natural_key(
+        _silver_rows("dispatch_scada", "UNIT_SCADA"), ("interval_end", "duid")
+    )
+    source_keys = {(row["interval_end"], row["duid"]) for row in selected_scada}
+    unit_keys = {(row["interval_end"], row["duid"]) for row in products["unit"]}
+    assert unit_keys == source_keys
+
+    unit_totals: dict[object, float] = defaultdict(float)
+    generation_totals: dict[object, float] = defaultdict(float)
+    for row in products["unit"]:
+        unit_totals[row["interval_end"]] += float(row["actual_generation_mw"])
+    for row in products["generation"]:
+        generation_totals[row["interval_end"]] += float(row["actual_generation_mw"])
+    assert generation_totals == unit_totals
+
+    statuses = {row["dimension_match_status"] for row in products["unit"]}
+    assert statuses <= {"REGION_AND_FUEL", "REGION_ONLY", "FUEL_ONLY", "UNMATCHED"}
+    assert "REGION_ONLY" in statuses  # RT_NSW6 remains visible with unknown fuel.
+
+
 def test_snapshot_intervals_are_five_minute_aligned_interval_endings() -> None:
     products, _ = _snapshot_products()
     for rows in products.values():
