@@ -573,7 +573,7 @@ def test_pipeline_poller_uses_exact_update_and_extracts_underlying_exception(mon
         {"update": {"update_id": "u1", "state": "RUNNING"}},
         {"update": {"update_id": "u1", "state": "COMPLETED"}},
     ])
-    client = DatabricksCLI("daveok", runner=lambda args: calls.append(args) or next(responses))
+    client = DatabricksCLI("DEFAULT", runner=lambda args: calls.append(args) or next(responses))
     monkeypatch.setattr("agentic_energy.nemweb.evidence.time.sleep", lambda _seconds: None)
     update = client.poll_pipeline_update("p1", "u1", 5)
     assert update["state"] == "COMPLETED"
