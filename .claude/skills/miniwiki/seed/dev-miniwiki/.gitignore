@@ -1,0 +1,4 @@
+# Obsidian local workspace state — per-host UI config (especially
+# workspace.json), not wiki content. Tracking it causes needless
+# cross-host rebase conflicts on every sync.
+.obsidian/
