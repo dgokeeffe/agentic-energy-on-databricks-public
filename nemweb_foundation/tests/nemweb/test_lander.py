@@ -26,6 +26,7 @@ from agentic_energy.nemweb.lander import (
     land_archives,
     land_snapshot,
     validate_nemweb_url,
+    _discover_live,
     _parse_iis_publication,
     _publication_token,
 )
@@ -67,6 +68,26 @@ def test_iis_publication_timestamp_is_locale_independent_and_utc() -> None:
 def test_network_allowlist_accepts_the_scoped_mmsdm_wholesale_archive() -> None:
     url = "https://nemweb.com.au/Data_Archive/Wholesale_Electricity/MMSDM/2026/MMSDM_2026_07/file.zip"
     assert validate_nemweb_url(url) == url
+
+
+def test_critical_discovery_fetches_only_dispatchis_and_scada() -> None:
+    calls: list[tuple[str, str]] = []
+
+    class FakeClient:
+        def list_archives(self, listing: str, *, prefix: str):
+            calls.append((listing, prefix))
+            return (f"{listing}{prefix}209901010005.zip",)
+
+        def download_archive(self, url: str, *, report_family: str, publication: str):
+            return (report_family, publication, url)
+
+    archives, required = _discover_live("critical", FakeClient())
+    assert required == ("dispatchis", "dispatch_scada")
+    assert [archive[0] for archive in archives] == ["dispatchis", "dispatch_scada"]
+    assert [prefix for _, prefix in calls] == [
+        "PUBLIC_DISPATCHIS_",
+        "PUBLIC_DISPATCHSCADA_",
+    ]
 
 
 def test_landing_is_checksum_idempotent_and_manifested_per_section(tmp_path: Path) -> None:
