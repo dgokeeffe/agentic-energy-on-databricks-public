@@ -9,9 +9,9 @@ resources:
         enabled: true
       # Operating cadence.
       #
-      # AEMO publishes a new Dispatch_SCADA interval every five minutes. This
-      # first app slice carries that source into the per-unit and region/fuel
-      # Gold contracts without waiting on unrelated NEMWEB report families.
+      # AEMO publishes Dispatch_SCADA and DispatchIS regional results every five
+      # minutes. This app slice carries SCADA, PRICE, and REGIONSUM into three
+      # focused Gold contracts without waiting on unrelated report families.
       #
       # The trigger fires every 5 minutes. Measured end-to-end cycle time is
       # ~340s, dominated by cold serverless start-up (~135s for the lander wheel
@@ -19,10 +19,10 @@ resources:
       # data volume (~80s of actual transformation). A cycle can therefore
       # occasionally overrun its own interval.
       #
-      # No SCADA interval is lost when that happens. The lander discovers by a
-      # bounded lookback window (critical_lookback_hours, default 2h) rather than
-      # by "what arrived since the last run", so the next cycle still picks up
-      # an interval published during an overrun. Delta landing is append-only and
+      # No critical interval is lost when that happens. The lander discovers by
+      # a bounded lookback window (critical_lookback_hours, default 2h) rather
+      # than by "what arrived since the last run", so the next cycle still picks
+      # up an interval published during an overrun. Delta landing is append-only and
       # idempotent, while max_concurrent_runs: 1 plus queueing prevents two
       # critical cycles from overlapping.
       #
@@ -70,19 +70,22 @@ resources:
           pipeline_task:
             pipeline_id: ${resources.pipelines.nemweb.id}
             full_refresh: false
-            # This first app slice needs only per-unit SCADA and generation by
-            # region/fuel. Registration context is refreshed separately at its
-            # monthly source cadence. Keeping regional dispatch, constraints,
-            # interconnectors, bids, settlement, and T+1 out of this selection
-            # prevents an unrelated source from blocking the two app panels.
+            # This app slice needs per-unit SCADA, generation by region/fuel,
+            # and regional price/demand. Registration context is refreshed
+            # separately at its monthly source cadence. Constraints,
+            # interconnectors, bids, settlement, and T+1 stay excluded.
             #
             # The facility dimension remains in the five-minute selection because
             # it is evaluated at MAX(bronze SCADA interval). Its three registration
             # inputs must already have been materialised by nemweb_context_refresh.
             refresh_selection:
+              - bronze_nem_dispatch_price
+              - bronze_nem_dispatch_region_sum
               - bronze_nem_dispatch_unit_scada
+              - silver_nem_region_dispatch
               - silver_nem_dispatch_unit_scada
               - silver_nem_facility_dimension
+              - gold_nem_region_dispatch_5min
               - gold_nem_unit_dispatch_5min
               - gold_nem_scada_generation_5min
         - task_key: capture_cycle_evidence

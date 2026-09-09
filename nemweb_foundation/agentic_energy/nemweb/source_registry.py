@@ -52,11 +52,21 @@ def _f(source: str, target: str | None = None, kind: str = "string", spark: str 
     return SourceField(source, target or source.lower(), kind, spark, required)
 
 
-def _dispatch(key: str, section: str, version: str, table: str, fields: tuple[SourceField, ...], natural: tuple[str, ...], deps: tuple[str, ...]) -> SourceSubject:
+def _dispatch(
+    key: str,
+    section: str,
+    version: str,
+    table: str,
+    fields: tuple[SourceField, ...],
+    natural: tuple[str, ...],
+    deps: tuple[str, ...],
+    *,
+    required_scope: str = "regional",
+) -> SourceSubject:
     return SourceSubject(key, "dispatchis", "current", "DispatchIS_Reports", None,
         "PUBLIC_DISPATCHIS_", ".zip", "DISPATCH", section, version, table,
         fields, natural, ("report_version", "source_run_no", "source_last_changed", "source_publication_at", "landed_at", "source_record_id"),
-        "five_minutes", "regional", frozenset({"direct", "nested"}), deps)
+        "five_minutes", required_scope, frozenset({"direct", "nested"}), deps)
 
 
 APP_CRITICAL_SUBJECTS: tuple[SourceSubject, ...] = (
@@ -66,14 +76,16 @@ APP_CRITICAL_SUBJECTS: tuple[SourceSubject, ...] = (
         _f("RRP", "rrp_aud_per_mwh", "float", "double", True), _f("EEP", "energy_excess_price_aud_per_mwh", "float", "double"),
         _f("ROP", "regional_override_price_aud_per_mwh", "float", "double"), _f("APCFLAG", "administered_price_cap_flag", "int", "int"),
         _f("MARKETSUSPENDEDFLAG", "market_suspended_flag", "int", "int"), _f("LASTCHANGED", "source_last_changed", "market_timestamp", "timestamp")),
-        ("interval_end", "region_id", "intervention"), ("gold_nem_app_region_status",)),
+        ("interval_end", "region_id", "intervention"),
+        ("gold_nem_region_dispatch_5min",), required_scope="critical"),
     _dispatch("dispatch_region_sum", "REGIONSUM", "9", "landing_nem_dispatch_region_sum", (
         _f("SETTLEMENTDATE", "settlementdate", "market_timestamp", "timestamp", True), _f("RUNNO", "source_run_no", "int", "long", True), _f("REGIONID", "region_id", required=True),
         _f("DISPATCHINTERVAL", "dispatch_interval", "int", "int"), _f("INTERVENTION", "intervention", "int", "int", True), _f("TOTALDEMAND", "total_demand_mw", "float", "double", True),
         _f("AVAILABLEGENERATION", "available_generation_mw", "float", "double"), _f("AVAILABLELOAD", "available_load_mw", "float", "double"),
         _f("DEMANDFORECAST", "demand_forecast_mw", "float", "double"), _f("DISPATCHABLEGENERATION", "dispatchable_generation_mw", "float", "double"),
         _f("DISPATCHABLELOAD", "dispatchable_load_mw", "float", "double"), _f("NETINTERCHANGE", "net_interchange_mw", "float", "double"), _f("LASTCHANGED", "source_last_changed", "market_timestamp", "timestamp")),
-        ("interval_end", "region_id", "intervention"), ("gold_nem_app_region_status",)),
+        ("interval_end", "region_id", "intervention"),
+        ("gold_nem_region_dispatch_5min",), required_scope="critical"),
     _dispatch("dispatch_constraint", "CONSTRAINT", "5", "landing_nem_dispatch_constraint", (
         _f("SETTLEMENTDATE", "settlementdate", "market_timestamp", "timestamp", True), _f("RUNNO", "source_run_no", "int", "long", True), _f("CONSTRAINTID", "constraint_id", required=True),
         _f("DISPATCHINTERVAL", "dispatch_interval", "int", "int"), _f("INTERVENTION", "intervention", "int", "int", True), _f("RHS", "rhs", "float", "double"),
@@ -115,6 +127,10 @@ GENERATION_APP_GOLD_TABLES = (
 )
 GENERATION_APP_SUBJECT_KEYS = frozenset(
     {"dispatch_unit_scada", "dudetail", "dualloc", "genunits"}
+)
+MARKET_CONTEXT_GOLD_TABLES = ("gold_nem_region_dispatch_5min",)
+MARKET_CONTEXT_SUBJECT_KEYS = frozenset(
+    {"dispatch_price", "dispatch_region_sum"}
 )
 
 _BY_KEY = {subject.key: subject for subject in APP_CRITICAL_SUBJECTS}
