@@ -21,6 +21,21 @@ resources:
               catalog: ${var.catalog}
               schema: ${var.schema}
               app_serving_schema: ${var.app_serving_schema}
+        # Second serving surface, for the Track C value-capture screen. Sequenced
+        # after the region-status publication rather than run in parallel, so a
+        # failure leaves an unambiguous point of interruption on one warehouse.
+        - task_key: publish_generation_source
+          depends_on:
+            - task_key: publish_regular_delta_source
+          max_retries: 0
+          sql_task:
+            warehouse_id: ${var.warehouse_id}
+            file:
+              path: ../sql/app_serving/gold_nem_scada_generation_5min.sql
+            parameters:
+              catalog: ${var.catalog}
+              schema: ${var.schema}
+              app_serving_schema: ${var.app_serving_schema}
       tags:
         data_classification: prepared_non_live
         writer: lakehouse_only

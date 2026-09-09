@@ -1,82 +1,929 @@
 @import '@databricks/appkit-ui/styles.css';
 
-:root {
-  /* --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.141 0.005 285.823);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.141 0.005 285.823);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.141 0.005 285.823);
-  --primary: oklch(0.21 0.006 285.885);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.967 0.001 286.375);
-  --secondary-foreground: oklch(0.21 0.006 285.885);
-  --muted: oklch(0.967 0.001 286.375);
-  --muted-foreground: oklch(0.552 0.016 285.938);
-  --accent: oklch(0.967 0.001 286.375);
-  --accent-foreground: oklch(0.21 0.006 285.885);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.985 0 0);
-  --success: oklch(0.603 0.135 166.892);
-  --success-foreground: oklch(1 0 0);
-  --warning: oklch(0.795 0.157 78.748);
-  --warning-foreground: oklch(0.199 0.027 238.732);
-  --border: oklch(0.92 0.004 286.32);
-  --input: oklch(0.92 0.004 286.32);
-  --ring: oklch(0.705 0.015 286.067);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.141 0.005 285.823);
-  --sidebar-primary: oklch(0.21 0.006 285.885);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.967 0.001 286.375);
-  --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
-  --sidebar-border: oklch(0.92 0.004 286.32);
-  --sidebar-ring: oklch(0.705 0.015 286.067); */
+/*
+ * Workshop theme adapted from Open Electricity (https://github.com/opennem/openelectricity),
+ * MIT licensed, © 2023-2026 Open Electricity.
+ *
+ * Borrowed: the warm-neutral palette, the fuel-technology colour system, the
+ * 10px-root rem scale, and the wide-tracked uppercase subheading treatment.
+ *
+ * Not borrowed: the typefaces. Open Electricity self-hosts DM Sans, Space
+ * Grotesk, and DM Mono; we deliberately ship no font binaries and make no
+ * third-party font request, so these stacks fall back to system faces. This
+ * costs some of the source identity by design.
+ *
+ * The fuel tokens are a display vocabulary, not a data contract. The AEMO fuel
+ * field cannot distinguish CCGT from OCGT, so no such token is offered here —
+ * see client/src/domain/fuelCapture.ts.
+ *
+ * This palette is light-only. AppKit ships
+ * `@media (prefers-color-scheme: dark) { :root:not(.light) { ... } }`, which wins
+ * on specificity over a bare `:root` and rendered the theme as near-black with
+ * unreadable text for any reviewer whose OS was in dark mode. index.html sets
+ * class="light" to opt out; the `:root:not(.light)` selector below repeats the
+ * tokens at equal specificity so the theme still holds if that class is ever
+ * dropped. Both are deliberate.
+ */
+
+:root,
+:root:not(.light),
+:root[class~='dark'] {
+  color-scheme: light;
+
+  /* Open Electricity neutrals and accent. */
+  --oe-white: #ffffff;
+  --oe-black: #000000;
+  --oe-red: #c74523;
+  --oe-dark-red: #963f29;
+  --oe-dark-grey: #353535;
+  --oe-mid-grey: #6a6a6a;
+  --oe-mid-warm-grey: #c6c6c6;
+  --oe-warm-grey: #f1f0ed;
+  --oe-light-warm-grey: #faf9f6;
+  --oe-error-red: #fa6060;
+  --oe-success-green: #70d26e;
+  --oe-alert: #eb1f70;
+
+  /* Open Electricity fuel technologies. */
+  --fuel-coal_black: #121212;
+  --fuel-coal_brown: #744a26;
+  --fuel-gas: #e87809;
+  --fuel-distillate: #e15c34;
+  --fuel-hydro: #5ea0c0;
+  --fuel-wind: #2c7629;
+  --fuel-solar_utility: #fed500;
+  --fuel-battery_charging: #577cff;
+  --fuel-battery_discharging: #3245c9;
+  --fuel-bioenergy_biomass: #1d7a7a;
+  --fuel-unknown: #6a6a6a;
+
+  --radius: 0.625rem;
+
+  --background: var(--oe-light-warm-grey);
+  --foreground: var(--oe-dark-grey);
+  --card: var(--oe-white);
+  --card-foreground: var(--oe-dark-grey);
+  --popover: var(--oe-white);
+  --popover-foreground: var(--oe-dark-grey);
+  --primary: var(--oe-dark-grey);
+  --primary-foreground: var(--oe-light-warm-grey);
+  --secondary: var(--oe-warm-grey);
+  --secondary-foreground: var(--oe-dark-grey);
+  --muted: var(--oe-warm-grey);
+  --muted-foreground: var(--oe-mid-grey);
+  --accent: var(--oe-warm-grey);
+  --accent-foreground: var(--oe-dark-grey);
+  --destructive: var(--oe-red);
+  --destructive-foreground: var(--oe-white);
+  --success: #2f7d43;
+  --success-foreground: var(--oe-white);
+  --warning: var(--oe-dark-red);
+  --warning-foreground: var(--oe-white);
+  --border: var(--oe-mid-warm-grey);
+  --input: var(--oe-mid-warm-grey);
+  --ring: var(--oe-red);
+
+  --chart-1: var(--oe-red);
+  --chart-2: var(--fuel-hydro);
+  --chart-3: var(--fuel-wind);
+  --chart-4: var(--fuel-solar_utility);
+  --chart-5: var(--fuel-battery_discharging);
+
+  --font-sans: 'DM Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Space Grotesk', var(--font-sans);
+  --font-mono: 'DM Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    /* --background: oklch(0.141 0.005 285.823);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.21 0.006 285.885);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.21 0.006 285.885);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.92 0.004 286.32);
-    --primary-foreground: oklch(0.21 0.006 285.885);
-    --secondary: oklch(0.274 0.006 286.033);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.274 0.006 286.033);
-    --muted-foreground: oklch(0.705 0.015 286.067);
-    --accent: oklch(0.274 0.006 286.033);
-    --accent-foreground: oklch(0.985 0 0);
-    --destructive: oklch(0.704 0.191 22.216);
-    --destructive-foreground: oklch(0.985 0 0);
-    --success: oklch(0.67 0.12 167);
-    --success-foreground: oklch(1 0 0);
-    --warning: oklch(0.83 0.165 85);
-    --warning-foreground: oklch(0.199 0.027 238.732);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.552 0.016 285.938);
-    --chart-1: oklch(0.488 0.243 264.376);
-    --chart-2: oklch(0.696 0.17 162.48);
-    --chart-3: oklch(0.769 0.188 70.08);
-    --chart-4: oklch(0.627 0.265 303.9);
-    --chart-5: oklch(0.645 0.246 16.439);
-    --sidebar: oklch(0.21 0.006 285.885);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.488 0.243 264.376);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.274 0.006 286.033);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.552 0.016 285.938); */
+/* Open Electricity's 1rem = 10px root, so the rem sizes below read directly. */
+html {
+  box-sizing: border-box;
+  font-size: 62.5%;
+  background: var(--background);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 1.6rem;
+  line-height: 1.5;
+  color: var(--foreground);
+  background: var(--background);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  margin: 0 0 0.5em;
+  letter-spacing: -0.048rem;
+}
+
+.numeric,
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ---------------------------------------------------------------- navigation */
+
+.app-nav-shell {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: color-mix(in srgb, var(--oe-light-warm-grey) 92%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+
+.app-nav {
+  max-width: 132rem;
+  margin: 0 auto;
+  padding: 1.2rem 2.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2.4rem;
+}
+
+.app-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.5rem;
+  letter-spacing: 0.063rem;
+  text-transform: uppercase;
+  color: var(--oe-dark-grey);
+  text-decoration: none;
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 2.8rem;
+  height: 2.8rem;
+  border-radius: 0.5rem;
+  background: var(--oe-red);
+  color: var(--oe-white);
+}
+
+.app-nav nav {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.app-nav nav a {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 500;
+  letter-spacing: 0.016rem;
+  color: var(--oe-mid-grey);
+  text-decoration: none;
+  padding-bottom: 0.2rem;
+  border-bottom: 2px solid transparent;
+}
+
+.app-nav nav a:hover {
+  color: var(--oe-red);
+  border-bottom-color: var(--oe-red);
+}
+
+/* --------------------------------------------------------------------- shell */
+
+.app-shell {
+  max-width: 132rem;
+  margin: 0 auto;
+  padding: 3.2rem 2.4rem 6.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2.4rem;
+}
+
+/* The navigation bar is sticky, so an in-page anchor would otherwise land with
+   its heading hidden underneath it. */
+[id] {
+  scroll-margin-top: 7rem;
+}
+
+.section-kicker,
+.eyebrow {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 500;
+  letter-spacing: 0.15rem;
+  text-transform: uppercase;
+  color: var(--oe-mid-grey);
+  margin: 0 0 0.8rem;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+  line-height: 1.15;
+  margin: 0;
+}
+
+/* ---------------------------------------------------------------------- hero */
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  gap: 3.2rem;
+  align-items: start;
+  padding: 3.2rem;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) + 4px);
+  background:
+    radial-gradient(
+      120% 140% at 100% 0%,
+      color-mix(in srgb, var(--oe-warm-grey) 90%, var(--oe-red)) 0%,
+      transparent 55%
+    ),
+    var(--oe-white);
+}
+
+.status-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-bottom: 1.6rem;
+}
+
+.hero h1 {
+  font-size: 3.6rem;
+  line-height: 1.08;
+  letter-spacing: -0.072rem;
+  margin: 0 0 1.2rem;
+  max-width: 24ch;
+}
+
+.hero-headline-figure {
+  color: var(--oe-red);
+}
+
+.hero-summary {
+  font-size: 1.7rem;
+  color: var(--oe-mid-grey);
+  margin: 0;
+  max-width: 58ch;
+}
+
+.hero-period {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 2rem;
+  border-radius: var(--radius);
+  background: var(--oe-warm-grey);
+  border: 1px solid var(--border);
+}
+
+.hero-period > span {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  letter-spacing: 0.15rem;
+  text-transform: uppercase;
+  color: var(--oe-mid-grey);
+}
+
+.hero-period > strong {
+  font-family: var(--font-mono);
+  font-size: 1.6rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--oe-dark-grey);
+}
+
+.hero-period > small {
+  font-size: 1.2rem;
+  color: var(--oe-mid-grey);
+}
+
+/* ----------------------------------------------------------- headline metric */
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(26rem, 1fr));
+  gap: 1.6rem;
+}
+
+.kpi-card {
+  border-radius: var(--radius);
+}
+
+.kpi-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.2rem;
+}
+
+.kpi-value {
+  font-family: var(--font-mono);
+  font-size: 2.8rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.048rem;
+  margin: 0.4rem 0 0;
+}
+
+.kpi-icon {
+  display: grid;
+  place-items: center;
+  width: 3.6rem;
+  height: 3.6rem;
+  border-radius: 0.6rem;
+  background: var(--oe-warm-grey);
+  color: var(--oe-mid-grey);
+  flex: none;
+}
+
+.kpi-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 1.3rem;
+  color: var(--oe-mid-grey);
+}
+
+.kpi-meta p {
+  margin: 0;
+}
+
+.kpi-negative .kpi-value {
+  color: var(--oe-red);
+}
+
+/* ----------------------------------------------------------- fuel capture UI */
+
+.capture-card {
+  border-radius: calc(var(--radius) + 2px);
+}
+
+.capture-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.6rem;
+}
+
+.region-select {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.region-select label {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  letter-spacing: 0.15rem;
+  text-transform: uppercase;
+  color: var(--oe-mid-grey);
+}
+
+/* Horizontal capture bars. A 1.0x baseline marker carries the comparison, so
+   the reader sees over- and under-capture without reading the number. */
+.capture-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+}
+
+.capture-row {
+  display: grid;
+  grid-template-columns: minmax(14rem, 18rem) minmax(0, 1fr) minmax(11rem, auto);
+  gap: 1.6rem;
+  align-items: center;
+}
+
+.capture-fuel {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.fuel-swatch {
+  width: 1.2rem;
+  height: 2.4rem;
+  border-radius: 0.2rem;
+  background: var(--fuel-unknown);
+  flex: none;
+}
+
+.capture-fuel-name {
+  font-weight: 600;
+  font-size: 1.4rem;
+}
+
+.capture-fuel-volume {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 1.2rem;
+  color: var(--oe-mid-grey);
+}
+
+.capture-track {
+  position: relative;
+  height: 2.4rem;
+  background: var(--oe-warm-grey);
+  border-radius: 0.2rem;
+  overflow: hidden;
+}
+
+.capture-fill {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  background: var(--fuel-unknown);
+  min-width: 2px;
+}
+
+.capture-baseline {
+  position: absolute;
+  inset-block: -0.4rem;
+  width: 2px;
+  background: var(--oe-dark-grey);
+}
+
+.capture-baseline-label {
+  position: absolute;
+  top: -1.8rem;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  color: var(--oe-mid-grey);
+  white-space: nowrap;
+}
+
+.capture-figures {
+  text-align: right;
+}
+
+.capture-rate {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 1.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.capture-rate-strong {
+  color: var(--success);
+}
+
+.capture-rate-weak {
+  color: var(--oe-red);
+}
+
+.capture-revenue {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 1.2rem;
+  color: var(--oe-mid-grey);
+}
+
+.capture-negative {
+  color: var(--oe-red);
+}
+
+.capture-scale {
+  margin: 2rem 0 0;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--border);
+  font-size: 1.3rem;
+  color: var(--oe-mid-grey);
+}
+
+.capture-empty-note {
+  font-size: 1.3rem;
+  color: var(--oe-mid-grey);
+}
+
+/* ------------------------------------------------------------ restatement UI */
+
+.restatement-card {
+  border-radius: var(--radius);
+  border-left: 4px solid var(--oe-red);
+}
+
+.restatement-figures {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  gap: 1.6rem;
+  margin: 0;
+}
+
+.restatement-figures > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.restatement-figures dt {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  letter-spacing: 0.15rem;
+  text-transform: uppercase;
+  color: var(--oe-mid-grey);
+}
+
+.restatement-figures dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 1.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* -------------------------------------------------------------- purpose card */
+
+.purpose-card {
+  border-radius: calc(var(--radius) + 2px);
+  background: var(--oe-warm-grey);
+  border-color: var(--oe-mid-warm-grey);
+}
+
+.purpose-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(24rem, 1fr));
+  gap: 2rem;
+}
+
+.purpose-grid li {
+  display: flex;
+  gap: 1.2rem;
+  align-items: flex-start;
+}
+
+.purpose-grid h3 {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  letter-spacing: 0.063rem;
+  text-transform: uppercase;
+  color: var(--oe-mid-grey);
+  margin: 0 0 0.4rem;
+}
+
+.purpose-grid p {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.purpose-icon {
+  display: grid;
+  place-items: center;
+  width: 3.2rem;
+  height: 3.2rem;
+  border-radius: 0.6rem;
+  background: var(--oe-white);
+  color: var(--oe-red);
+  flex: none;
+}
+
+.purpose-boundary .purpose-icon {
+  background: var(--oe-red);
+  color: var(--oe-white);
+}
+
+/* --------------------------------------------------------------------- table */
+
+.data-table-card {
+  border-radius: var(--radius);
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+.data-table-card th,
+.data-table-card td {
+  font-size: 1.35rem;
+}
+
+.data-table-card .numeric {
+  text-align: right;
+}
+
+.region-cell {
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+tr[data-focused='true'] {
+  background: var(--oe-warm-grey);
+}
+
+/* ------------------------------------------------------------- lower context */
+
+.lower-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(32rem, 1fr));
+  gap: 1.6rem;
+  align-items: start;
+}
+
+.context-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1.6rem;
+}
+
+.context-grid > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.context-grid span {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  letter-spacing: 0.15rem;
+  text-transform: uppercase;
+  color: var(--oe-mid-grey);
+}
+
+.context-grid strong {
+  font-family: var(--font-mono);
+  font-size: 1.8rem;
+}
+
+.context-grid small {
+  font-size: 1.2rem;
+  color: var(--oe-mid-grey);
+}
+
+.context-note {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 1.3rem;
+  color: var(--oe-mid-grey);
+}
+
+.freshness-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.2rem;
+}
+
+.freshness-list {
+  display: grid;
+  gap: 1.2rem;
+  margin: 0;
+}
+
+.freshness-list > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.freshness-list dt {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  letter-spacing: 0.15rem;
+  text-transform: uppercase;
+  color: var(--oe-mid-grey);
+}
+
+.freshness-list dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 1.35rem;
+}
+
+/* ------------------------------------------------------------------- banners */
+
+.state-banner {
+  margin: 0;
+  padding: 1.2rem 1.6rem;
+  border-radius: var(--radius);
+  font-size: 1.4rem;
+  border: 1px solid transparent;
+}
+
+.state-banner-danger {
+  background: color-mix(in srgb, var(--oe-error-red) 14%, var(--oe-white));
+  border-color: color-mix(in srgb, var(--oe-error-red) 45%, var(--oe-white));
+  color: var(--oe-dark-red);
+}
+
+.state-banner-warning {
+  background: color-mix(in srgb, var(--fuel-solar_utility) 18%, var(--oe-white));
+  border-color: color-mix(in srgb, var(--fuel-solar_utility) 55%, var(--oe-white));
+  color: #6b4a00;
+}
+
+/* Same information as the danger banner, without the alarm. Used where the state
+   is an expected property of a prepared fixture rather than a live anomaly. */
+.state-banner-info {
+  background: var(--oe-warm-grey);
+  border-color: var(--oe-mid-warm-grey);
+  color: var(--oe-mid-grey);
+}
+
+/* ---------------------------------------------------------------- journal UI */
+
+.decision-cta {
+  border-radius: calc(var(--radius) + 2px);
+  background: var(--oe-dark-grey);
+  color: var(--oe-light-warm-grey);
+  border: none;
+}
+
+.decision-cta .section-kicker {
+  color: var(--oe-mid-warm-grey);
+}
+
+.decision-cta [data-slot='card-content'] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2.4rem;
+}
+
+.decision-cta h2 {
+  font-size: 2.2rem;
+  margin: 0 0 0.8rem;
+  color: var(--oe-white);
+}
+
+.decision-cta p {
+  margin: 0;
+  color: var(--oe-mid-warm-grey);
+  max-width: 62ch;
+  font-size: 1.4rem;
+}
+
+.decision-cta button {
+  background: var(--oe-red);
+  color: var(--oe-white);
+}
+
+.journal-sheet {
+  padding: 2.4rem;
+  overflow-y: auto;
+  background: var(--oe-light-warm-grey);
+}
+
+.investigation-card {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.investigation-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+}
+
+.investigation-footer {
+  font-size: 1.25rem;
+  color: var(--oe-mid-grey);
+}
+
+/* ------------------------------------------------------------- query states */
+
+.query-state-shell {
+  max-width: 96rem;
+  margin: 0 auto;
+  padding: 6.4rem 2.4rem;
+}
+
+.query-state-centred {
+  display: grid;
+  place-items: center;
+  min-height: 60vh;
+  text-align: center;
+}
+
+.query-state-heading {
+  font-family: var(--font-display);
+  font-size: 2rem;
+}
+
+.query-state-grid {
+  display: grid;
+  gap: 1.6rem;
+}
+
+.query-error {
+  color: var(--oe-dark-red);
+  font-size: 1.4rem;
+}
+
+.skeleton-card {
+  padding: 2.4rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--oe-white);
+  display: grid;
+  gap: 1.2rem;
+}
+
+.skeleton-line {
+  height: 1.2rem;
+  border-radius: 0.4rem;
+  background: linear-gradient(90deg, var(--oe-warm-grey), var(--oe-mid-warm-grey), var(--oe-warm-grey));
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
+.skeleton-title {
+  width: 42%;
+  height: 2rem;
+}
+
+.skeleton-short {
+  width: 68%;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-line {
+    animation: none;
+  }
+}
+
+/* ------------------------------------------------------------------- footer */
+
+.app-disclaimer {
+  border-top: 1px solid var(--border);
+  padding-top: 2rem;
+  display: grid;
+  gap: 0.8rem;
+}
+
+.app-disclaimer p {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--oe-mid-grey);
+  max-width: 96ch;
+}
+
+.app-disclaimer a {
+  color: var(--oe-dark-red);
+}
+
+/* ------------------------------------------------------------------ responsive */
+
+@media (max-width: 1023px) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 2.4rem;
+  }
+
+  .hero h1 {
+    font-size: 2.8rem;
+  }
+
+  .capture-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.8rem;
+  }
+
+  .capture-figures {
+    text-align: left;
+  }
+
+  .app-nav nav a {
+    display: none;
   }
 }

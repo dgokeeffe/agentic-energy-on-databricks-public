@@ -49,6 +49,14 @@ installation. The repository-owned workflow is documented in
   attendee gets an isolated Lakebase branch and App in one shared workspace, the
   20-concurrent-compute limit that actually binds, and the naming constraints
   that make an explicit attendee slug unavoidable.
+- [`decisions/app-value-capture-redesign.md`](decisions/app-value-capture-redesign.md)
+  — why the Track C app was reframed from "can I trust this number?" to fuel value
+  capture, the Open Electricity design system it borrows, and the availability and
+  settlement boundaries it must state on screen.
+- [`decisions/facility-dimension-as-of.md`](decisions/facility-dimension-as-of.md)
+  — the facility dimension selected registration rows by wall-clock time, so the
+  same Bronze data produced different Silver rows; why 290 tests missed it, why the
+  pinned instant is derived from the data, and the bug found in the guard itself.
 
 ## How to grow this wiki
 

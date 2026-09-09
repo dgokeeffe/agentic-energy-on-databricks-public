@@ -2,15 +2,18 @@ import { useEffect, useState } from 'react';
 import { useAnalyticsQuery } from '@databricks/appkit-ui/react';
 import { RegionalOperationsShell } from './components/RegionalOperationsShell';
 import { classifyRows, type QueryState } from './domain/regionStatus';
-import { normaliseIntegrationRows } from './data/integrationRegionStatusRepository';
+import type { FuelGenerationRow } from './domain/fuelCapture';
+import { integrationQueryState } from './data/integrationRegionStatusRepository';
+import { fuelGenerationRowsOrNull } from './data/fuelGenerationRepository';
 import { MockRegionStatusRepository } from './data/mockRegionStatusRepository';
+import { MockFuelGenerationRepository } from './data/mockFuelGenerationRepository';
 
 function MockApp() {
   const [state, setState] = useState<QueryState>({ kind: 'loading' });
   useEffect(() => {
-    new MockRegionStatusRepository()
-      .load()
-      .then((rows) => setState(classifyRows(rows, 'mock')))
+    Promise.all([new MockRegionStatusRepository().load(), new MockFuelGenerationRepository().load()])
+      // Inside an effect, so evaluating the instant here is not a render-time call.
+      .then(([rows, fuelRows]) => setState(classifyRows(rows, 'mock', Date.now(), fuelRows)))
       .catch((error: unknown) =>
         setState({
           kind: 'error',
@@ -21,8 +24,15 @@ function MockApp() {
   return <RegionalOperationsShell state={state} />;
 }
 
+const EMPTY_QUERY_PARAMETERS: Record<string, never> = Object.freeze({});
+
 function IntegrationApp() {
-  const query = useAnalyticsQuery('latest_region_status', {});
+  const query = useAnalyticsQuery('latest_region_status', EMPTY_QUERY_PARAMETERS);
+  // Separate governed read. Its failure must not blank the page: the generation
+  // tables need a Unity Catalog grant the region-status table does not imply, so
+  // an unprivileged deployment still has to report price and freshness.
+  const fuelQuery = useAnalyticsQuery('latest_fuel_generation', EMPTY_QUERY_PARAMETERS);
+
   if (query.warehouseStatus && query.warehouseStatus.state !== 'RUNNING') {
     return (
       <RegionalOperationsShell
@@ -34,9 +44,10 @@ function IntegrationApp() {
   if (query.error) {
     return <RegionalOperationsShell state={{ kind: 'error', message: String(query.error) }} />;
   }
-  const candidates: unknown[] = Array.isArray(query.data) ? query.data : [];
-  const rows = normaliseIntegrationRows(candidates);
-  return <RegionalOperationsShell state={classifyRows(rows, 'integration')} />;
+
+  const fuelRows: FuelGenerationRow[] | null =
+    fuelQuery.loading || fuelQuery.error ? null : fuelGenerationRowsOrNull(fuelQuery.data);
+  return <RegionalOperationsShell state={integrationQueryState(query.data, fuelRows)} />;
 }
 
 export default function App() {

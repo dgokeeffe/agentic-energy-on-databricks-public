@@ -24,7 +24,25 @@ async function start() {
         app.get('/api/region-status', async (_req, res) => {
           try {
             const result = await appkit.lakebase.query(
-              `SELECT * FROM app_read.nem_region_status_synced
+              `SELECT
+                 region_id,
+                 interval_end,
+                 intervention,
+                 rrp_aud_per_mwh,
+                 total_demand_mw,
+                 source_interval_watermark,
+                 source_publication_at,
+                 gold_published_at,
+                 market_wide_binding_constraint_count,
+                 market_wide_interconnector_count,
+                 market_wide_interconnector_source_sign_flow_mw,
+                 prediction_score,
+                 prediction_model_version,
+                 prediction_feature_time,
+                 prediction_scored_at,
+                 prediction_source_freshness,
+                 prediction_missing_feature_status
+               FROM app_read.nem_region_status_synced
                ORDER BY interval_end DESC, region_id
                LIMIT 100`
             );
