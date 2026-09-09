@@ -660,7 +660,8 @@ class NemwebClient:
         )
 
 
-_GENERATION_CURRENT_SOURCES = (
+_CRITICAL_CURRENT_SOURCES = (
+    ("dispatchis", "https://www.nemweb.com.au/REPORTS/CURRENT/DispatchIS_Reports/", "PUBLIC_DISPATCHIS_"),
     ("dispatch_scada", "https://www.nemweb.com.au/REPORTS/CURRENT/Dispatch_SCADA/", "PUBLIC_DISPATCHSCADA_"),
 )
 _REGIONAL_CURRENT_SOURCES = (
@@ -710,13 +711,12 @@ def _discover_live(
     scope: str, client: NemwebClient, *, critical_lookback_hours: int = 2,
     context_lookback_days: int = 7,
 ) -> tuple[list[ArchiveInput], tuple[str, ...]]:
-    # The app's first critical slice needs only five-minute SCADA. Regional
-    # dispatch remains available as an explicit separate scope, so a missing
-    # PRICE/REGIONSUM archive cannot block unit and fuel-generation publication.
-    # Context is registration only; bids, trading, settlement, and T+1 remain
-    # outside this app-first path.
+    # The app's critical path now combines five-minute SCADA with regional
+    # PRICE and REGIONSUM. Constraints and interconnectors remain available only
+    # through the separate regional scope. Context is registration only; bids,
+    # trading, settlement, and T+1 remain outside this app-first path.
     if scope == "critical":
-        sources = _GENERATION_CURRENT_SOURCES
+        sources = _CRITICAL_CURRENT_SOURCES
     elif scope == "regional":
         sources = _REGIONAL_CURRENT_SOURCES
     else:

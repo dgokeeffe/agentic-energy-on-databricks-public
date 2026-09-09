@@ -176,12 +176,16 @@ def test_five_minute_refresh_selects_only_critical_datasets():
     job = _job("resources/nemweb_refresh.job.yml", "nemweb_refresh")
     task = next(t for t in job["tasks"] if t["task_key"] == "publish_medallion")
     selection = task["pipeline_task"]["refresh_selection"]
-    # The first app slice depends only on per-unit SCADA and its registration
-    # enrichment. Unrelated regional and slower domains cannot block it.
+    # The app slice combines SCADA with regional price/demand. Constraints,
+    # interconnectors, and slower domains remain outside the five-minute update.
     assert selection == [
+        "bronze_nem_dispatch_price",
+        "bronze_nem_dispatch_region_sum",
         "bronze_nem_dispatch_unit_scada",
+        "silver_nem_region_dispatch",
         "silver_nem_dispatch_unit_scada",
         "silver_nem_facility_dimension",
+        "gold_nem_region_dispatch_5min",
         "gold_nem_unit_dispatch_5min",
         "gold_nem_scada_generation_5min",
     ]

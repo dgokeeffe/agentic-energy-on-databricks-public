@@ -2,6 +2,8 @@ from agentic_energy.nemweb.source_registry import (
     APP_CRITICAL_SUBJECTS,
     GENERATION_APP_GOLD_TABLES,
     GENERATION_APP_SUBJECT_KEYS,
+    MARKET_CONTEXT_GOLD_TABLES,
+    MARKET_CONTEXT_SUBJECT_KEYS,
     get_subject_by_section,
     landing_tables,
     subjects_for_family,
@@ -38,8 +40,12 @@ def test_generation_app_scope_is_only_scada_plus_registration():
     )
     critical = subjects_for_scope("critical")
     context = subjects_for_scope("context")
-    assert {subject.key for subject in critical} == {"dispatch_unit_scada"}
-    assert {subject.key for subject in (*critical, *context)} == GENERATION_APP_SUBJECT_KEYS
+    generation_critical = tuple(
+        subject for subject in critical if subject.key == "dispatch_unit_scada"
+    )
+    assert {
+        subject.key for subject in (*generation_critical, *context)
+    } == GENERATION_APP_SUBJECT_KEYS
     assert {subject.section_name for subject in context} == {
         "DUDETAILSUMMARY",
         "DUALLOC",
@@ -47,14 +53,27 @@ def test_generation_app_scope_is_only_scada_plus_registration():
     }
     assert all(
         set(subject.app_dependencies) == set(GENERATION_APP_GOLD_TABLES)
-        for subject in (*critical, *context)
+        for subject in (*generation_critical, *context)
     )
+
+
+def test_market_context_adds_only_price_and_region_sum_to_critical_scope():
+    critical = subjects_for_scope("critical")
+    market = tuple(
+        subject for subject in critical if subject.key in MARKET_CONTEXT_SUBJECT_KEYS
+    )
+    assert {subject.key for subject in market} == MARKET_CONTEXT_SUBJECT_KEYS
+    assert MARKET_CONTEXT_GOLD_TABLES == ("gold_nem_region_dispatch_5min",)
+    assert all(subject.app_dependencies == MARKET_CONTEXT_GOLD_TABLES for subject in market)
 
 
 def test_regional_dispatch_remains_a_separate_compatible_scope():
     dispatch = subjects_for_family("dispatchis")
     assert len(dispatch) == 4
-    assert set(dispatch) == set(subjects_for_scope("regional"))
+    assert {subject.key for subject in subjects_for_scope("regional")} == {
+        "dispatch_constraint",
+        "dispatch_interconnector_res",
+    }
     assert {s.current_folder for s in dispatch} == {"DispatchIS_Reports"}
     assert {s.filename_prefix for s in dispatch} == {"PUBLIC_DISPATCHIS_"}
     assert len({s.filename_prefix for s in subjects_for_scope("context")}) == 3

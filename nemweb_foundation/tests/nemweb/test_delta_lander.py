@@ -49,17 +49,21 @@ def _scada_archive() -> ArchiveInput:
     return _archive("dispatch_scada", next((FIXTURE / "dispatch_scada").glob("*.zip")))
 
 
-def test_generation_critical_batch_needs_only_scada_and_retry_is_idempotent():
-    archive = _scada_archive()
+def _dispatch_archive() -> ArchiveInput:
+    return _archive("dispatchis", next((FIXTURE / "dispatchis").glob("*.zip")))
+
+
+def test_critical_batch_combines_scada_price_and_demand_idempotently():
+    archives = [_dispatch_archive(), _scada_archive()]
     first = prepare_landing_batch(
-        [archive],
+        archives,
         run_id="one",
         source_mode="snapshot",
         scope="critical",
         landed_at="2024-01-01T00:07:00+00:00",
     )
     retry = prepare_landing_batch(
-        [archive],
+        archives,
         run_id="two",
         source_mode="snapshot",
         scope="critical",
@@ -67,11 +71,16 @@ def test_generation_critical_batch_needs_only_scada_and_retry_is_idempotent():
     )
 
     assert first.status == "COMPLETE_NEW_DATA"
-    assert set(first.records_by_subject) == {"dispatch_unit_scada"}
-    assert first.records_by_subject["dispatch_unit_scada"]
-    assert [record.source_record_id for record in first.records_by_subject["dispatch_unit_scada"]] == [
-        record.source_record_id for record in retry.records_by_subject["dispatch_unit_scada"]
-    ]
+    assert set(first.records_by_subject) == {
+        "dispatch_price",
+        "dispatch_region_sum",
+        "dispatch_unit_scada",
+    }
+    assert all(first.records_by_subject.values())
+    for subject_key in first.records_by_subject:
+        assert [record.source_record_id for record in first.records_by_subject[subject_key]] == [
+            record.source_record_id for record in retry.records_by_subject[subject_key]
+        ]
 
     backend = MemoryBackend()
     status1, inserted1 = write_landing_batch_to_backend(backend, first)
@@ -83,15 +92,18 @@ def test_generation_critical_batch_needs_only_scada_and_retry_is_idempotent():
     assert {run_id for run_id, _, _ in backend.associations} == {"one", "two"}
 
 
-def test_unrelated_dispatchis_archive_cannot_block_or_enter_generation_cycle():
-    dispatch = _archive("dispatchis", next((FIXTURE / "dispatchis").glob("*.zip")))
+def test_scada_only_cycle_is_partial_when_price_and_demand_are_missing():
     batch = prepare_landing_batch(
-        [dispatch], run_id="wrong-family", source_mode="snapshot", scope="critical"
+        [_scada_archive()],
+        run_id="missing-market-context",
+        source_mode="snapshot",
+        scope="critical",
     )
 
-    assert batch.status == "FAILED"
-    assert set(batch.records_by_subject) == {"dispatch_unit_scada"}
-    assert batch.records_by_subject["dispatch_unit_scada"] == ()
+    assert batch.status == "PARTIAL"
+    assert batch.records_by_subject["dispatch_unit_scada"]
+    assert batch.records_by_subject["dispatch_price"] == ()
+    assert batch.records_by_subject["dispatch_region_sum"] == ()
 
 
 def test_context_batch_requires_all_three_registration_sections():
@@ -111,16 +123,13 @@ def test_context_batch_requires_all_three_registration_sections():
     assert all(batch.records_by_subject.values())
 
 
-def test_regional_dispatch_has_an_explicit_non_critical_scope():
-    dispatch = _archive("dispatchis", next((FIXTURE / "dispatchis").glob("*.zip")))
+def test_constraints_and_interconnectors_remain_a_separate_scope():
     batch = prepare_landing_batch(
-        [dispatch], run_id="regional", source_mode="snapshot", scope="regional"
+        [_dispatch_archive()], run_id="regional", source_mode="snapshot", scope="regional"
     )
 
     assert batch.status == "COMPLETE_NEW_DATA"
     assert set(batch.records_by_subject) == {
-        "dispatch_price",
-        "dispatch_region_sum",
         "dispatch_constraint",
         "dispatch_interconnector_res",
     }
