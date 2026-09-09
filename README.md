@@ -35,6 +35,7 @@ one role for each track:
 ```text
 QUICKSTART.md                 participant entry point
 PRE-REQUISITES.md             administrator, facilitator, and participant checks
+CONTRIBUTING.md               how to fork and open a pull request
 foundation/                   facilitator operations guidance
 nemweb_foundation/            governed NEMWEB implementation and contracts
 nemweb_app/                   AppKit regional-operations starter
