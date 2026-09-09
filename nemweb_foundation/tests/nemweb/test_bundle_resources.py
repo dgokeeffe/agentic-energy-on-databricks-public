@@ -199,7 +199,8 @@ def test_five_minute_refresh_is_paused_ordered_and_non_destructive():
     assert job["queue"] == {"enabled": True}
     assert job["trigger"] == {
         "pause_status": "PAUSED",
-        "periodic": {"interval": 5, "unit": "MINUTES"},
+        "quartz_cron_expression": "0 0/5 * * * ?",
+        "timezone_id": "Australia/Brisbane",
     }
     tasks = {task["task_key"]: task for task in job["tasks"]}
     assert set(tasks) == {
