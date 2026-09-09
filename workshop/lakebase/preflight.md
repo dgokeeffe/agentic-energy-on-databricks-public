@@ -1,9 +1,9 @@
 # Facilitator Lakebase preflight
 
-Use only the explicit `daveok` profile. Record resource names, states, and command exit codes, but never hosts, tokens, workspace URLs, tenant IDs, or service-principal IDs.
+Use only the explicit `DEFAULT` profile. Record resource names, states, and command exit codes, but never hosts, tokens, workspace URLs, tenant IDs, or service-principal IDs.
 
 1. Confirm Databricks CLI 1.0 or later and Python SDK 0.81 or later.
-2. Run `databricks postgres -h` and `databricks postgres create-synced-table -h` with `--profile daveok` where accepted.
+2. Run `databricks postgres -h` and `databricks postgres create-synced-table -h` with `--profile DEFAULT` where accepted.
 3. Confirm Lakebase Autoscaling and PostgreSQL 17. Do not use retired Provisioned Lakebase.
 4. Confirm the LTAP Direct Writes Beta preview. If unavailable, record the ordinary initial-load fallback; synced tables remain supported.
 5. Confirm the Lakebase Change Data Feed preview and `create-cdf-config` command.
@@ -18,7 +18,7 @@ Use only the explicit `daveok` profile. Record resource names, states, and comma
    ```bash
    databricks permissions update database-projects "$BUNDLE_VAR_lakebase_project_id" \
      --json '{"access_control_list": [{"group_name": "<approved-participant-group>", "permission_level": "CAN_MANAGE"}]}' \
-     --profile daveok
+     --profile DEFAULT
    ```
 
    Attendee agents use the endpoint helper only. After every endpoint is ready,

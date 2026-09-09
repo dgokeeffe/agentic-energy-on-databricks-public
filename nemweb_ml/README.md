@@ -29,7 +29,7 @@ Model Serving endpoint.
 ```bash
 uv sync --extra test
 uv run python -m pytest tests -q
-databricks bundle validate --strict -t dev --profile daveok
+databricks bundle validate --strict -t dev --profile DEFAULT
 ```
 
 Training, model registration, and scoring have not been run by the repository

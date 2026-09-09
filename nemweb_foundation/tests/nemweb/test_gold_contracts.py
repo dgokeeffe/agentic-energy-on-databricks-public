@@ -79,6 +79,9 @@ def test_current_unit_product_is_scada_actual_not_fabricated_availability() -> N
     assert "availability_mw" not in source
     assert "dispatch_target_mw" not in source
     assert "does not publish five-minute unit availability" in source
+    assert '"known_dimension_match_status"' in source
+    for status in ("REGION_AND_FUEL", "REGION_ONLY", "FUEL_ONLY", "UNMATCHED"):
+        assert status in source
 
 
 def test_scada_generation_left_joins_and_keeps_unknown_dimensions() -> None:
@@ -87,6 +90,8 @@ def test_scada_generation_left_joins_and_keeps_unknown_dimensions() -> None:
     assert source.count('F.lit("UNKNOWN")') >= 2
     assert '.groupBy("interval_end", "region_id", "fuel_type")' in source
     assert 'F.sum("actual_generation_mw")' in source
+    assert '"valid_scada_enrichment_counts"' in source
+    assert "partially_enriched_facility_count BETWEEN 0 AND facility_count" in source
 
 
 def test_binding_rule_and_flow_sign_are_explicit_not_silently_changed() -> None:

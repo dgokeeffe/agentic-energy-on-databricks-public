@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
-: "${PROFILE:?Set PROFILE=daveok explicitly}"
+: "${PROFILE:?Set PROFILE=DEFAULT explicitly}"
 if [[ "$PROFILE" != "daveok" ]]; then
-  echo "PROFILE=daveok is required" >&2
+  echo "PROFILE=DEFAULT is required" >&2
   exit 2
 fi
 

@@ -17,8 +17,8 @@ def main() -> int:
     parser.add_argument("--resources", type=Path, required=True)
     parser.add_argument("--profile", required=True)
     args = parser.parse_args()
-    if args.profile != "daveok":
-        parser.error("--profile daveok is required")
+    if args.profile != "DEFAULT":
+        parser.error("--profile DEFAULT is required")
 
     resources = json.loads(args.resources.read_text())
     required = {

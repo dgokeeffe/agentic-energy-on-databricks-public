@@ -13,7 +13,9 @@ from pyspark.sql import functions as F
 from pyspark.sql import types as T
 from pyspark.sql.window import Window
 
+from agentic_energy.nemweb.delta_lander import successful_run_records
 from agentic_energy.nemweb.pipeline.config import PipelineConfig
+from agentic_energy.nemweb.source_registry import get_subject_by_key
 
 # Required on every critical Bronze table.  ``source_values`` and
 # ``_unknown_columns`` are retained in addition to this common contract so an
@@ -230,29 +232,65 @@ def read_parsed_records(spark_session):
 def section_stream(
     spark_session,
     *,
-    report_family: str,
-    section_group: str,
-    section_name: str,
-    columns: tuple[tuple[str, str, str], ...],
+    subject_key: str | None = None,
+    report_family: str | None = None,
+    section_group: str | None = None,
+    section_name: str | None = None,
+    columns: tuple[tuple[str, str, str], ...] | None = None,
 ):
-    """Select one section and project typed business columns without data loss."""
+    """Read one successful Delta-landing association stream.
 
-    frame = spark_session.readStream.table("_nemweb_parsed_records").where(
-        (F.col("report_family") == report_family)
-        & (F.col("section_group") == section_group)
-        & (F.col("section_name") == section_name)
+    Registry fields are the only projection source; legacy keyword arguments
+    remain accepted temporarily so unrelated callers fail safely during local
+    migration rather than creating a second mapping.
+    """
+    if subject_key is None:
+        # Compatibility path for non-app subjects deliberately outside this
+        # migration. App-critical Bronze callers always provide subject_key.
+        if not all((report_family, section_group, section_name, columns)):
+            raise ValueError("subject_key or complete legacy section arguments are required")
+        frame = spark_session.readStream.table("_nemweb_parsed_records").where(
+            (F.col("report_family") == report_family)
+            & (F.col("section_group") == section_group)
+            & (F.col("section_name") == section_name)
+        )
+        projected = [F.col("source_values").getItem(source).cast(data_type).alias(target)
+                     for source, target, data_type in columns]
+        return frame.select(*projected, *PROVENANCE_COLUMNS, "section_group", "source_values", "_unknown_columns", "source_row_number")
+    subject = get_subject_by_key(subject_key)
+    config = PipelineConfig.from_spark(spark_session)
+    frame = successful_run_records(
+        spark_session, subject, config.landing_catalog, config.landing_schema
     )
     projected = [
-        F.col("source_values").getItem(source).cast(data_type).alias(target)
-        for source, target, data_type in columns
+        F.col("typed_values").getItem(field.source_name).cast(field.spark_type).alias(field.target_name)
+        for field in subject.fields
     ]
     return frame.select(
         *projected,
-        *PROVENANCE_COLUMNS,
-        "section_group",
-        "source_values",
-        "_unknown_columns",
+        F.lit(config.source_mode).alias("source_mode"),
+        "source_url_path",
+        F.col("source_filename").alias("source_archive"),
+        "source_archive_sha256",
+        "source_csv_member",
+        F.lit(subject.report_family).alias("report_family"),
+        F.lit(subject.section_name).alias("section_name"),
+        F.lit(subject.section_version).alias("report_version"),
+        F.col("typed_values").getItem("RUNNO").cast("long").alias("run_no"),
+        "source_publication_at",
+        F.lit("listing_or_http").alias("source_publication_basis"),
+        F.to_timestamp(F.col("typed_values").getItem("SETTLEMENTDATE")).alias("interval_end"),
+        "landed_at",
+        F.current_timestamp().alias("ingested_at"),
+        F.col("run_id").alias("ingestion_run_id"),
+        F.col("source_row_number").alias("ingestion_sequence"),
+        F.lit(None).cast("string").alias("_rescued_data"),
+        F.lit(subject.section_group).alias("section_group"),
+        F.col("typed_values").alias("source_values"),
+        F.array_except(F.map_keys("unexpected_values"), F.array(F.lit("__none__"))).alias("_unknown_columns"),
         "source_row_number",
+        "source_record_id",
+        "source_version_id",
     )
 
 

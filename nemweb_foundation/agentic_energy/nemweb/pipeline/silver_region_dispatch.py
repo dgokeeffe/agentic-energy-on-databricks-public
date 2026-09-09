@@ -4,6 +4,7 @@ from pyspark import pipelines as dp
 from pyspark.sql import functions as F
 
 from agentic_energy.nemweb.pipeline.silver_common import latest_correction, with_effective_run
+from agentic_energy.nemweb.source_registry import get_subject_by_key
 
 _KEY = ("interval_end", "region_id", "intervention")
 
@@ -19,8 +20,10 @@ _KEY = ("interval_end", "region_id", "intervention")
     "AND rrp_aud_per_mwh IS NOT NULL AND total_demand_mw IS NOT NULL",
 )
 def silver_nem_region_dispatch():
-    price = latest_correction(spark.read.table("bronze_nem_dispatch_price"), _KEY).alias("p")
-    demand = latest_correction(spark.read.table("bronze_nem_dispatch_region_sum"), _KEY).alias("d")
+    price = latest_correction(spark.read.table("bronze_nem_dispatch_price"), _KEY,
+                              correction_order=get_subject_by_key("dispatch_price").correction_order).alias("p")
+    demand = latest_correction(spark.read.table("bronze_nem_dispatch_region_sum"), _KEY,
+                               correction_order=get_subject_by_key("dispatch_region_sum").correction_order).alias("d")
     # PRICE and REGIONSUM are a single analyst contract. An incomplete section
     # pair must not supersede a complete effective run with a null measure.
     joined = price.join(demand, list(_KEY), "inner").select(

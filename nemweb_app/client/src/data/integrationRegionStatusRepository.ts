@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { classifyRows, type QueryState, type RegionStatus } from '../domain/regionStatus';
 import type { FuelGenerationRow } from '../domain/fuelCapture';
+import type { UnitDispatchRow } from '../domain/facilityMap';
 import type { RegionStatusRepository } from './regionStatusRepository';
 
 const requiredNumber = z.preprocess(
@@ -72,11 +73,12 @@ export function normaliseIntegrationRows(rows: unknown[]): RegionStatus[] {
 export function integrationQueryState(
   data: unknown,
   fuelRows: FuelGenerationRow[] | null = null,
+  unitRows: UnitDispatchRow[] | null = null,
   nowMs = Date.now()
 ): QueryState {
   try {
     if (!Array.isArray(data)) throw new Error('Unexpected analytics payload');
-    return classifyRows(normaliseIntegrationRows(data), 'integration', nowMs, fuelRows);
+    return classifyRows(normaliseIntegrationRows(data), 'integration', nowMs, fuelRows, unitRows);
   } catch {
     return {
       kind: 'error',

@@ -38,7 +38,8 @@ the repeated values across regions.**
 
 ## Stages
 
-Use a fresh AI-assistant conversation for each stage. Record the decision before
+Use a fresh AI-assistant conversation for each stage. Record what you learned,
+what remains uncertain, and whether to continue, revise, or ask for help before
 opening the next.
 
 ### Stage 1 — run the app locally against mock data
@@ -75,7 +76,7 @@ for the endpoint bootstrap and do not manage anyone else's resources.
 Confirm your branch exists before continuing:
 
 ```bash
-databricks postgres list-branches projects/<PROJECT_ID> --profile daveok
+databricks postgres list-branches projects/<PROJECT_ID> --profile DEFAULT
 ```
 
 You should see `dev-<your-slug>`. Record the branch path. Do not use a branch
@@ -85,7 +86,7 @@ Create or configure only your own primary endpoint. This helper never creates,
 replaces, resets, or deletes branches, and enables five-minute scale-to-zero:
 
 ```bash
-PROFILE=daveok PROJECT_ID=<PROJECT_ID> ATTENDEE_SLUG=<your-slug> \\
+PROFILE=DEFAULT PROJECT_ID=<PROJECT_ID> ATTENDEE_SLUG=<your-slug> \\
   bash workshop/lakebase/scripts/provision-attendee-endpoint.sh
 ```
 
@@ -94,7 +95,7 @@ Confirm the endpoint is ready before continuing:
 ```bash
 databricks postgres get-endpoint \\
   projects/<PROJECT_ID>/branches/dev-<your-slug>/endpoints/primary \\
-  --profile daveok
+  --profile DEFAULT
 ```
 
 If the endpoint command fails with a permission error, stop and ask the
@@ -108,7 +109,7 @@ own identity and the app then fails with `permission denied … 42501`.
 
 ```bash
 cd nemweb_app
-databricks bundle validate --strict -t dev --profile daveok \
+databricks bundle validate --strict -t dev --profile DEFAULT \
   --var attendee_slug=<your-slug> \
   --var lakebase_project_id=<project-id> \
   --var sql_warehouse_id=<warehouse-id>
@@ -122,13 +123,13 @@ yours, stop.
 > while the Postgres **database name** is underscored (`databricks_postgres`).
 > The bundle default is already correct. If you override it, confirm the real
 > value with
-> `databricks postgres list-databases projects/<project-id>/branches/dev-<your-slug> --profile daveok`,
+> `databricks postgres list-databases projects/<project-id>/branches/dev-<your-slug> --profile DEFAULT`,
 > or the app will point at a resource path that does not exist.
 
 Then, once the facilitator has released deployment:
 
 ```bash
-databricks bundle deploy -t dev --profile daveok \
+databricks bundle deploy -t dev --profile DEFAULT \
   --var attendee_slug=<your-slug> \
   --var lakebase_project_id=<project-id> \
   --var sql_warehouse_id=<warehouse-id>
@@ -143,7 +144,7 @@ service principal project `CAN_MANAGE` just to bootstrap compute.
 Confirm your app's service principal owns the schema it created:
 
 ```bash
-databricks apps get aew-<your-slug> --profile daveok
+databricks apps get aew-<your-slug> --profile DEFAULT
 ```
 
 Note the `service_principal_client_id`. That same ID should own `app_write` on
@@ -189,9 +190,13 @@ you could not verify.
 If you want your change considered for the repository, open a pull request. Do not
 merge it yourself.
 
-## Stops
+## Explore safely
 
-Stop and ask the facilitator if:
+The app is a place to try an analyst workflow, not to make an automated market
+or trading decision. Use the prepared path to explore the experience before
+connecting live resources.
+
+Pause and ask the facilitator if:
 
 - your slug or branch is not confirmed yours;
 - you are about to deploy with someone else's slug;
@@ -203,5 +208,8 @@ Stop and ask the facilitator if:
 - a test needs weakening, skipping, or deleting to pass; or
 - you need a credential, token, or private workspace detail in a file.
 
-Do not deploy the foundation bundle, run its jobs, change grants, enable live
-NEMWEB, change a schedule, delete a Lakebase project or branch, or merge.
+Keep these hard boundaries: do not deploy the foundation bundle, run its jobs,
+change grants, enable live NEMWEB, change a schedule, delete a Lakebase project
+or branch, or merge. Do not put credentials or private workspace details in the
+app, a prompt, or a record. Prepared and snapshot evidence is welcome for
+exploration, but label it clearly and do not describe it as live.

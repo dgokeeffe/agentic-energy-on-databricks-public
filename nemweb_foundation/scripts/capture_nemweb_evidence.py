@@ -58,6 +58,7 @@ def main() -> int:
     parser.add_argument("--warehouse-id", required=True)
     parser.add_argument("--catalog", required=True)
     parser.add_argument("--schema", required=True)
+    parser.add_argument("--app-serving-schema", required=True)
     parser.add_argument("--pipeline-id", required=True)
     parser.add_argument("--pipeline-update-id", required=True)
     parser.add_argument("--orchestration-run-id", required=True)
@@ -77,6 +78,7 @@ def main() -> int:
     previous = _last_by_subject(existing)
     current = capture_live_evidence(
         client=DatabricksCLI(args.profile), catalog=args.catalog, schema=args.schema,
+        app_serving_schema=args.app_serving_schema,
         warehouse_id=args.warehouse_id, pipeline_id=args.pipeline_id,
         pipeline_update_id=args.pipeline_update_id,
         orchestration_run_id=args.orchestration_run_id,

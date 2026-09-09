@@ -21,6 +21,7 @@ resources:
               catalog: ${var.catalog}
               schema: ${var.schema}
               app_serving_schema: ${var.app_serving_schema}
+              source_mode: ${var.nemweb_mode}
         # Second serving surface, for the Track C value-capture screen. Sequenced
         # after the region-status publication rather than run in parallel, so a
         # failure leaves an unambiguous point of interruption on one warehouse.
@@ -36,6 +37,7 @@ resources:
               catalog: ${var.catalog}
               schema: ${var.schema}
               app_serving_schema: ${var.app_serving_schema}
+              source_mode: ${var.nemweb_mode}
       tags:
-        data_classification: prepared_non_live
+        data_classification: mode_explicit
         writer: lakehouse_only

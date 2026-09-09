@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import pytest
 
-from agentic_energy.nemweb.evidence import job_outcomes, resolve_lander_run_id
+from agentic_energy.nemweb.evidence import job_outcomes, resolve_lander_run_id, resolve_pipeline_update_id
 
 
 class _Client:
@@ -24,6 +24,10 @@ class _Client:
 
     def list_job_runs(self, job_id, limit=25):
         self.calls.append((job_id, limit))
+        return self.runs
+
+    def list_pipeline_updates(self, pipeline_id, max_results=25):
+        self.calls.append((pipeline_id, max_results))
         return self.runs
 
 
@@ -133,6 +137,16 @@ def test_open_ended_window_accepts_later_run():
     del task["end_time"]
 
     assert resolve_lander_run_id(client, _parent_run(task)) == "444444444444444"
+
+
+def test_exact_pipeline_update_resolution_prefers_exposed_id_and_fails_ambiguous_window():
+    client = _Client([])
+    assert resolve_pipeline_update_id(client, "p", {"pipeline_task": {"update_id": "u-exact"}}) == "u-exact"
+    client = _Client([{"update_id": "u1", "creation_time": 150}, {"update_id": "u2", "creation_time": 160}])
+    with pytest.raises(RuntimeError, match="2 updates"):
+        resolve_pipeline_update_id(client, "p", {"start_time": 100, "end_time": 200})
+    client = _Client([{"update_id": "u1", "creation_time": 150}])
+    assert resolve_pipeline_update_id(client, "p", {"start_time": 100, "end_time": 200}) == "u1"
 
 
 def test_job_outcomes_still_reports_task_run_id():

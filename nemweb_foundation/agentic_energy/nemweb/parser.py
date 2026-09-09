@@ -59,7 +59,7 @@ def _validate_member(info: zipfile.ZipInfo, limits: ZipLimits) -> None:
     mode = info.external_attr >> 16
     if info.is_dir():
         raise UnsafeArchiveError(f"ZIP directories are not accepted: {name!r}")
-    if mode and not stat.S_ISREG(mode):
+    if stat.S_IFMT(mode) and not stat.S_ISREG(mode):
         raise UnsafeArchiveError(f"non-regular ZIP member is not accepted: {name!r}")
     if info.file_size > limits.max_member_bytes:
         raise UnsafeArchiveError(f"ZIP member exceeds expanded-byte limit: {name!r}")
@@ -134,10 +134,19 @@ def _parse_member(report_family: str, member: str, data: bytes) -> tuple[
     list[ParsedRecord], list[ControlRecord], list[ParseIssue],
     dict[tuple[str, str, str], tuple[str, ...]],
 ]:
+    selected_encoding = "utf-8-sig"
     try:
-        text = data.decode("utf-8-sig")
-    except UnicodeDecodeError as exc:
-        raise ContractError(f"CSV member {member!r} is not UTF-8") from exc
+        text = data.decode(selected_encoding)
+    except UnicodeDecodeError:
+        selected_encoding = "cp1252"
+        try:
+            text = data.decode(selected_encoding)
+        except UnicodeDecodeError as exc:  # pragma: no cover - cp1252 is total
+            raise ContractError(f"CSV member {member!r} uses an unsupported encoding") from exc
+    # CP1252 decodes every byte, so reject binary/control payloads rather than
+    # accepting them as superficially valid text.
+    if any(ord(ch) < 32 and ch not in "\r\n\t" for ch in text):
+        raise ContractError(f"CSV member {member!r} contains unsupported control bytes")
 
     records: list[ParsedRecord] = []
     controls: list[ControlRecord] = []
@@ -228,7 +237,7 @@ def _parse_member(report_family: str, member: str, data: bytes) -> tuple[
                     continue
             records.append(ParsedRecord(
                 report_family, key[0], key[1], key[2], member, row_number,
-                values, unknown,
+                values, unknown, selected_encoding,
             ))
     except csv.Error as exc:
         issues.append(_issue("MALFORMED_CSV", "error", member, reader.line_num,
@@ -241,30 +250,71 @@ def parse_zip_bytes(
     report_family: str,
     limits: ZipLimits = ZipLimits(),
 ) -> ParseResult:
-    """Validate and parse every CSV member and interleaved section in a ZIP."""
+    """Validate direct CSVs or one nested ZIP and parse every CSV member.
 
-    infos = inspect_zip(data, limits)
+    Expansion limits are accumulated across both levels. Nested ZIPs are a real
+    NEMWEB shape for selected reports; deeper nesting is rejected.
+    """
+
     records: list[ParsedRecord] = []
     controls: list[ControlRecord] = []
     issues: list[ParseIssue] = []
     headers: dict[tuple[str, str, str], tuple[str, ...]] = {}
-    with zipfile.ZipFile(io.BytesIO(data)) as archive:
-        for info in sorted(infos, key=lambda item: item.filename):
-            try:
-                member_data = archive.read(info)
-            except (zipfile.BadZipFile, RuntimeError, OSError) as exc:
-                raise UnsafeArchiveError(f"ZIP CRC/read failure for {info.filename!r}") from exc
-            parsed = _parse_member(report_family, info.filename, member_data)
-            records.extend(parsed[0])
-            controls.extend(parsed[1])
-            issues.extend(parsed[2])
-            for key, columns in parsed[3].items():
-                previous = headers.get(key)
-                if previous is not None and previous != columns:
-                    issues.append(_issue("CONFLICTING_ARCHIVE_HEADER", "error", info.filename, 0,
-                                         "section/version differs across CSV members", key))
-                else:
-                    headers[key] = columns
+    total_members = 0
+    total_expanded = 0
+
+    def visit(payload: bytes, prefix: str, depth: int) -> None:
+        nonlocal total_members, total_expanded
+        try:
+            archive = zipfile.ZipFile(io.BytesIO(payload))
+        except (zipfile.BadZipFile, OSError) as exc:
+            raise UnsafeArchiveError("invalid ZIP central directory") from exc
+        with archive:
+            infos = tuple(archive.infolist())
+            if not infos:
+                raise UnsafeArchiveError("ZIP archive is empty")
+            for info in sorted(infos, key=lambda item: item.filename):
+                name = info.filename.replace("\\", "/")
+                path = PurePosixPath(name)
+                if not name or name.startswith("/") or path.is_absolute() or ".." in path.parts:
+                    raise UnsafeArchiveError(f"unsafe ZIP member path: {info.filename!r}")
+                if info.flag_bits & 0x1:
+                    raise UnsafeArchiveError(f"encrypted ZIP member is not supported: {name!r}")
+                mode = info.external_attr >> 16
+                if info.is_dir() or (stat.S_IFMT(mode) and not stat.S_ISREG(mode)):
+                    raise UnsafeArchiveError(f"non-regular ZIP member is not accepted: {name!r}")
+                if info.file_size > limits.max_member_bytes:
+                    raise UnsafeArchiveError(f"ZIP member exceeds expanded-byte limit: {name!r}")
+                if info.file_size / max(info.compress_size, 1) > limits.max_compression_ratio:
+                    raise UnsafeArchiveError(f"ZIP member exceeds compression-ratio limit: {name!r}")
+                total_members += 1
+                total_expanded += info.file_size
+                if total_members > limits.max_files or total_expanded > limits.max_total_expanded_bytes:
+                    raise UnsafeArchiveError("ZIP archive exceeds aggregate expansion limits")
+                try:
+                    member_data = archive.read(info)
+                except (zipfile.BadZipFile, RuntimeError, OSError) as exc:
+                    raise UnsafeArchiveError(f"ZIP CRC/read failure for {name!r}") from exc
+                full_name = f"{prefix}{name}"
+                suffix = path.suffix.upper()
+                if suffix == ".ZIP":
+                    if depth >= 1:
+                        raise UnsafeArchiveError("nested ZIP depth exceeds one level")
+                    visit(member_data, full_name + "!", depth + 1)
+                    continue
+                if suffix != ".CSV":
+                    raise UnsafeArchiveError(f"unexpected non-CSV ZIP member: {name!r}")
+                parsed = _parse_member(report_family, full_name, member_data)
+                records.extend(parsed[0]); controls.extend(parsed[1]); issues.extend(parsed[2])
+                for key, columns in parsed[3].items():
+                    previous = headers.get(key)
+                    if previous is not None and previous != columns:
+                        issues.append(_issue("CONFLICTING_ARCHIVE_HEADER", "error", full_name, 0,
+                                             "section/version differs across CSV members", key))
+                    else:
+                        headers[key] = columns
+
+    visit(data, "", 0)
     return ParseResult(report_family, tuple(records), tuple(controls), tuple(issues), headers)
 
 

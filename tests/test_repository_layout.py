@@ -23,14 +23,14 @@ def test_no_tracked_retired_foundation_paths_or_content_references():
 def test_app_analytics_identifier_is_fixed_to_the_regular_serving_table():
     query = (ROOT / "nemweb_app/config/queries/latest_region_status.sql").read_text()
     table = "agentic_energy_workshop.agentic_energy_workshop_d4_serving.gold_nem_app_region_status"
-    assert f"FROM {table}" in query
+    assert "FROM IDENTIFIER(:region_status_table)" in query
+    assert table in query  # type-generation-only sample value
     assert "FROM daveok." not in query
-    assert "IDENTIFIER(" not in query
-    assert ":serving_table" not in query
     assert "SERVING_TABLE" not in (ROOT / "nemweb_app/app.yaml").read_text()
 
     bundle = (ROOT / "nemweb_app/databricks.yml").read_text()
-    assert f"securable_full_name: {table}" in bundle
+    assert "securable_full_name: ${var.region_status_table}" in bundle
+    assert f"default: {table}" in bundle
     assert "securable_type: TABLE" in bundle
     assert "permission: SELECT" in bundle
 
@@ -47,13 +47,13 @@ def test_app_fuel_generation_read_is_fixed_and_separately_granted():
         "agentic_energy_workshop.agentic_energy_workshop_d4_serving"
         ".gold_nem_scada_generation_5min"
     )
-    assert f"FROM {table}" in query
+    assert "FROM IDENTIFIER(:fuel_generation_table)" in query
+    assert table in query  # type-generation-only sample value
     assert "FROM daveok." not in query
-    assert "IDENTIFIER(" not in query
-    assert ":serving_table" not in query
 
     bundle = (ROOT / "nemweb_app/databricks.yml").read_text()
-    assert f"securable_full_name: {table}" in bundle
+    assert "securable_full_name: ${var.fuel_generation_table}" in bundle
+    assert f"default: {table}" in bundle
     # A schema-level grant would hand the app every table in the serving schema.
     assert "securable_type: SCHEMA" not in bundle
 
@@ -89,6 +89,8 @@ def test_app_mock_smoke_does_not_start_workspace_plugins():
 def test_app_analytics_query_parameters_are_referentially_stable():
     app = (ROOT / "nemweb_app/client/src/App.tsx").read_text()
     assert "const EMPTY_QUERY_PARAMETERS" in app
-    for query in ("latest_region_status", "latest_fuel_generation"):
-        assert f"useAnalyticsQuery('{query}', EMPTY_QUERY_PARAMETERS)" in app
-        assert f"useAnalyticsQuery('{query}', {{}})" not in app
+    assert "useMemo(() => ({" in app
+    assert "useAnalyticsQuery('latest_region_status', regionParameters)" in app
+    assert "useAnalyticsQuery('latest_fuel_generation', fuelParameters)" in app
+    assert "sql.string(servingTableParameters.region_status_table)" in app
+    assert "sql.string(servingTableParameters.fuel_generation_table)" in app

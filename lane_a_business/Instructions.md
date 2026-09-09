@@ -13,12 +13,12 @@ and keep it beside you.
 > Can an operator trust the latest regional price trend, given NEMWEB
 > corrections, freshness, and timezone handling?
 
-Do not invent a different question, report family, or data store unless the
-facilitator approves the change. Do not assume a metric view, Genie Agent, Genie
-One feature, MCP endpoint, dashboard, or App exists. Use a workspace surface
-only after the facilitator confirms the relevant item in
-[`../PRE-REQUISITES.md`](../PRE-REQUISITES.md) and releases it. Otherwise record
-the step as `not-run` or `blocked` and continue with local work.
+Start with the supplied question, then explore sensible follow-up questions
+when they help explain the result. Keep the governed data contract rather than
+creating a second data store. A metric view, Genie Agent, Genie One feature,
+MCP endpoint, dashboard, or App may be live, prepared, or unavailable; label
+which one you used and continue with the prepared path when the live surface is
+not released.
 
 ## What you must produce
 
@@ -57,7 +57,8 @@ bid, forecast unpublished intervals, or hide missing and uncertain context.
 ## Numbered stages
 
 Use a fresh AI-assistant conversation for every prompt. Finish the current stage
-and record the human decision before starting the next.
+by recording what you learned, what remains uncertain, and whether you want to
+continue, revise the question, or ask for help.
 
 | Stage | Prompt | Output |
 |---|---|---|---|
@@ -68,23 +69,23 @@ and record the human decision before starting the next.
 | 5. Governed answer surface | [`05-build-answer-surface.md`](prompts/05-build-answer-surface.md) | one surface showing owner, source, and freshness |
 | 6. Benchmarks and close | [`06-benchmark-and-close.md`](prompts/06-benchmark-and-close.md) | expected results, rerun decision, closing note |
 
-## Decisions and stop conditions
+## Explore safely
 
-At every stage, a person chooses **accept**, **send back**, **reject**, or
-**stop**. Stop when:
+At every stage, record the evidence label, what you learned, and the next
+choice: continue, revise, ask for help, or stop. Prepared and snapshot paths are
+valid ways to rehearse the workflow; they must simply remain labelled as such.
 
-- the decision owner is absent or the question changes without approval;
-- the source, grain, time semantics, correction policy, or freshness evidence
-  cannot be cited;
-- snapshot or prepared evidence is about to be described as live;
-- the analysis needs another table, a second product, or unapproved data;
-- a workspace capability or identity has not passed preflight;
-- the supported answer omits source, time range, units, or freshness;
-- the product gives bid or forecast advice instead of refusing;
-- another tool is added before the refusal works;
-- the answer surface hides owner, source, or freshness; or
-- the benchmark question or expected result changes to make a rerun pass.
+Keep these as hard boundaries:
 
-Do not deploy, merge, run a job, change permissions, expose credentials, or
-weaken a check. When a capability is unavailable, record `not-run` or `blocked`
-and continue with local work.
+- never describe prepared or snapshot evidence as live;
+- keep source, grain, time semantics, correction policy, units, and freshness
+  visible when presenting an answer;
+- do not infer availability, curtailment, causation, bids, or forecasts from
+  this historical dataset;
+- do not expose credentials or private workspace details;
+- do not deploy, run jobs, change permissions, or alter live schedules without
+  explicit facilitator authorisation; and
+- do not change an expected result merely to make a rerun pass.
+
+When a live capability is unavailable, use the prepared path, label the gap, and
+continue exploring rather than treating the stage as blocked.

@@ -1,6 +1,10 @@
 # Facilitator reference solution
 
-This directory contains the completed NEMWEB implementation. It is the
+This directory contains the completed NEMWEB implementation. The app-first
+Delta landing provenance and exact eight-subject scope are recorded in
+[`MIGRATION_MANIFEST.md`](MIGRATION_MANIFEST.md).
+
+It is the
 authoritative Python project and Databricks Asset Bundle for facilitator
 validation and deployment. Workshop participants use `QUICKSTART.md` and their
 assigned track; they do not work in this directory.
@@ -25,7 +29,7 @@ root.
 Supply approved values through `BUNDLE_VAR_*` environment variables, then run:
 
 ```bash
-databricks bundle validate --strict -t dev --profile daveok
+databricks bundle validate --strict -t dev --profile DEFAULT
 ```
 
 Do not guess workspace identifiers or principal names. Validation does not

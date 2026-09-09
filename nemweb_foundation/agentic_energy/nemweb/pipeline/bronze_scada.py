@@ -9,13 +9,7 @@ from agentic_energy.nemweb.pipeline.io import (
     section_stream,
 )
 
-_SCADA_COLUMNS = (
-    ("SETTLEMENTDATE", "settlementdate", "timestamp"),
-    ("DUID", "duid", "string"),
-    # Negative values are legitimate for batteries and dispatchable load.
-    ("SCADAVALUE", "actual_generation_mw", "double"),
-    ("LASTCHANGED", "source_last_changed", "timestamp"),
-)
+# Typed projection is owned by source_registry.dispatch_unit_scada.
 _SCADA_VALID = (
     f"{COMMON_VALIDITY_SQL} AND interval_end IS NOT NULL AND duid IS NOT NULL "
     f"AND actual_generation_mw IS NOT NULL AND {FIVE_MINUTE_BOUNDARY_SQL}"
@@ -26,10 +20,7 @@ _SCADA_VALID = (
 def raw_nem_dispatch_unit_scada():
     return section_stream(
         spark,
-        report_family="dispatch_scada",
-        section_group="DISPATCH",
-        section_name="UNIT_SCADA",
-        columns=_SCADA_COLUMNS,
+        subject_key="dispatch_unit_scada",
     )
 
 

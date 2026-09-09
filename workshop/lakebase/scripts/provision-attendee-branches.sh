@@ -6,15 +6,15 @@
 # hosts, tokens, workspace URLs, tenant IDs, or service-principal IDs.
 #
 # Usage:
-#   PROFILE=daveok PROJECT_ID=<project> PARENT_BRANCH=<branch-id> \
+#   PROFILE=DEFAULT PROJECT_ID=<project> PARENT_BRANCH=<branch-id> \
 #     bash workshop/lakebase/scripts/provision-attendee-branches.sh dok ajb kt
 #
 #   DRY_RUN=1 ... to print the planned commands without creating anything.
 set -euo pipefail
 
-: "${PROFILE:?Set PROFILE=daveok explicitly}"
+: "${PROFILE:?Set PROFILE=DEFAULT explicitly}"
 if [[ "$PROFILE" != "daveok" ]]; then
-  echo "PROFILE=daveok is required" >&2
+  echo "PROFILE=DEFAULT is required" >&2
   exit 2
 fi
 

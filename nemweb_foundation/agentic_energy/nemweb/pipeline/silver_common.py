@@ -4,7 +4,7 @@ from pyspark.sql import functions as F
 from pyspark.sql.window import Window
 
 
-def latest_correction(frame, natural_key, *, source_revision=None):
+def latest_correction(frame, natural_key, *, source_revision=None, correction_order=None):
     """Select the latest source correction without deleting Bronze history.
 
     ``source_revision`` names a report-specific VERSIONNO/SETTLEMENTRUNNO
@@ -13,17 +13,24 @@ def latest_correction(frame, natural_key, *, source_revision=None):
     tie-breakers.
     """
 
-    report_order = [F.col("report_version").cast("long").desc_nulls_last()]
-    if source_revision is not None:
-        report_order.append(F.col(source_revision).cast("long").desc_nulls_last())
-    order = (
-        *report_order,
-        F.col("run_no").desc_nulls_last(),
-        F.col("source_publication_at").desc_nulls_last(),
-        F.col("landed_at").desc_nulls_last(),
-        F.col("ingestion_run_id").desc_nulls_last(),
-        F.col("ingestion_sequence").desc_nulls_last(),
-    )
+    if correction_order is not None:
+        numeric = {"report_version", "source_run_no", "source_version_no"}
+        order = tuple(
+            (F.col(name).cast("long") if name in numeric else F.col(name)).desc_nulls_last()
+            for name in correction_order
+        )
+    else:
+        report_order = [F.col("report_version").cast("long").desc_nulls_last()]
+        if source_revision is not None:
+            report_order.append(F.col(source_revision).cast("long").desc_nulls_last())
+        order = (
+            *report_order,
+            F.col("run_no").desc_nulls_last(),
+            F.col("source_publication_at").desc_nulls_last(),
+            F.col("landed_at").desc_nulls_last(),
+            F.col("ingestion_run_id").desc_nulls_last(),
+            F.col("ingestion_sequence").desc_nulls_last(),
+        )
     window = Window.partitionBy(*natural_key).orderBy(*order)
     return frame.withColumn("_correction_rank", F.row_number().over(window)).where(
         F.col("_correction_rank") == 1

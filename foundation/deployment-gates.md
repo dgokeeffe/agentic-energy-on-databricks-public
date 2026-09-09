@@ -8,7 +8,7 @@ authoritative executable step is
 this page is the gate sequence around it. Run the script rather than copying its
 commands.
 
-Every workspace-aware command selects `--profile daveok` explicitly. Never rely on
+Every workspace-aware command selects `--profile DEFAULT` explicitly. Never rely on
 an implicit or default profile.
 
 ## Gate 1 — local and identity
@@ -18,7 +18,7 @@ Nothing touches a workspace until these pass.
 ```bash
 git status --short
 make validate-local
-databricks auth describe --profile daveok
+databricks auth describe --profile DEFAULT
 ```
 
 Stop if the profile is absent, unauthenticated, or points at an unexpected
@@ -32,7 +32,7 @@ non-secret value. Keep `.env` local and uncommitted.
 ```bash
 cp -f env.example .env
 set -a; . ./.env; set +a
-make bundle-validate PROFILE=daveok
+make bundle-validate PROFILE=DEFAULT
 ```
 
 `make bundle-validate` pre-checks every no-default variable by name and validates
@@ -46,7 +46,7 @@ Validation does not authorise deployment.
 Requires explicit current human authorisation, recorded before you run it.
 
 ```bash
-bash nemweb_foundation/scripts/deploy.sh dev
+bash nemweb_foundation/scripts/deploy.sh live_evidence
 ```
 
 ### Cold-workspace ordering, verified 2026-09-07
@@ -88,7 +88,7 @@ mv -f nemweb_foundation/.databricks/bundle/dev nemweb_foundation/.databricks/bun
 Otherwise the deploy fails with `Unable to find dashboard [<old-id>]`.
 
 The bundle uses the direct deployment engine, so there is no Terraform state. The
-script validates and then deploys with the `daveok` profile.
+script validates and then deploys with the `DEFAULT` profile.
 
 After deployment, confirm before going further:
 
@@ -119,7 +119,7 @@ Validate all canonical SQL before creating or updating any analyst asset.
 uv run --project nemweb_foundation python nemweb_foundation/scripts/validate_nemweb_genie.py
 
 uv run --project nemweb_foundation python nemweb_foundation/scripts/validate_nemweb_genie.py --execute \
-  --profile daveok --warehouse-id "$BUNDLE_VAR_warehouse_id" \
+  --profile DEFAULT --warehouse-id "$BUNDLE_VAR_warehouse_id" \
   --catalog "$BUNDLE_VAR_catalog" --schema "$BUNDLE_VAR_schema"
 ```
 
@@ -129,15 +129,19 @@ governed.
 
 ## Gate 6 — live proof, separately authorised
 
-Live mode needs its own approval, distinct from the deployment approval. Capture
-each scheduled cycle by its **exact** pipeline update ID; never select "latest".
+Live mode needs its own approval, distinct from validation. Deploy only the
+isolated `live_evidence` target, keep both schedules paused, run context once,
+and run three critical cycles manually at approximately five-minute start
+intervals. Capture each cycle by its **exact** pipeline update ID; never select
+"latest".
 
 ```bash
 uv run --project nemweb_foundation python nemweb_foundation/scripts/capture_nemweb_evidence.py \
-  --profile daveok \
+  --profile DEFAULT \
   --warehouse-id "$BUNDLE_VAR_warehouse_id" \
   --catalog "$BUNDLE_VAR_catalog" \
-  --schema "$BUNDLE_VAR_schema" \
+  --schema "$BUNDLE_VAR_live_evidence_schema" \
+  --app-serving-schema "$BUNDLE_VAR_live_evidence_app_serving_schema" \
   --pipeline-id "$NEMWEB_PIPELINE_ID" \
   --pipeline-update-id "$NEMWEB_UPDATE_ID" \
   --orchestration-run-id "$NEMWEB_JOB_RUN_ID" \

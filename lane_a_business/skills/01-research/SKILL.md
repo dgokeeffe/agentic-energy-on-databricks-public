@@ -9,8 +9,9 @@ Use this skill for Track A stage 1. Read the
 [quickstart](../../../QUICKSTART.md) and your
 [track record](../../../workshop/track-record-template.md).
 
-When a workspace capability is unavailable, record the step as `not-run` or
-`blocked` and label any substitute **prepared**.
+When a workspace capability is unavailable, use the prepared path and label
+any substitute **prepared** or **snapshot**. Continue the research rather than
+turning an unavailable surface into a blocked stage.
 
 ## Research record
 

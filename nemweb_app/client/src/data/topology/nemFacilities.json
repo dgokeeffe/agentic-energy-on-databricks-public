@@ -1,0 +1,3482 @@
+[
+  {
+    "facilityCode": "ADP",
+    "facilityName": "Adelaide Desalination",
+    "regionId": "SA1",
+    "latitude": -35.096948,
+    "longitude": 138.484061,
+    "duids": ["ADPPV1", "ADPBA1", "ADPPV2", "ADPPV3", "ADPMH1"]
+  },
+  {
+    "facilityCode": "AGLHAL",
+    "facilityName": "Hallett",
+    "regionId": "SA1",
+    "latitude": -33.349528,
+    "longitude": 138.751607,
+    "duids": ["AGLHAL"]
+  },
+  {
+    "facilityCode": "AGLSOM",
+    "facilityName": "Somerton",
+    "regionId": "VIC1",
+    "latitude": -37.631692,
+    "longitude": 144.952802,
+    "duids": ["AGLSOM"]
+  },
+  {
+    "facilityCode": "ALDGASF",
+    "facilityName": "Aldoga",
+    "regionId": "QLD1",
+    "latitude": -23.839544,
+    "longitude": 151.0849,
+    "duids": ["ALDGASF1"]
+  },
+  {
+    "facilityCode": "ANGASTON",
+    "facilityName": "Angaston",
+    "regionId": "SA1",
+    "latitude": -34.503389,
+    "longitude": 139.02458,
+    "duids": ["ANGAST1"]
+  },
+  {
+    "facilityCode": "APPIN",
+    "facilityName": "Appin",
+    "regionId": "NSW1",
+    "latitude": -34.210868,
+    "longitude": 150.792711,
+    "duids": ["APPIN"]
+  },
+  {
+    "facilityCode": "ARWF",
+    "facilityName": "Ararat",
+    "regionId": "VIC1",
+    "latitude": -37.263393,
+    "longitude": 143.082116,
+    "duids": ["ARWF1"]
+  },
+  {
+    "facilityCode": "AVLSF",
+    "facilityName": "Avonlie",
+    "regionId": "NSW1",
+    "latitude": -34.913826,
+    "longitude": 146.590545,
+    "duids": ["AVLSF1"]
+  },
+  {
+    "facilityCode": "B2PS",
+    "facilityName": "Braemar 2",
+    "regionId": "QLD1",
+    "latitude": -27.112874,
+    "longitude": 150.905442,
+    "duids": ["BRAEMAR5", "BRAEMAR7", "BRAEMAR6"]
+  },
+  {
+    "facilityCode": "BAKING",
+    "facilityName": "Baking Board",
+    "regionId": "QLD1",
+    "latitude": -26.720639,
+    "longitude": 150.553781,
+    "duids": ["BAKING1"]
+  },
+  {
+    "facilityCode": "BALBESS",
+    "facilityName": "Ballarat",
+    "regionId": "VIC1",
+    "latitude": -37.567603,
+    "longitude": 143.919894,
+    "duids": ["BALB1"]
+  },
+  {
+    "facilityCode": "BANGOWF",
+    "facilityName": "Bango",
+    "regionId": "NSW1",
+    "latitude": -34.767208,
+    "longitude": 148.921499,
+    "duids": ["BANGOWF2", "BANGOWF1"]
+  },
+  {
+    "facilityCode": "BANNSP",
+    "facilityName": "Bannerton",
+    "regionId": "VIC1",
+    "latitude": -34.687324,
+    "longitude": 142.77895,
+    "duids": ["BANN1"]
+  },
+  {
+    "facilityCode": "BAPS",
+    "facilityName": "Banimboola",
+    "regionId": "VIC1",
+    "latitude": -36.534342,
+    "longitude": 147.45934,
+    "duids": ["BAPS"]
+  },
+  {
+    "facilityCode": "BARCALDN",
+    "facilityName": "Barcaldine",
+    "regionId": "QLD1",
+    "latitude": -23.552279,
+    "longitude": 145.314856,
+    "duids": ["BARCALDN"]
+  },
+  {
+    "facilityCode": "BARCSF",
+    "facilityName": "Barcaldine",
+    "regionId": "QLD1",
+    "latitude": -23.547776,
+    "longitude": 145.318817,
+    "duids": ["BARCSF1"]
+  },
+  {
+    "facilityCode": "BARKIPS",
+    "facilityName": "Barker Inlet",
+    "regionId": "SA1",
+    "latitude": -34.803695,
+    "longitude": 138.523864,
+    "duids": ["BARKIPS1"]
+  },
+  {
+    "facilityCode": "BARRON",
+    "facilityName": "Barron Gorge",
+    "regionId": "QLD1",
+    "latitude": -16.850852,
+    "longitude": 145.646758,
+    "duids": ["BARRON-2", "BARRON-1"]
+  },
+  {
+    "facilityCode": "BASTYAN",
+    "facilityName": "Bastyan",
+    "regionId": "TAS1",
+    "latitude": -41.736045,
+    "longitude": 145.532064,
+    "duids": ["BASTYAN"]
+  },
+  {
+    "facilityCode": "BAYSW",
+    "facilityName": "Bayswater",
+    "regionId": "NSW1",
+    "latitude": -32.394981,
+    "longitude": 150.94949,
+    "duids": ["BW03", "BW02", "BW04", "BW01"]
+  },
+  {
+    "facilityCode": "BBATTERY",
+    "facilityName": "Bouldercombe",
+    "regionId": "QLD1",
+    "latitude": -23.535251,
+    "longitude": 150.489057,
+    "duids": ["BBATTERY1"]
+  },
+  {
+    "facilityCode": "BBP31",
+    "facilityName": "Bell Bay Three",
+    "regionId": "TAS1",
+    "latitude": -41.139324,
+    "longitude": 146.905522,
+    "duids": ["TVPP104", "BBTHREE3", "BBTHREE1", "BBTHREE2"]
+  },
+  {
+    "facilityCode": "BDONGHYD",
+    "facilityName": "Burrendong",
+    "regionId": "NSW1",
+    "latitude": -32.664624,
+    "longitude": 149.107959,
+    "duids": ["BDONGHYD"]
+  },
+  {
+    "facilityCode": "BERYLSF",
+    "facilityName": "Beryl",
+    "regionId": "NSW1",
+    "latitude": -32.356446,
+    "longitude": 149.470517,
+    "duids": ["BERYLSF1"]
+  },
+  {
+    "facilityCode": "BHB",
+    "facilityName": "Broken Hill Battery",
+    "regionId": "NSW1",
+    "latitude": -31.986306,
+    "longitude": 141.422951,
+    "duids": ["BHB1"]
+  },
+  {
+    "facilityCode": "BHILLGT",
+    "facilityName": "Broken Hill",
+    "regionId": "NSW1",
+    "latitude": -31.986313,
+    "longitude": 141.42062,
+    "duids": ["GB01"]
+  },
+  {
+    "facilityCode": "BHWF",
+    "facilityName": "Bald Hills",
+    "regionId": "VIC1",
+    "latitude": -38.746897,
+    "longitude": 145.949104,
+    "duids": ["BALDHWF1"]
+  },
+  {
+    "facilityCode": "BIALAWF",
+    "facilityName": "Biala",
+    "regionId": "NSW1",
+    "latitude": -34.587836,
+    "longitude": 149.369848,
+    "duids": ["GULLRWF2"]
+  },
+  {
+    "facilityCode": "BLAYNEY",
+    "facilityName": "Blayney",
+    "regionId": "NSW1",
+    "latitude": -33.621944,
+    "longitude": 149.198333,
+    "duids": ["BLAYNEY"]
+  },
+  {
+    "facilityCode": "BLUEGSF",
+    "facilityName": "Blue Grass",
+    "regionId": "QLD1",
+    "latitude": -26.682643,
+    "longitude": 150.504537,
+    "duids": ["BLUEGSF1"]
+  },
+  {
+    "facilityCode": "BLUFF",
+    "facilityName": "The Bluff",
+    "regionId": "SA1",
+    "latitude": -33.367741,
+    "longitude": 138.79379,
+    "duids": ["BLUFF1"]
+  },
+  {
+    "facilityCode": "BLYTHB",
+    "facilityName": "Blyth",
+    "regionId": "SA1",
+    "latitude": -33.848475,
+    "longitude": 138.403204,
+    "duids": ["BLYTHB1"]
+  },
+  {
+    "facilityCode": "BNGSF1",
+    "facilityName": "Bungala One",
+    "regionId": "SA1",
+    "latitude": -32.415846,
+    "longitude": 137.841225,
+    "duids": ["BNGSF1"]
+  },
+  {
+    "facilityCode": "BNGSF2",
+    "facilityName": "Bungala Two",
+    "regionId": "SA1",
+    "latitude": -32.415846,
+    "longitude": 137.841225,
+    "duids": ["BNGSF2"]
+  },
+  {
+    "facilityCode": "BOCOROCK",
+    "facilityName": "Boco Rock",
+    "regionId": "NSW1",
+    "latitude": -36.574527,
+    "longitude": 149.124863,
+    "duids": ["BOCORWF1"]
+  },
+  {
+    "facilityCode": "BODWF",
+    "facilityName": "Bodangora",
+    "regionId": "NSW1",
+    "latitude": -32.414669,
+    "longitude": 149.099633,
+    "duids": ["BODWF1"]
+  },
+  {
+    "facilityCode": "BOLIVAR",
+    "facilityName": "Bolivar",
+    "regionId": "SA1",
+    "latitude": -34.495482,
+    "longitude": 138.387641,
+    "duids": ["BOWWPV1", "BOWWBA1", "BOLIVAR1"]
+  },
+  {
+    "facilityCode": "BOLIVPS",
+    "facilityName": "Bolivar",
+    "regionId": "SA1",
+    "latitude": -34.7772,
+    "longitude": 138.5826,
+    "duids": ["BOLIVPS1"]
+  },
+  {
+    "facilityCode": "BOMENSF",
+    "facilityName": "Bomen",
+    "regionId": "NSW1",
+    "latitude": -35.046577,
+    "longitude": 147.442585,
+    "duids": ["BOMENSF1"]
+  },
+  {
+    "facilityCode": "BPLANDF",
+    "facilityName": "Browns Plains",
+    "regionId": "QLD1",
+    "latitude": -27.674584,
+    "longitude": 153.068499,
+    "duids": ["BPLANDF1"]
+  },
+  {
+    "facilityCode": "BRAEMARA",
+    "facilityName": "Braemar",
+    "regionId": "QLD1",
+    "latitude": -27.110488,
+    "longitude": 150.905683,
+    "duids": ["BRAEMAR2", "BRAEMAR1", "BRAEMAR3"]
+  },
+  {
+    "facilityCode": "BRDD",
+    "facilityName": "Broadsound",
+    "regionId": "QLD1",
+    "latitude": -22.810001,
+    "longitude": 149.36302,
+    "duids": ["BRDDBES1", "BRDDSF01"]
+  },
+  {
+    "facilityCode": "BRNDBES",
+    "facilityName": "Brendale",
+    "regionId": "QLD1",
+    "latitude": -27.329333,
+    "longitude": 152.974384,
+    "duids": ["BRNDBES1"]
+  },
+  {
+    "facilityCode": "BROKENH",
+    "facilityName": "Broken Hill",
+    "regionId": "NSW1",
+    "latitude": -31.987538,
+    "longitude": 141.391994,
+    "duids": ["BROKENH1"]
+  },
+  {
+    "facilityCode": "BROOKLYN",
+    "facilityName": "Brooklyn",
+    "regionId": "VIC1",
+    "latitude": -37.818597,
+    "longitude": 144.828492,
+    "duids": ["BROOKLYN"]
+  },
+  {
+    "facilityCode": "BROWNMT",
+    "facilityName": "Brown Mountain",
+    "regionId": "NSW1",
+    "latitude": -36.594993,
+    "longitude": 149.473997,
+    "duids": ["BROWNMT"]
+  },
+  {
+    "facilityCode": "BRYB1WF1",
+    "facilityName": "Berrybank",
+    "regionId": "VIC1",
+    "latitude": -37.885519,
+    "longitude": 143.453446,
+    "duids": ["BRYB1WF1", "BRYB2WF2"]
+  },
+  {
+    "facilityCode": "BULGANA",
+    "facilityName": "Bulgana Green Power Hub",
+    "regionId": "VIC1",
+    "latitude": -37.039507,
+    "longitude": 142.982799,
+    "duids": ["BULBES1", "BULGANA1"]
+  },
+  {
+    "facilityCode": "BUNGAMB",
+    "facilityName": "Bungama",
+    "regionId": "SA1",
+    "latitude": -33.191223,
+    "longitude": 138.08733,
+    "duids": ["BUNGAMB1"]
+  },
+  {
+    "facilityCode": "BURRIN",
+    "facilityName": "Burrinjuck",
+    "regionId": "NSW1",
+    "latitude": -35.003008,
+    "longitude": 148.582864,
+    "duids": ["BURRIN"]
+  },
+  {
+    "facilityCode": "BUSF",
+    "facilityName": "Bundaberg",
+    "regionId": "QLD1",
+    "latitude": -24.943515,
+    "longitude": 152.020698,
+    "duids": ["BUSF1"]
+  },
+  {
+    "facilityCode": "BUTLERSG",
+    "facilityName": "Butlers Gorge",
+    "regionId": "TAS1",
+    "latitude": -42.266898,
+    "longitude": 146.261823,
+    "duids": ["BUTLERSG"]
+  },
+  {
+    "facilityCode": "BWTR1",
+    "facilityName": "Broadwater",
+    "regionId": "NSW1",
+    "latitude": -29.016483,
+    "longitude": 153.445756,
+    "duids": ["BWTR1"]
+  },
+  {
+    "facilityCode": "CALLIDEC1",
+    "facilityName": "Callide C",
+    "regionId": "QLD1",
+    "latitude": -24.346016,
+    "longitude": 150.61856,
+    "duids": ["CPP_3", "CPP_4"]
+  },
+  {
+    "facilityCode": "CALL_B",
+    "facilityName": "Callide B",
+    "regionId": "QLD1",
+    "latitude": -24.346016,
+    "longitude": 150.61856,
+    "duids": ["CALL_B_1", "CALL_B_2"]
+  },
+  {
+    "facilityCode": "CANUNDA1",
+    "facilityName": "Canunda",
+    "regionId": "SA1",
+    "latitude": -37.698303,
+    "longitude": 140.383633,
+    "duids": ["CNUNDAWF"]
+  },
+  {
+    "facilityCode": "CAPBES",
+    "facilityName": "Capital",
+    "regionId": "NSW1",
+    "latitude": -35.338251,
+    "longitude": 149.215529,
+    "duids": ["CAPBES1"]
+  },
+  {
+    "facilityCode": "CAPTL_WF",
+    "facilityName": "Capital",
+    "regionId": "NSW1",
+    "latitude": -35.123534,
+    "longitude": 149.500249,
+    "duids": ["CAPTL_WF"]
+  },
+  {
+    "facilityCode": "CATHROCK",
+    "facilityName": "Cathedral Rocks",
+    "regionId": "SA1",
+    "latitude": -34.848741,
+    "longitude": 135.592649,
+    "duids": ["CATHROCK"]
+  },
+  {
+    "facilityCode": "CBWF",
+    "facilityName": "Coonoer Bridge",
+    "regionId": "VIC1",
+    "latitude": -36.415237,
+    "longitude": 143.380189,
+    "duids": ["CBWF1"]
+  },
+  {
+    "facilityCode": "CBWWBA",
+    "facilityName": "Christies Beach",
+    "regionId": "SA1",
+    "latitude": -35.125958,
+    "longitude": 138.47135,
+    "duids": ["CBWWBA1", "CBWWPV1", "CBWWBG1", "CBWWDG1", "CBWWDG2", "CBWWPV2"]
+  },
+  {
+    "facilityCode": "CESF",
+    "facilityName": "Capital East",
+    "regionId": "NSW1",
+    "latitude": -35.180684,
+    "longitude": 149.546482,
+    "duids": ["CESF1"]
+  },
+  {
+    "facilityCode": "CETHANA",
+    "facilityName": "Cethana",
+    "regionId": "TAS1",
+    "latitude": -41.480804,
+    "longitude": 146.134511,
+    "duids": ["CETHANA"]
+  },
+  {
+    "facilityCode": "CHALLWF",
+    "facilityName": "Challicum Hills",
+    "regionId": "VIC1",
+    "latitude": -37.395466,
+    "longitude": 143.10459,
+    "duids": ["CHALLHWF"]
+  },
+  {
+    "facilityCode": "CHBESS",
+    "facilityName": "Chinchilla",
+    "regionId": "QLD1",
+    "latitude": -26.918551,
+    "longitude": 150.745399,
+    "duids": ["CHBESS1"]
+  },
+  {
+    "facilityCode": "CHILDSF",
+    "facilityName": "Childers",
+    "regionId": "QLD1",
+    "latitude": -25.305189,
+    "longitude": 152.402663,
+    "duids": ["CHILDSF1"]
+  },
+  {
+    "facilityCode": "CHPSTWF",
+    "facilityName": "Chepstowe",
+    "regionId": "VIC1",
+    "latitude": -37.596503,
+    "longitude": 143.499582,
+    "duids": ["CHPSTWF1"]
+  },
+  {
+    "facilityCode": "CHYTWF",
+    "facilityName": "Cherry Tree",
+    "regionId": "VIC1",
+    "latitude": -37.1018,
+    "longitude": 145.2656,
+    "duids": ["CHYTWF1"]
+  },
+  {
+    "facilityCode": "CLARESF",
+    "facilityName": "Clare",
+    "regionId": "QLD1",
+    "latitude": -19.839817,
+    "longitude": 147.204884,
+    "duids": ["CLARESF1"]
+  },
+  {
+    "facilityCode": "CLAYTON",
+    "facilityName": "Clayton",
+    "regionId": "VIC1",
+    "latitude": -37.950618,
+    "longitude": 145.119681,
+    "duids": ["CLAYTON"]
+  },
+  {
+    "facilityCode": "CLEMGPWF",
+    "facilityName": "Clements Gap",
+    "regionId": "SA1",
+    "latitude": -33.489773,
+    "longitude": 138.111695,
+    "duids": ["CLEMGPWF", "CGBESS01"]
+  },
+  {
+    "facilityCode": "CLERMSF",
+    "facilityName": "Clermont",
+    "regionId": "QLD1",
+    "latitude": -22.837763,
+    "longitude": 147.579322,
+    "duids": ["CLERMSF1"]
+  },
+  {
+    "facilityCode": "CLOVER",
+    "facilityName": "Clover",
+    "regionId": "VIC1",
+    "latitude": -36.785257,
+    "longitude": 147.220466,
+    "duids": ["CLOVER"]
+  },
+  {
+    "facilityCode": "CLRKCWF",
+    "facilityName": "Clarke Creek",
+    "regionId": "QLD1",
+    "latitude": -22.850446,
+    "longitude": 149.453252,
+    "duids": ["CLRKCWF2", "CLRKCWF1"]
+  },
+  {
+    "facilityCode": "CLUNY",
+    "facilityName": "Cluny",
+    "regionId": "TAS1",
+    "latitude": -42.506442,
+    "longitude": 146.68104,
+    "duids": ["CLUNY"]
+  },
+  {
+    "facilityCode": "CODRGTON",
+    "facilityName": "Codrington",
+    "regionId": "VIC1",
+    "latitude": -38.282875,
+    "longitude": 141.95496,
+    "duids": ["CODRNGTON"]
+  },
+  {
+    "facilityCode": "COHUNSF1",
+    "facilityName": "Cohuna",
+    "regionId": "VIC1",
+    "latitude": -35.886553,
+    "longitude": 144.217421,
+    "duids": ["COHUNSF1"]
+  },
+  {
+    "facilityCode": "COLEASF",
+    "facilityName": "Coleambally",
+    "regionId": "NSW1",
+    "latitude": -34.762456,
+    "longitude": 145.928786,
+    "duids": ["COLEASF1"]
+  },
+  {
+    "facilityCode": "COLONGRA",
+    "facilityName": "Colongra",
+    "regionId": "NSW1",
+    "latitude": -33.209801,
+    "longitude": 151.544968,
+    "duids": ["CG2", "CG4", "CG3", "CG1"]
+  },
+  {
+    "facilityCode": "COLUMSF",
+    "facilityName": "Columboola",
+    "regionId": "QLD1",
+    "latitude": -26.633781,
+    "longitude": 150.298894,
+    "duids": ["COLUMSF1"]
+  },
+  {
+    "facilityCode": "COLWF01",
+    "facilityName": "Collector",
+    "regionId": "NSW1",
+    "latitude": -34.862066,
+    "longitude": 149.388245,
+    "duids": ["COLWF01"]
+  },
+  {
+    "facilityCode": "CONDONG1",
+    "facilityName": "Condong",
+    "regionId": "NSW1",
+    "latitude": -28.314766,
+    "longitude": 153.433808,
+    "duids": ["CONDONG1"]
+  },
+  {
+    "facilityCode": "COOPGWF",
+    "facilityName": "Coopers Gap",
+    "regionId": "QLD1",
+    "latitude": -26.717004,
+    "longitude": 151.449177,
+    "duids": ["COOPGWF1"]
+  },
+  {
+    "facilityCode": "COPTNHYD",
+    "facilityName": "Copeton",
+    "regionId": "NSW1",
+    "latitude": -29.910174,
+    "longitude": 150.92348,
+    "duids": ["COPTNHYD"]
+  },
+  {
+    "facilityCode": "CPSA",
+    "facilityName": "Condamine A",
+    "regionId": "QLD1",
+    "latitude": -26.668181,
+    "longitude": 150.270023,
+    "duids": ["CPSA"]
+  },
+  {
+    "facilityCode": "CROOKWEL",
+    "facilityName": "Crookwell",
+    "regionId": "NSW1",
+    "latitude": -34.5165,
+    "longitude": 149.54248,
+    "duids": ["CROOKWEL"]
+  },
+  {
+    "facilityCode": "CROOKWF2",
+    "facilityName": "Crookwell 2",
+    "regionId": "NSW1",
+    "latitude": -34.556855,
+    "longitude": 149.609565,
+    "duids": ["CROOKWF2"]
+  },
+  {
+    "facilityCode": "CROOKWF3",
+    "facilityName": "Crookwell 3",
+    "regionId": "NSW1",
+    "latitude": -34.484645,
+    "longitude": 149.54447,
+    "duids": ["CROOKWF3"]
+  },
+  {
+    "facilityCode": "CROWLWF",
+    "facilityName": "Crowlands",
+    "regionId": "VIC1",
+    "latitude": -36.97615,
+    "longitude": 143.097998,
+    "duids": ["CROWLWF1"]
+  },
+  {
+    "facilityCode": "CRURWF1",
+    "facilityName": "Crudine Ridge",
+    "regionId": "NSW1",
+    "latitude": -32.864748,
+    "longitude": 149.81297,
+    "duids": ["CRURWF1"]
+  },
+  {
+    "facilityCode": "CRWARP",
+    "facilityName": "Carwarp",
+    "regionId": "VIC1",
+    "latitude": -34.454955,
+    "longitude": 142.15808,
+    "duids": ["CRWARP1"]
+  },
+  {
+    "facilityCode": "CRWASF1",
+    "facilityName": "Corowa",
+    "regionId": "NSW1",
+    "latitude": -35.979325,
+    "longitude": 146.359356,
+    "duids": ["CRWASF1"]
+  },
+  {
+    "facilityCode": "CSPVPS",
+    "facilityName": "Collinsville",
+    "regionId": "QLD1",
+    "latitude": -20.541215,
+    "longitude": 147.807432,
+    "duids": ["CSPVPS1"]
+  },
+  {
+    "facilityCode": "CTHLWF",
+    "facilityName": "Cattle Hill",
+    "regionId": "TAS1",
+    "latitude": -42.149661,
+    "longitude": 146.724045,
+    "duids": ["CTHLWF1"]
+  },
+  {
+    "facilityCode": "CULCSF",
+    "facilityName": "Culcairn",
+    "regionId": "NSW1",
+    "latitude": -35.709592,
+    "longitude": 146.981761,
+    "duids": ["CUSF1"]
+  },
+  {
+    "facilityCode": "CULLERIN",
+    "facilityName": "Cullerin Range",
+    "regionId": "NSW1",
+    "latitude": -34.809208,
+    "longitude": 149.399185,
+    "duids": ["CULLRGWF"]
+  },
+  {
+    "facilityCode": "DALNTH",
+    "facilityName": "Dalrymple North",
+    "regionId": "SA1",
+    "latitude": -34.933952,
+    "longitude": 137.743532,
+    "duids": ["DALNTH1"]
+  },
+  {
+    "facilityCode": "DARLSF",
+    "facilityName": "Darlington Point",
+    "regionId": "NSW1",
+    "latitude": -34.648971,
+    "longitude": 146.061179,
+    "duids": ["DARLSF1"]
+  },
+  {
+    "facilityCode": "DARTM",
+    "facilityName": "Dartmouth",
+    "regionId": "VIC1",
+    "latitude": -36.556485,
+    "longitude": 147.520456,
+    "duids": ["DARTM1"]
+  },
+  {
+    "facilityCode": "DAYDSF",
+    "facilityName": "Daydream",
+    "regionId": "QLD1",
+    "latitude": -20.479752,
+    "longitude": 147.763711,
+    "duids": ["DAYDSF1"]
+  },
+  {
+    "facilityCode": "DDPS1",
+    "facilityName": "Darling Downs",
+    "regionId": "QLD1",
+    "latitude": -27.116855,
+    "longitude": 150.894761,
+    "duids": ["DDPS1"]
+  },
+  {
+    "facilityCode": "DDSF",
+    "facilityName": "Darling Downs",
+    "regionId": "QLD1",
+    "latitude": -27.113797,
+    "longitude": 150.879733,
+    "duids": ["DDSF1"]
+  },
+  {
+    "facilityCode": "DEIBDL",
+    "facilityName": "Bairnsdale",
+    "regionId": "VIC1",
+    "latitude": -37.842918,
+    "longitude": 147.563855,
+    "duids": ["BDL01", "BDL02"]
+  },
+  {
+    "facilityCode": "DEVILS_G",
+    "facilityName": "Devils Gate",
+    "regionId": "TAS1",
+    "latitude": -41.350513,
+    "longitude": 146.263394,
+    "duids": ["DEVILS_G"]
+  },
+  {
+    "facilityCode": "DIAPURWF",
+    "facilityName": "Diapur 2",
+    "regionId": "VIC1",
+    "latitude": -36.339953,
+    "longitude": 141.447361,
+    "duids": ["DIAPURWF1"]
+  },
+  {
+    "facilityCode": "DPNTB",
+    "facilityName": "Darlington Point",
+    "regionId": "NSW1",
+    "latitude": -34.647016,
+    "longitude": 146.035236,
+    "duids": ["DPNTB1"]
+  },
+  {
+    "facilityCode": "DRYCGT",
+    "facilityName": "Dry Creek",
+    "regionId": "SA1",
+    "latitude": -34.847703,
+    "longitude": 138.5816,
+    "duids": ["DRYCGT2", "DRYCGT1", "DRYCGT3"]
+  },
+  {
+    "facilityCode": "DULAWF",
+    "facilityName": "Dulacca",
+    "regionId": "QLD1",
+    "latitude": -26.631438,
+    "longitude": 149.867554,
+    "duids": ["DULAWF1"]
+  },
+  {
+    "facilityCode": "DUNDWF",
+    "facilityName": "Dundonnell",
+    "regionId": "VIC1",
+    "latitude": -37.863894,
+    "longitude": 142.943454,
+    "duids": ["DUNDWF1", "DUNDWF2", "DUNDWF3"]
+  },
+  {
+    "facilityCode": "EASTCRK",
+    "facilityName": "Eastern Creek",
+    "regionId": "NSW1",
+    "latitude": -33.815468,
+    "longitude": 150.854307,
+    "duids": ["EASTCRK"]
+  },
+  {
+    "facilityCode": "EASTCRK2",
+    "facilityName": "Eastern Creek 2",
+    "regionId": "NSW1",
+    "latitude": -33.815468,
+    "longitude": 150.854307,
+    "duids": ["EASTCRK2"]
+  },
+  {
+    "facilityCode": "EDENVSF",
+    "facilityName": "Edenvale",
+    "regionId": "QLD1",
+    "latitude": -26.931732,
+    "longitude": 150.582727,
+    "duids": ["EDENVSF1"]
+  },
+  {
+    "facilityCode": "EILDON",
+    "facilityName": "Eildon",
+    "regionId": "VIC1",
+    "latitude": -37.221982,
+    "longitude": 145.921476,
+    "duids": ["EILDON2", "EILDON1"]
+  },
+  {
+    "facilityCode": "EILDONPD",
+    "facilityName": "Eildon",
+    "regionId": "VIC1",
+    "latitude": -37.221774,
+    "longitude": 145.922582,
+    "duids": ["EILDON3"]
+  },
+  {
+    "facilityCode": "ELAINEWF",
+    "facilityName": "Elaine",
+    "regionId": "VIC1",
+    "latitude": -37.6352,
+    "longitude": 144.0237,
+    "duids": ["ELAINWF1"]
+  },
+  {
+    "facilityCode": "EMERASF",
+    "facilityName": "Emerald",
+    "regionId": "QLD1",
+    "latitude": -23.507996,
+    "longitude": 148.126404,
+    "duids": ["EMERASF1"]
+  },
+  {
+    "facilityCode": "ERARING",
+    "facilityName": "Eraring",
+    "regionId": "NSW1",
+    "latitude": -33.061039,
+    "longitude": 151.51984,
+    "duids": ["ER02", "ER03", "ER01", "ER04"]
+  },
+  {
+    "facilityCode": "ERB",
+    "facilityName": "Eraring",
+    "regionId": "NSW1",
+    "latitude": -33.066837,
+    "longitude": 151.515026,
+    "duids": ["ERB01"]
+  },
+  {
+    "facilityCode": "ERGT01",
+    "facilityName": "Eraring",
+    "regionId": "NSW1",
+    "latitude": -33.062117,
+    "longitude": 151.517224,
+    "duids": ["ERGT01"]
+  },
+  {
+    "facilityCode": "FINLEYSF",
+    "facilityName": "Finley",
+    "regionId": "NSW1",
+    "latitude": -35.648941,
+    "longitude": 145.50575,
+    "duids": ["FINLYSF1"]
+  },
+  {
+    "facilityCode": "FISHER",
+    "facilityName": "Fisher",
+    "regionId": "TAS1",
+    "latitude": -41.673312,
+    "longitude": 146.268511,
+    "duids": ["FISHER"]
+  },
+  {
+    "facilityCode": "FLYCRKWF",
+    "facilityName": "Flyers Creek",
+    "regionId": "NSW1",
+    "latitude": -33.517716,
+    "longitude": 149.052949,
+    "duids": ["FLYCRKWF"]
+  },
+  {
+    "facilityCode": "FWF",
+    "facilityName": "Ferguson",
+    "regionId": "VIC1",
+    "latitude": -38.610902,
+    "longitude": 143.179321,
+    "duids": ["FSWF1", "FNWF1"]
+  },
+  {
+    "facilityCode": "GANGARR",
+    "facilityName": "Gangarri",
+    "regionId": "QLD1",
+    "latitude": -26.270557,
+    "longitude": 149.758054,
+    "duids": ["GANGARR1"]
+  },
+  {
+    "facilityCode": "GANNBESS",
+    "facilityName": "Gannawarra",
+    "regionId": "VIC1",
+    "latitude": -35.734598,
+    "longitude": 143.779894,
+    "duids": ["GANNB1"]
+  },
+  {
+    "facilityCode": "GANNSF",
+    "facilityName": "Gannawarra",
+    "regionId": "VIC1",
+    "latitude": -35.729012,
+    "longitude": 143.783189,
+    "duids": ["GANNSF1"]
+  },
+  {
+    "facilityCode": "GERMCRK",
+    "facilityName": "German Creek",
+    "regionId": "QLD1",
+    "latitude": -22.928526,
+    "longitude": 148.549097,
+    "duids": ["GERMCRK"]
+  },
+  {
+    "facilityCode": "GESF",
+    "facilityName": "Glenellen",
+    "regionId": "NSW1",
+    "latitude": -35.929882,
+    "longitude": 146.909107,
+    "duids": ["GESF1"]
+  },
+  {
+    "facilityCode": "GIRGSF",
+    "facilityName": "Girgarre",
+    "regionId": "VIC1",
+    "latitude": -36.426125,
+    "longitude": 144.922155,
+    "duids": ["GIRGSF"]
+  },
+  {
+    "facilityCode": "GLBWNHYD",
+    "facilityName": "Glenbawn",
+    "regionId": "NSW1",
+    "latitude": -32.107937,
+    "longitude": 150.999481,
+    "duids": ["GLBWNHYD"]
+  },
+  {
+    "facilityCode": "GLENMAGG",
+    "facilityName": "Glenmaggie",
+    "regionId": "VIC1",
+    "latitude": -37.904836,
+    "longitude": 146.800388,
+    "duids": ["GLENMAG1"]
+  },
+  {
+    "facilityCode": "GLENNCRK",
+    "facilityName": "Glennies Creek",
+    "regionId": "NSW1",
+    "latitude": -32.459876,
+    "longitude": 151.128697,
+    "duids": ["GLENNCRK"]
+  },
+  {
+    "facilityCode": "GLENSF",
+    "facilityName": "Glenrowan",
+    "regionId": "VIC1",
+    "latitude": -36.464,
+    "longitude": 146.221,
+    "duids": ["GLENSF1"]
+  },
+  {
+    "facilityCode": "GLRWNSF",
+    "facilityName": "Glenrowan West",
+    "regionId": "VIC1",
+    "latitude": -36.4907,
+    "longitude": 146.157473,
+    "duids": ["GLRWNSF1"]
+  },
+  {
+    "facilityCode": "GNNDHSF",
+    "facilityName": "Gunnedah",
+    "regionId": "NSW1",
+    "latitude": -30.937263,
+    "longitude": 150.344174,
+    "duids": ["GNNDHSF1"]
+  },
+  {
+    "facilityCode": "GOESF1",
+    "facilityName": "Goorambat East",
+    "regionId": "VIC1",
+    "latitude": -36.427352,
+    "longitude": 145.918853,
+    "duids": ["GOESF1"]
+  },
+  {
+    "facilityCode": "GOONUMSF",
+    "facilityName": "Goonumbla",
+    "regionId": "NSW1",
+    "latitude": -33.109212,
+    "longitude": 148.092982,
+    "duids": ["GOONSF1"]
+  },
+  {
+    "facilityCode": "GORDON",
+    "facilityName": "Gordon",
+    "regionId": "TAS1",
+    "latitude": -42.740519,
+    "longitude": 145.982796,
+    "duids": ["GORDON", "GOVILLB1"]
+  },
+  {
+    "facilityCode": "GPWFEST",
+    "facilityName": "Golden Plains East",
+    "regionId": "VIC1",
+    "latitude": -37.9729,
+    "longitude": 143.783,
+    "duids": ["GPWFEST1", "GPWFEST3", "GPWFEST2"]
+  },
+  {
+    "facilityCode": "GPWFWST",
+    "facilityName": "Golden Plains West",
+    "regionId": "VIC1",
+    "latitude": -37.90844,
+    "longitude": 143.664887,
+    "duids": ["GPWFWST1"]
+  },
+  {
+    "facilityCode": "GRANGEAV",
+    "facilityName": "Grange Avenue",
+    "regionId": "NSW1",
+    "latitude": -33.713011,
+    "longitude": 150.83316,
+    "duids": ["GRANGEAV"]
+  },
+  {
+    "facilityCode": "GRANWF",
+    "facilityName": "Granville Harbour",
+    "regionId": "TAS1",
+    "latitude": -41.778439,
+    "longitude": 145.065517,
+    "duids": ["GRANWF1"]
+  },
+  {
+    "facilityCode": "GREENB",
+    "facilityName": "Greenbank",
+    "regionId": "QLD1",
+    "latitude": -27.733562,
+    "longitude": 152.955042,
+    "duids": ["GREENB1"]
+  },
+  {
+    "facilityCode": "GRIFSF",
+    "facilityName": "Griffith",
+    "regionId": "NSW1",
+    "latitude": -34.317617,
+    "longitude": 146.121416,
+    "duids": ["GRIFSF1"]
+  },
+  {
+    "facilityCode": "GROSV1",
+    "facilityName": "Grosvenor 1",
+    "regionId": "QLD1",
+    "latitude": -21.929194,
+    "longitude": 148.032416,
+    "duids": ["GROSV1"]
+  },
+  {
+    "facilityCode": "GROSV2",
+    "facilityName": "Grosvenor 2",
+    "regionId": "QLD1",
+    "latitude": -21.929194,
+    "longitude": 148.032416,
+    "duids": ["GROSV2"]
+  },
+  {
+    "facilityCode": "GSTONE",
+    "facilityName": "Gladstone",
+    "regionId": "QLD1",
+    "latitude": -23.853641,
+    "longitude": 151.217515,
+    "duids": ["GSTONE6", "GSTONE1", "GSTONE3", "GSTONE4", "GSTONE2", "GSTONE5"]
+  },
+  {
+    "facilityCode": "GSWF",
+    "facilityName": "Goyder South",
+    "regionId": "SA1",
+    "latitude": -33.682196,
+    "longitude": 138.936249,
+    "duids": ["GSWF1B1", "GSWF1A"]
+  },
+  {
+    "facilityCode": "GULLRGWF",
+    "facilityName": "Gullen Range",
+    "regionId": "NSW1",
+    "latitude": -34.615245,
+    "longitude": 149.45808,
+    "duids": ["GULLRSF1", "GULLRWF1"]
+  },
+  {
+    "facilityCode": "GUNNING",
+    "facilityName": "Gunning",
+    "regionId": "NSW1",
+    "latitude": -34.691531,
+    "longitude": 149.373013,
+    "duids": ["GUNNING1"]
+  },
+  {
+    "facilityCode": "GUSF",
+    "facilityName": "Gunsynd",
+    "regionId": "QLD1",
+    "latitude": -28.408388,
+    "longitude": 150.343437,
+    "duids": ["GUSF1"]
+  },
+  {
+    "facilityCode": "HALAMRD",
+    "facilityName": "Hallam Road",
+    "regionId": "VIC1",
+    "latitude": -38.052181,
+    "longitude": 145.267798,
+    "duids": ["HALAMRD1"]
+  },
+  {
+    "facilityCode": "HALLWF",
+    "facilityName": "Hallett 1",
+    "regionId": "SA1",
+    "latitude": -33.328434,
+    "longitude": 138.704669,
+    "duids": ["HALLWF1"]
+  },
+  {
+    "facilityCode": "HALLWF2",
+    "facilityName": "Hallett 2",
+    "regionId": "SA1",
+    "latitude": -33.53821,
+    "longitude": 138.857215,
+    "duids": ["HALLWF2"]
+  },
+  {
+    "facilityCode": "HAMISF",
+    "facilityName": "Hamilton",
+    "regionId": "QLD1",
+    "latitude": -20.496081,
+    "longitude": 147.738803,
+    "duids": ["HAMISF1"]
+  },
+  {
+    "facilityCode": "HAMPTON",
+    "facilityName": "Hampton",
+    "regionId": "NSW1",
+    "latitude": -33.649722,
+    "longitude": 150.05,
+    "duids": ["HAMPTON"]
+  },
+  {
+    "facilityCode": "HASTING",
+    "facilityName": "Hastings",
+    "regionId": "VIC1",
+    "latitude": -38.295952,
+    "longitude": 145.221926,
+    "duids": ["HASTINGS1", "HASTINGS2", "HASTINGS3"]
+  },
+  {
+    "facilityCode": "HAUGHT1",
+    "facilityName": "Haughton",
+    "regionId": "QLD1",
+    "latitude": -19.750134,
+    "longitude": 147.048103,
+    "duids": ["HAUGHT11"]
+  },
+  {
+    "facilityCode": "HAYMSF",
+    "facilityName": "Hayman",
+    "regionId": "QLD1",
+    "latitude": -20.510097,
+    "longitude": 147.755711,
+    "duids": ["HAYMSF1"]
+  },
+  {
+    "facilityCode": "HBESS",
+    "facilityName": "Hazelwood BESS",
+    "regionId": "VIC1",
+    "latitude": -38.267845,
+    "longitude": 146.390293,
+    "duids": ["HBESS1"]
+  },
+  {
+    "facilityCode": "HD1WF",
+    "facilityName": "Hawkesdale",
+    "regionId": "VIC1",
+    "latitude": -38.148008,
+    "longitude": 142.360925,
+    "duids": ["HD1WF1"]
+  },
+  {
+    "facilityCode": "HEPWIND",
+    "facilityName": "Hepburn",
+    "regionId": "VIC1",
+    "latitude": -37.424555,
+    "longitude": 144.115711,
+    "duids": ["HEPWIND1"]
+  },
+  {
+    "facilityCode": "HEZ",
+    "facilityName": "Hunter Economic Zone",
+    "regionId": "NSW1",
+    "latitude": -32.835481,
+    "longitude": 151.451033,
+    "duids": ["HEZ1"]
+  },
+  {
+    "facilityCode": "HILLSTN",
+    "facilityName": "Hillston Sun",
+    "regionId": "NSW1",
+    "latitude": -33.531624,
+    "longitude": 145.52242,
+    "duids": ["HILLSTN1"]
+  },
+  {
+    "facilityCode": "HLMSEW01",
+    "facilityName": "Hallam",
+    "regionId": "VIC1",
+    "latitude": -38.143332,
+    "longitude": 145.119964,
+    "duids": ["HLMSEW01"]
+  },
+  {
+    "facilityCode": "HORNSDAL",
+    "facilityName": "Hornsdale",
+    "regionId": "SA1",
+    "latitude": -33.05982,
+    "longitude": 138.537673,
+    "duids": ["HDWF1"]
+  },
+  {
+    "facilityCode": "HORNSDAL2",
+    "facilityName": "Hornsdale 2",
+    "regionId": "SA1",
+    "latitude": -33.05982,
+    "longitude": 138.537673,
+    "duids": ["HDWF2"]
+  },
+  {
+    "facilityCode": "HORNSDAL3",
+    "facilityName": "Hornsdale 3",
+    "regionId": "SA1",
+    "latitude": -33.05982,
+    "longitude": 138.537673,
+    "duids": ["HDWF3"]
+  },
+  {
+    "facilityCode": "HORNSDPR",
+    "facilityName": "Hornsdale Power Reserve",
+    "regionId": "SA1",
+    "latitude": -33.086389,
+    "longitude": 138.518659,
+    "duids": ["HPR1"]
+  },
+  {
+    "facilityCode": "HUGSF",
+    "facilityName": "Hughenden",
+    "regionId": "QLD1",
+    "latitude": -20.85484,
+    "longitude": 144.186257,
+    "duids": ["HUGSF1"]
+  },
+  {
+    "facilityCode": "HUMENSW",
+    "facilityName": "Hume",
+    "regionId": "NSW1",
+    "latitude": -36.106639,
+    "longitude": 147.032526,
+    "duids": ["HUMENSW"]
+  },
+  {
+    "facilityCode": "HUMEV",
+    "facilityName": "Hume",
+    "regionId": "VIC1",
+    "latitude": -36.106887,
+    "longitude": 147.032572,
+    "duids": ["HUMEV"]
+  },
+  {
+    "facilityCode": "HUNTER",
+    "facilityName": "Hunter",
+    "regionId": "NSW1",
+    "latitude": -32.793406,
+    "longitude": 151.478353,
+    "duids": ["HUNTER2", "HUNTER1"]
+  },
+  {
+    "facilityCode": "HVWW",
+    "facilityName": "Happy Valley",
+    "regionId": "SA1",
+    "latitude": -35.063118,
+    "longitude": 138.56476,
+    "duids": ["HVWWPV1", "HVWWBA1"]
+  },
+  {
+    "facilityCode": "ICSM",
+    "facilityName": "Isis Central Sugar Mill",
+    "regionId": "QLD1",
+    "latitude": -25.197619,
+    "longitude": 152.206949,
+    "duids": ["ICSM"]
+  },
+  {
+    "facilityCode": "INVICTA",
+    "facilityName": "Invicta Sugar Mill",
+    "regionId": "QLD1",
+    "latitude": -19.520476,
+    "longitude": 147.107439,
+    "duids": ["INVICTA"]
+  },
+  {
+    "facilityCode": "JACKSGUL",
+    "facilityName": "Jacks Gully",
+    "regionId": "NSW1",
+    "latitude": -34.072955,
+    "longitude": 150.743691,
+    "duids": ["JACKSGUL"]
+  },
+  {
+    "facilityCode": "JBUTTERS",
+    "facilityName": "John Butters",
+    "regionId": "TAS1",
+    "latitude": -42.154894,
+    "longitude": 145.534508,
+    "duids": ["JBUTTERS"]
+  },
+  {
+    "facilityCode": "JEERA",
+    "facilityName": "Jeeralang A",
+    "regionId": "VIC1",
+    "latitude": -38.275046,
+    "longitude": 146.425572,
+    "duids": ["JLA03", "JLA04", "JLA01", "JLA02"]
+  },
+  {
+    "facilityCode": "JEERB",
+    "facilityName": "Jeeralang B",
+    "regionId": "VIC1",
+    "latitude": -38.273845,
+    "longitude": 146.424827,
+    "duids": ["JLB02", "JLB01", "JLB03"]
+  },
+  {
+    "facilityCode": "JEMALNG1",
+    "facilityName": "Jemalong",
+    "regionId": "NSW1",
+    "latitude": -33.409099,
+    "longitude": 147.655008,
+    "duids": ["JEMALNG1"]
+  },
+  {
+    "facilityCode": "JNDSHPS",
+    "facilityName": "Jindabyne",
+    "regionId": "NSW1",
+    "latitude": -36.434918,
+    "longitude": 148.63057,
+    "duids": ["JNDABNE1"]
+  },
+  {
+    "facilityCode": "JOUNAMA",
+    "facilityName": "Jounama",
+    "regionId": "NSW1",
+    "latitude": -35.562015,
+    "longitude": 148.305493,
+    "duids": ["JOUNAMA1"]
+  },
+  {
+    "facilityCode": "JUNEESF",
+    "facilityName": "Junee",
+    "regionId": "NSW1",
+    "latitude": -34.814929,
+    "longitude": 147.572334,
+    "duids": ["JUNEESF1"]
+  },
+  {
+    "facilityCode": "KABANWF",
+    "facilityName": "Kaban",
+    "regionId": "QLD1",
+    "latitude": -17.560606,
+    "longitude": 145.413125,
+    "duids": ["KABANWF1"]
+  },
+  {
+    "facilityCode": "KAREEYA",
+    "facilityName": "Kareeya",
+    "regionId": "QLD1",
+    "latitude": -17.767013,
+    "longitude": 145.577993,
+    "duids": ["KAREEYA3", "KAREEYA2", "KAREEYA4", "KAREEYA1", "KAREEYA5"]
+  },
+  {
+    "facilityCode": "KARSF",
+    "facilityName": "Karadoc",
+    "regionId": "VIC1",
+    "latitude": -34.411851,
+    "longitude": 142.250443,
+    "duids": ["KARSF1"]
+  },
+  {
+    "facilityCode": "KEEPIT",
+    "facilityName": "Keepit",
+    "regionId": "NSW1",
+    "latitude": -30.87868,
+    "longitude": 150.491876,
+    "duids": ["KEEPIT"]
+  },
+  {
+    "facilityCode": "KENNEDY",
+    "facilityName": "Kennedy Energy Park",
+    "regionId": "QLD1",
+    "latitude": -20.872792,
+    "longitude": 144.413034,
+    "duids": ["KEPSF1", "KEPWF1", "KEPBG1", "KEPBL1"]
+  },
+  {
+    "facilityCode": "KERNGSP",
+    "facilityName": "Kerang",
+    "regionId": "VIC1",
+    "latitude": -35.779895,
+    "longitude": 143.941051,
+    "duids": ["KERNGSP1"]
+  },
+  {
+    "facilityCode": "KESS1",
+    "facilityName": "Koorangie",
+    "regionId": "VIC1",
+    "latitude": -35.735367,
+    "longitude": 143.754813,
+    "duids": ["KESSB1"]
+  },
+  {
+    "facilityCode": "KIAMSF1",
+    "facilityName": "Kiamal",
+    "regionId": "VIC1",
+    "latitude": -35.021508,
+    "longitude": 142.297971,
+    "duids": ["KIAMSF1"]
+  },
+  {
+    "facilityCode": "KIATAWF",
+    "facilityName": "Kiata",
+    "regionId": "VIC1",
+    "latitude": -36.397288,
+    "longitude": 141.747394,
+    "duids": ["KIATAWF1"]
+  },
+  {
+    "facilityCode": "KINGASF",
+    "facilityName": "Kingaroy",
+    "regionId": "QLD1",
+    "latitude": -26.537087,
+    "longitude": 151.890398,
+    "duids": ["KINGASF1"]
+  },
+  {
+    "facilityCode": "KOGANCK",
+    "facilityName": "Kogan Creek",
+    "regionId": "QLD1",
+    "latitude": -26.915285,
+    "longitude": 150.748948,
+    "duids": ["KPP_1"]
+  },
+  {
+    "facilityCode": "KSP1",
+    "facilityName": "Kidston",
+    "regionId": "QLD1",
+    "latitude": -18.889381,
+    "longitude": 144.14246,
+    "duids": ["KSP1"]
+  },
+  {
+    "facilityCode": "LADBROKE",
+    "facilityName": "Ladbroke Grove",
+    "regionId": "SA1",
+    "latitude": -37.456341,
+    "longitude": 140.782163,
+    "duids": ["LADBROK1", "LADBROK2"]
+  },
+  {
+    "facilityCode": "LBBESS",
+    "facilityName": "Lake Bonney",
+    "regionId": "SA1",
+    "latitude": -37.738979,
+    "longitude": 140.38681,
+    "duids": ["LBB1"]
+  },
+  {
+    "facilityCode": "LDBESS",
+    "facilityName": "Liddell",
+    "regionId": "NSW1",
+    "latitude": -32.37564,
+    "longitude": 150.978578,
+    "duids": ["LDBESS1"]
+  },
+  {
+    "facilityCode": "LEM_WIL",
+    "facilityName": "Lemonthyme / Wilmot",
+    "regionId": "TAS1",
+    "latitude": -41.603738,
+    "longitude": 146.13894,
+    "duids": ["LEM_WIL"]
+  },
+  {
+    "facilityCode": "LGAPWF1",
+    "facilityName": "Lincoln Gap",
+    "regionId": "SA1",
+    "latitude": -32.564612,
+    "longitude": 137.557203,
+    "duids": ["LGAPWF2", "LGAPWF1", "LGAPBS1"]
+  },
+  {
+    "facilityCode": "LILYVASF",
+    "facilityName": "Lilyvale",
+    "regionId": "QLD1",
+    "latitude": -23.084225,
+    "longitude": 148.425994,
+    "duids": ["LILYSF1"]
+  },
+  {
+    "facilityCode": "LIMBESS",
+    "facilityName": "Limondale",
+    "regionId": "NSW1",
+    "latitude": -34.769354,
+    "longitude": 143.559464,
+    "duids": ["LIMBESS1"]
+  },
+  {
+    "facilityCode": "LIMOSF1",
+    "facilityName": "Limondale",
+    "regionId": "NSW1",
+    "latitude": -34.771747,
+    "longitude": 143.500494,
+    "duids": ["LIMOSF11"]
+  },
+  {
+    "facilityCode": "LIMOSF2",
+    "facilityName": "Limondale 2",
+    "regionId": "NSW1",
+    "latitude": -34.775502,
+    "longitude": 143.508046,
+    "duids": ["LIMOSF21"]
+  },
+  {
+    "facilityCode": "LI_WY_CA",
+    "facilityName": "Catagunya / Liapootah / Wayatinah",
+    "regionId": "TAS1",
+    "latitude": -42.376279,
+    "longitude": 146.510051,
+    "duids": ["LI_WY_CA"]
+  },
+  {
+    "facilityCode": "LKBONNY1",
+    "facilityName": "Lake Bonney",
+    "regionId": "SA1",
+    "latitude": -37.760504,
+    "longitude": 140.405541,
+    "duids": ["LKBONNY1"]
+  },
+  {
+    "facilityCode": "LKBONNY3",
+    "facilityName": "Lake Bonney 3",
+    "regionId": "SA1",
+    "latitude": -37.760504,
+    "longitude": 140.405541,
+    "duids": ["LKBONNY3"]
+  },
+  {
+    "facilityCode": "LKBONNY_2",
+    "facilityName": "Lake Bonney 2",
+    "regionId": "SA1",
+    "latitude": -37.760504,
+    "longitude": 140.405541,
+    "duids": ["LKBONNY2"]
+  },
+  {
+    "facilityCode": "LK_ECHO",
+    "facilityName": "Lake Echo",
+    "regionId": "TAS1",
+    "latitude": -42.253643,
+    "longitude": 146.620627,
+    "duids": ["LK_ECHO"]
+  },
+  {
+    "facilityCode": "LNGS",
+    "facilityName": "Laverton North",
+    "regionId": "VIC1",
+    "latitude": -37.841703,
+    "longitude": 144.788796,
+    "duids": ["LNGS1", "LNGS2"]
+  },
+  {
+    "facilityCode": "LONGFORD",
+    "facilityName": "Longford",
+    "regionId": "VIC1",
+    "latitude": -38.223244,
+    "longitude": 147.1631,
+    "duids": ["LONGFORD"]
+  },
+  {
+    "facilityCode": "LONSDALE",
+    "facilityName": "Lonsdale",
+    "regionId": "SA1",
+    "latitude": -35.109703,
+    "longitude": 138.490992,
+    "duids": ["LONSDALE"]
+  },
+  {
+    "facilityCode": "LOYYANGA",
+    "facilityName": "Loy Yang A",
+    "regionId": "VIC1",
+    "latitude": -38.253534,
+    "longitude": 146.574459,
+    "duids": ["LYA1", "LYA2", "LYA4", "LYA3"]
+  },
+  {
+    "facilityCode": "LOYYB",
+    "facilityName": "Loy Yang B",
+    "regionId": "VIC1",
+    "latitude": -38.256446,
+    "longitude": 146.584982,
+    "duids": ["LOYYB1", "LOYYB2"]
+  },
+  {
+    "facilityCode": "LRSF",
+    "facilityName": "Longreach",
+    "regionId": "QLD1",
+    "latitude": -23.446178,
+    "longitude": 144.35918,
+    "duids": ["LRSF1"]
+  },
+  {
+    "facilityCode": "LUCAS2S2",
+    "facilityName": "Lucas Heights 2",
+    "regionId": "NSW1",
+    "latitude": -34.044088,
+    "longitude": 150.972475,
+    "duids": ["LUCAS2S2"]
+  },
+  {
+    "facilityCode": "LUCASHGT",
+    "facilityName": "Lucas Heights",
+    "regionId": "NSW1",
+    "latitude": -34.04829,
+    "longitude": 150.973916,
+    "duids": ["LUCASHGT"]
+  },
+  {
+    "facilityCode": "LVES",
+    "facilityName": "Latrobe Valley",
+    "regionId": "VIC1",
+    "latitude": -38.258183,
+    "longitude": 146.418614,
+    "duids": ["LVES1"]
+  },
+  {
+    "facilityCode": "MACARTH",
+    "facilityName": "Macarthur",
+    "regionId": "VIC1",
+    "latitude": -38.043483,
+    "longitude": 142.179081,
+    "duids": ["MACARTH1"]
+  },
+  {
+    "facilityCode": "MACKNTSH",
+    "facilityName": "Mackintosh",
+    "regionId": "TAS1",
+    "latitude": -41.69974,
+    "longitude": 145.646154,
+    "duids": ["MACKNTSH"]
+  },
+  {
+    "facilityCode": "MANNSF",
+    "facilityName": "Mannum 2",
+    "regionId": "SA1",
+    "latitude": -34.9144,
+    "longitude": 139.2681,
+    "duids": ["MANNSF2"]
+  },
+  {
+    "facilityCode": "MANNUMB",
+    "facilityName": "Mannum",
+    "regionId": "SA1",
+    "latitude": -34.917537,
+    "longitude": 139.262695,
+    "duids": ["MANNUMB1"]
+  },
+  {
+    "facilityCode": "MANSLR",
+    "facilityName": "Manildra",
+    "regionId": "NSW1",
+    "latitude": -33.172681,
+    "longitude": 148.718175,
+    "duids": ["MANSLR1"]
+  },
+  {
+    "facilityCode": "MAPS2",
+    "facilityName": "Mannum Pumping Station",
+    "regionId": "SA1",
+    "latitude": -34.854044,
+    "longitude": 139.189749,
+    "duids": ["MAPS2PV1", "MAPS3PV1"]
+  },
+  {
+    "facilityCode": "MAROOWF1",
+    "facilityName": "Maroona",
+    "regionId": "VIC1",
+    "latitude": -37.41875,
+    "longitude": 142.82434,
+    "duids": ["MAROOWF1"]
+  },
+  {
+    "facilityCode": "MARYRSF",
+    "facilityName": "Maryrorough",
+    "regionId": "QLD1",
+    "latitude": -27.708611,
+    "longitude": 151.546202,
+    "duids": ["MARYRSF1"]
+  },
+  {
+    "facilityCode": "MBAHNTH",
+    "facilityName": "Moranbah North",
+    "regionId": "QLD1",
+    "latitude": -21.978481,
+    "longitude": 148.004809,
+    "duids": ["MBAHNTH"]
+  },
+  {
+    "facilityCode": "MBPS2",
+    "facilityName": "Murray Bridge-Onkaparinga",
+    "regionId": "SA1",
+    "latitude": -35.096848,
+    "longitude": 139.209527,
+    "duids": ["MBPS2PV1"]
+  },
+  {
+    "facilityCode": "MCINTYR",
+    "facilityName": "MacIntyre",
+    "regionId": "QLD1",
+    "latitude": -28.2163,
+    "longitude": 152.0327,
+    "duids": ["MCINTYR1"]
+  },
+  {
+    "facilityCode": "MCKAY",
+    "facilityName": "Bogong / Mackay",
+    "regionId": "VIC1",
+    "latitude": -36.858282,
+    "longitude": 147.234146,
+    "duids": ["MCKAY1"]
+  },
+  {
+    "facilityCode": "MEADOWBK",
+    "facilityName": "Meadowbank",
+    "regionId": "TAS1",
+    "latitude": -42.611178,
+    "longitude": 146.845687,
+    "duids": ["MEADOWBK"]
+  },
+  {
+    "facilityCode": "METZSF",
+    "facilityName": "Metz N",
+    "regionId": "NSW1",
+    "latitude": -30.515484,
+    "longitude": 151.859815,
+    "duids": ["METZSF1"]
+  },
+  {
+    "facilityCode": "MEWF",
+    "facilityName": "Mt Emerald",
+    "regionId": "QLD1",
+    "latitude": -17.133248,
+    "longitude": 145.380037,
+    "duids": ["MEWF1"]
+  },
+  {
+    "facilityCode": "MIDDLSF1",
+    "facilityName": "Middlemount",
+    "regionId": "QLD1",
+    "latitude": -22.823243,
+    "longitude": 148.718008,
+    "duids": ["MIDDLSF1"]
+  },
+  {
+    "facilityCode": "MIDLDPS",
+    "facilityName": "Midlands",
+    "regionId": "TAS1",
+    "latitude": -42.085747,
+    "longitude": 147.274558,
+    "duids": ["MIDLDPS1"]
+  },
+  {
+    "facilityCode": "MILLMERN",
+    "facilityName": "Millmerran",
+    "regionId": "QLD1",
+    "latitude": -27.961319,
+    "longitude": 151.277699,
+    "duids": ["MPP_1", "MPP_2"]
+  },
+  {
+    "facilityCode": "MINTARO",
+    "facilityName": "Mintaro",
+    "regionId": "SA1",
+    "latitude": -33.903056,
+    "longitude": 138.738162,
+    "duids": ["MINTARO", "MINTNL1"]
+  },
+  {
+    "facilityCode": "MLB",
+    "facilityName": "Mortlake",
+    "regionId": "VIC1",
+    "latitude": -38.06698,
+    "longitude": 142.669466,
+    "duids": ["MLB01"]
+  },
+  {
+    "facilityCode": "MLSP",
+    "facilityName": "Mugga Lane",
+    "regionId": "NSW1",
+    "latitude": -35.399485,
+    "longitude": 149.1454,
+    "duids": ["MLSP1"]
+  },
+  {
+    "facilityCode": "MLWF",
+    "facilityName": "Mortons Lane",
+    "regionId": "VIC1",
+    "latitude": -37.833186,
+    "longitude": 142.465288,
+    "duids": ["MLWF1"]
+  },
+  {
+    "facilityCode": "MOKOSF",
+    "facilityName": "Mokoan",
+    "regionId": "VIC1",
+    "latitude": -36.489246,
+    "longitude": 146.128325,
+    "duids": ["MOKOSF1"]
+  },
+  {
+    "facilityCode": "MOLNGSF1",
+    "facilityName": "Molong",
+    "regionId": "NSW1",
+    "latitude": -33.08981,
+    "longitude": 148.912255,
+    "duids": ["MOLNGSF1"]
+  },
+  {
+    "facilityCode": "MOORAWF1",
+    "facilityName": "Moorabool",
+    "regionId": "VIC1",
+    "latitude": -37.739433,
+    "longitude": 144.171985,
+    "duids": ["MOORAWF1"]
+  },
+  {
+    "facilityCode": "MORANBAH",
+    "facilityName": "Moranbah",
+    "regionId": "QLD1",
+    "latitude": -21.962469,
+    "longitude": 148.006004,
+    "duids": ["MORANBAH"]
+  },
+  {
+    "facilityCode": "MOREESF",
+    "facilityName": "Moree",
+    "regionId": "NSW1",
+    "latitude": -29.569066,
+    "longitude": 149.866721,
+    "duids": ["MOREESF1"]
+  },
+  {
+    "facilityCode": "MORNBESS",
+    "facilityName": "Mornington",
+    "regionId": "VIC1",
+    "latitude": -38.268707,
+    "longitude": 145.204823,
+    "duids": ["MRNBESS1"]
+  },
+  {
+    "facilityCode": "MORTLK",
+    "facilityName": "Mortlake",
+    "regionId": "VIC1",
+    "latitude": -38.063237,
+    "longitude": 142.668677,
+    "duids": ["MORTLK12", "MORTLK11"]
+  },
+  {
+    "facilityCode": "MOUSF",
+    "facilityName": "Moura",
+    "regionId": "QLD1",
+    "latitude": -24.515007,
+    "longitude": 150.087256,
+    "duids": ["MOUSF1"]
+  },
+  {
+    "facilityCode": "MP",
+    "facilityName": "Mt Piper",
+    "regionId": "NSW1",
+    "latitude": -33.358121,
+    "longitude": 150.032642,
+    "duids": ["MP2", "MP1"]
+  },
+  {
+    "facilityCode": "MREH",
+    "facilityName": "Melbourne A1",
+    "regionId": "VIC1",
+    "latitude": -37.661157,
+    "longitude": 144.726292,
+    "duids": ["MREHA1"]
+  },
+  {
+    "facilityCode": "MREHA2",
+    "facilityName": "Melbourne A2",
+    "regionId": "VIC1",
+    "latitude": -37.663934,
+    "longitude": 144.726927,
+    "duids": ["MREHA2"]
+  },
+  {
+    "facilityCode": "MREHA3",
+    "facilityName": "Melbourne A3",
+    "regionId": "VIC1",
+    "latitude": -37.663819,
+    "longitude": 144.726859,
+    "duids": ["MREHA3"]
+  },
+  {
+    "facilityCode": "MRTLSWF",
+    "facilityName": "Mortlake South",
+    "regionId": "VIC1",
+    "latitude": -38.146832,
+    "longitude": 142.853134,
+    "duids": ["MRTLSWF1"]
+  },
+  {
+    "facilityCode": "MSTUART",
+    "facilityName": "Mt Stuart",
+    "regionId": "QLD1",
+    "latitude": -19.337807,
+    "longitude": 146.850916,
+    "duids": ["MSTUART2", "MSTUART1", "MSTUART3"]
+  },
+  {
+    "facilityCode": "MTGELWF",
+    "facilityName": "Mt Gellibrand",
+    "regionId": "VIC1",
+    "latitude": -38.258519,
+    "longitude": 143.802037,
+    "duids": ["MTGELWF1"]
+  },
+  {
+    "facilityCode": "MTMERCER",
+    "facilityName": "Mt Mercer",
+    "regionId": "VIC1",
+    "latitude": -37.831791,
+    "longitude": 143.888681,
+    "duids": ["MERCER01"]
+  },
+  {
+    "facilityCode": "MTMILLAR",
+    "facilityName": "Mt Millar",
+    "regionId": "SA1",
+    "latitude": -33.62534,
+    "longitude": 136.703771,
+    "duids": ["MTMILLAR"]
+  },
+  {
+    "facilityCode": "MUCRKSF",
+    "facilityName": "Munna Creek",
+    "regionId": "QLD1",
+    "latitude": -25.882106,
+    "longitude": 152.459626,
+    "duids": ["MUCRKSF1"]
+  },
+  {
+    "facilityCode": "MURRAY",
+    "facilityName": "Murray",
+    "regionId": "VIC1",
+    "latitude": -36.24683,
+    "longitude": 148.1902,
+    "duids": ["MURRAY"]
+  },
+  {
+    "facilityCode": "MUSSELRO",
+    "facilityName": "Musselroe",
+    "regionId": "TAS1",
+    "latitude": -40.780012,
+    "longitude": 148.010283,
+    "duids": ["MUSSELR1"]
+  },
+  {
+    "facilityCode": "MUWAWF",
+    "facilityName": "Murra Warra",
+    "regionId": "VIC1",
+    "latitude": -36.438821,
+    "longitude": 142.246003,
+    "duids": ["MUWAWF1", "MUWAWF2"]
+  },
+  {
+    "facilityCode": "MWPS",
+    "facilityName": "Morganwhyalla Pipeline",
+    "regionId": "SA1",
+    "latitude": -33.97382,
+    "longitude": 139.193756,
+    "duids": ["MWPS4PV1", "MWPS2PV1", "MWPS1PV1", "MWPS3PV1"]
+  },
+  {
+    "facilityCode": "NASF",
+    "facilityName": "Narromine",
+    "regionId": "NSW1",
+    "latitude": -32.220895,
+    "longitude": 148.255308,
+    "duids": ["NASF1"]
+  },
+  {
+    "facilityCode": "NBHWF",
+    "facilityName": "North Brown Hill",
+    "regionId": "SA1",
+    "latitude": -33.228116,
+    "longitude": 138.716888,
+    "duids": ["NBHWF1"]
+  },
+  {
+    "facilityCode": "NESBESS1",
+    "facilityName": "New England 1",
+    "regionId": "NSW1",
+    "latitude": -30.626481,
+    "longitude": 151.616,
+    "duids": ["NESBESS1"]
+  },
+  {
+    "facilityCode": "NESBESS2",
+    "facilityName": "New England 2",
+    "regionId": "NSW1",
+    "latitude": -30.626481,
+    "longitude": 151.616,
+    "duids": ["NESBESS2"]
+  },
+  {
+    "facilityCode": "NEVERSF",
+    "facilityName": "Nevertire",
+    "regionId": "NSW1",
+    "latitude": -31.822603,
+    "longitude": 147.703086,
+    "duids": ["NEVERSF1"]
+  },
+  {
+    "facilityCode": "NEWENSF",
+    "facilityName": "New England",
+    "regionId": "NSW1",
+    "latitude": -30.627323,
+    "longitude": 151.556425,
+    "duids": ["NEWENSF2", "NEWENSF1"]
+  },
+  {
+    "facilityCode": "NEWPORT",
+    "facilityName": "Newport",
+    "regionId": "VIC1",
+    "latitude": -37.841423,
+    "longitude": 144.894923,
+    "duids": ["NPS"]
+  },
+  {
+    "facilityCode": "NPPPPS",
+    "facilityName": "Pelican Point",
+    "regionId": "SA1",
+    "latitude": -34.765325,
+    "longitude": 138.505402,
+    "duids": ["PPCCGT"]
+  },
+  {
+    "facilityCode": "NUMURKSF",
+    "facilityName": "Numurkah",
+    "regionId": "VIC1",
+    "latitude": -36.161038,
+    "longitude": 145.476491,
+    "duids": ["NUMURSF1"]
+  },
+  {
+    "facilityCode": "NYNGAN",
+    "facilityName": "Nyngan",
+    "regionId": "NSW1",
+    "latitude": -31.555475,
+    "longitude": 147.08622,
+    "duids": ["NYNGAN1"]
+  },
+  {
+    "facilityCode": "OAKEY",
+    "facilityName": "Oakey",
+    "regionId": "QLD1",
+    "latitude": -27.418268,
+    "longitude": 151.680205,
+    "duids": ["OAKEY2", "OAKEY1"]
+  },
+  {
+    "facilityCode": "OAKEY1SF",
+    "facilityName": "Oakey Solar Farm",
+    "regionId": "QLD1",
+    "latitude": -27.410516,
+    "longitude": 151.652849,
+    "duids": ["OAKEY1SF"]
+  },
+  {
+    "facilityCode": "OAKEY2SF",
+    "facilityName": "Oakey 2",
+    "regionId": "QLD1",
+    "latitude": -27.402454,
+    "longitude": 151.642576,
+    "duids": ["OAKEY2SF"]
+  },
+  {
+    "facilityCode": "OAKLAND",
+    "facilityName": "Oaklands Hill",
+    "regionId": "VIC1",
+    "latitude": -37.681514,
+    "longitude": 142.552322,
+    "duids": ["OAKLAND1"]
+  },
+  {
+    "facilityCode": "OAKY2",
+    "facilityName": "Oaky Creek 2",
+    "regionId": "QLD1",
+    "latitude": -23.048717,
+    "longitude": 148.484462,
+    "duids": ["OAKY2"]
+  },
+  {
+    "facilityCode": "OCPS",
+    "facilityName": "Oaky Creek",
+    "regionId": "QLD1",
+    "latitude": -23.048717,
+    "longitude": 148.484462,
+    "duids": ["OAKYCREK"]
+  },
+  {
+    "facilityCode": "ORABESS",
+    "facilityName": "Orana",
+    "regionId": "NSW1",
+    "latitude": -32.530421,
+    "longitude": 148.962923,
+    "duids": ["ORABESS1"]
+  },
+  {
+    "facilityCode": "OSBORNE",
+    "facilityName": "Osborne",
+    "regionId": "SA1",
+    "latitude": -34.797702,
+    "longitude": 138.50779,
+    "duids": ["OSB-AG"]
+  },
+  {
+    "facilityCode": "PALOONA",
+    "facilityName": "Paloona",
+    "regionId": "TAS1",
+    "latitude": -41.282674,
+    "longitude": 146.249036,
+    "duids": ["PALOONA"]
+  },
+  {
+    "facilityCode": "PAREPW",
+    "facilityName": "Port Augusta Energy Park",
+    "regionId": "SA1",
+    "latitude": -32.595609,
+    "longitude": 137.885629,
+    "duids": ["PAREPS1", "PAREPW1"]
+  },
+  {
+    "facilityCode": "PIBESS",
+    "facilityName": "Phillip Island",
+    "regionId": "VIC1",
+    "latitude": -38.483293,
+    "longitude": 145.22488,
+    "duids": ["PIBESS1"]
+  },
+  {
+    "facilityCode": "PINDARI",
+    "facilityName": "Pindari",
+    "regionId": "NSW1",
+    "latitude": -29.388034,
+    "longitude": 151.244774,
+    "duids": ["PINDARI"]
+  },
+  {
+    "facilityCode": "PIONEER",
+    "facilityName": "Pioneer Sugar Mill",
+    "regionId": "QLD1",
+    "latitude": -19.557546,
+    "longitude": 147.330825,
+    "duids": ["PIONEER"]
+  },
+  {
+    "facilityCode": "PORTLCN",
+    "facilityName": "Port Lincoln",
+    "regionId": "SA1",
+    "latitude": -34.700389,
+    "longitude": 135.804384,
+    "duids": ["POR01", "POR03"]
+  },
+  {
+    "facilityCode": "PORTWF",
+    "facilityName": "Portland",
+    "regionId": "VIC1",
+    "latitude": -38.361417,
+    "longitude": 141.38456,
+    "duids": ["PORTWF"]
+  },
+  {
+    "facilityCode": "PSF",
+    "facilityName": "Parkes",
+    "regionId": "NSW1",
+    "latitude": -33.117567,
+    "longitude": 148.078825,
+    "duids": ["PARSF1"]
+  },
+  {
+    "facilityCode": "PTINA",
+    "facilityName": "Poatina",
+    "regionId": "TAS1",
+    "latitude": -41.811531,
+    "longitude": 146.919117,
+    "duids": ["POAT110", "PO110NL1", "POAT220"]
+  },
+  {
+    "facilityCode": "QBYNB",
+    "facilityName": "Queanbeyan",
+    "regionId": "NSW1",
+    "latitude": -35.339311,
+    "longitude": 149.215101,
+    "duids": ["QBYNB1"]
+  },
+  {
+    "facilityCode": "QP",
+    "facilityName": "Quorn Park",
+    "regionId": "NSW1",
+    "latitude": -33.079517,
+    "longitude": 148.089521,
+    "duids": ["QPSFB2", "QPSFB1"]
+  },
+  {
+    "facilityCode": "QUARANTN",
+    "facilityName": "Quarantine",
+    "regionId": "SA1",
+    "latitude": -34.779339,
+    "longitude": 138.522883,
+    "duids": ["QPS5", "QPS4", "QPS2", "QPS3", "QPS1"]
+  },
+  {
+    "facilityCode": "RACOMIL",
+    "facilityName": "Racecourse Mill",
+    "regionId": "QLD1",
+    "latitude": -21.163842,
+    "longitude": 149.135738,
+    "duids": ["RACOMIL1"]
+  },
+  {
+    "facilityCode": "RANGEB",
+    "facilityName": "Rangebank",
+    "regionId": "VIC1",
+    "latitude": -38.085056,
+    "longitude": 145.259936,
+    "duids": ["RANGEB1"]
+  },
+  {
+    "facilityCode": "REECE",
+    "facilityName": "Reece",
+    "regionId": "TAS1",
+    "latitude": -41.723739,
+    "longitude": 145.136012,
+    "duids": ["REECE2", "REECE1"]
+  },
+  {
+    "facilityCode": "REPULSE",
+    "facilityName": "Repulse",
+    "regionId": "TAS1",
+    "latitude": -42.507691,
+    "longitude": 146.647,
+    "duids": ["REPULSE"]
+  },
+  {
+    "facilityCode": "RESS",
+    "facilityName": "Riverina 1",
+    "regionId": "NSW1",
+    "latitude": -34.646349,
+    "longitude": 146.035015,
+    "duids": ["RESS1"]
+  },
+  {
+    "facilityCode": "RIVNB",
+    "facilityName": "Riverina 2",
+    "regionId": "NSW1",
+    "latitude": -34.646349,
+    "longitude": 146.035015,
+    "duids": ["RIVNB2"]
+  },
+  {
+    "facilityCode": "ROMA",
+    "facilityName": "Roma",
+    "regionId": "QLD1",
+    "latitude": -26.577126,
+    "longitude": 148.84009,
+    "duids": ["ROMA_7", "ROMA_8"]
+  },
+  {
+    "facilityCode": "ROWALLAN",
+    "facilityName": "Rowallan",
+    "regionId": "TAS1",
+    "latitude": -41.729547,
+    "longitude": 146.217649,
+    "duids": ["ROWALLAN"]
+  },
+  {
+    "facilityCode": "ROYALLA",
+    "facilityName": "Royalla",
+    "regionId": "NSW1",
+    "latitude": -35.489826,
+    "longitude": 149.142704,
+    "duids": ["ROYALLA1"]
+  },
+  {
+    "facilityCode": "RPCG",
+    "facilityName": "Rocky Point Cogen",
+    "regionId": "QLD1",
+    "latitude": -27.733564,
+    "longitude": 153.326464,
+    "duids": ["RPCG"]
+  },
+  {
+    "facilityCode": "RRSF",
+    "facilityName": "Ross River",
+    "regionId": "QLD1",
+    "latitude": -19.42622,
+    "longitude": 146.715299,
+    "duids": ["RRSF1"]
+  },
+  {
+    "facilityCode": "RUBICON",
+    "facilityName": "Rubicon",
+    "regionId": "VIC1",
+    "latitude": -37.292453,
+    "longitude": 145.818202,
+    "duids": ["RUBICON"]
+  },
+  {
+    "facilityCode": "RUGBYR",
+    "facilityName": "Rugby Run",
+    "regionId": "QLD1",
+    "latitude": -22.142401,
+    "longitude": 147.928736,
+    "duids": ["RUGBYR1"]
+  },
+  {
+    "facilityCode": "RYANCWF",
+    "facilityName": "Ryan Corner",
+    "regionId": "VIC1",
+    "latitude": -38.271156,
+    "longitude": 142.14003,
+    "duids": ["RYANCWF1"]
+  },
+  {
+    "facilityCode": "RYEPARK",
+    "facilityName": "Rye Park",
+    "regionId": "NSW1",
+    "latitude": -34.63317,
+    "longitude": 148.95364,
+    "duids": ["RYEPARK1"]
+  },
+  {
+    "facilityCode": "SALTCRK",
+    "facilityName": "Salt Creek",
+    "regionId": "VIC1",
+    "latitude": -37.930719,
+    "longitude": 142.773524,
+    "duids": ["SALTCRK1"]
+  },
+  {
+    "facilityCode": "SAPHWF1",
+    "facilityName": "Sapphire",
+    "regionId": "NSW1",
+    "latitude": -29.710273,
+    "longitude": 151.44558,
+    "duids": ["SAPHWF1"]
+  },
+  {
+    "facilityCode": "SEBSF",
+    "facilityName": "Sebastopol",
+    "regionId": "NSW1",
+    "latitude": -34.609386,
+    "longitude": 147.557888,
+    "duids": ["SEBSF1"]
+  },
+  {
+    "facilityCode": "SHEP1",
+    "facilityName": "Shepparton",
+    "regionId": "VIC1",
+    "latitude": -36.322223,
+    "longitude": 145.379291,
+    "duids": ["SHEP1"]
+  },
+  {
+    "facilityCode": "SHOAL",
+    "facilityName": "Shoalhaven Starches",
+    "regionId": "NSW1",
+    "latitude": -34.8547,
+    "longitude": 150.6138,
+    "duids": ["SHOAL1"]
+  },
+  {
+    "facilityCode": "SHOALHAV",
+    "facilityName": "Shoalhaven",
+    "regionId": "NSW1",
+    "latitude": -34.733085,
+    "longitude": 150.4667,
+    "duids": ["SHPUMP", "SHGEN"]
+  },
+  {
+    "facilityCode": "SITHE",
+    "facilityName": "Smithfield",
+    "regionId": "NSW1",
+    "latitude": -33.849945,
+    "longitude": 150.94941,
+    "duids": ["SITHE01"]
+  },
+  {
+    "facilityCode": "SKSF",
+    "facilityName": "South Keswick",
+    "regionId": "NSW1",
+    "latitude": -32.272801,
+    "longitude": 148.659285,
+    "duids": ["SKSF1"]
+  },
+  {
+    "facilityCode": "SMCSF",
+    "facilityName": "Sun Metals",
+    "regionId": "QLD1",
+    "latitude": -19.332335,
+    "longitude": 146.875929,
+    "duids": ["SMCSF1"]
+  },
+  {
+    "facilityCode": "SMFBESS1",
+    "facilityName": "Summerfield 1",
+    "regionId": "SA1",
+    "latitude": -34.9538,
+    "longitude": 139.21502,
+    "duids": ["SMFBESS1"]
+  },
+  {
+    "facilityCode": "SMFBESS2",
+    "facilityName": "Summerfield 2",
+    "regionId": "SA1",
+    "latitude": -34.958457,
+    "longitude": 139.2099,
+    "duids": ["SMFBESS2"]
+  },
+  {
+    "facilityCode": "SMTHBES1",
+    "facilityName": "Smithfield",
+    "regionId": "NSW1",
+    "latitude": -33.849972,
+    "longitude": 150.947448,
+    "duids": ["SMTHBES1"]
+  },
+  {
+    "facilityCode": "SNAPPER",
+    "facilityName": "Snapper Point",
+    "regionId": "SA1",
+    "latitude": -34.764433,
+    "longitude": 138.508149,
+    "duids": ["SNAPPER1"]
+  },
+  {
+    "facilityCode": "SNB1",
+    "facilityName": "Supernode",
+    "regionId": "QLD1",
+    "latitude": -27.458521,
+    "longitude": 153.111745,
+    "duids": ["SNB01"]
+  },
+  {
+    "facilityCode": "SNOWNTH",
+    "facilityName": "Snowtown North",
+    "regionId": "SA1",
+    "latitude": -33.756479,
+    "longitude": 138.143043,
+    "duids": ["SNOWNTH1"]
+  },
+  {
+    "facilityCode": "SNOWSTH",
+    "facilityName": "Snowtown South",
+    "regionId": "SA1",
+    "latitude": -33.862624,
+    "longitude": 138.130367,
+    "duids": ["SNOWSTH1"]
+  },
+  {
+    "facilityCode": "SNOWTOWN",
+    "facilityName": "Snowtown",
+    "regionId": "SA1",
+    "latitude": -33.691598,
+    "longitude": 138.166022,
+    "duids": ["SNOWTWN1"]
+  },
+  {
+    "facilityCode": "SNOWY2",
+    "facilityName": "Tumut",
+    "regionId": "NSW1",
+    "latitude": -35.952003,
+    "longitude": 148.367255,
+    "duids": ["UPPTUMUT"]
+  },
+  {
+    "facilityCode": "SNOWY3",
+    "facilityName": "Guthega",
+    "regionId": "NSW1",
+    "latitude": -36.350097,
+    "longitude": 148.413602,
+    "duids": ["GUTHEGA"]
+  },
+  {
+    "facilityCode": "SNOWY6",
+    "facilityName": "Blowering",
+    "regionId": "NSW1",
+    "latitude": -35.398563,
+    "longitude": 148.246201,
+    "duids": ["BLOWERNG"]
+  },
+  {
+    "facilityCode": "SNUG",
+    "facilityName": "Snuggery",
+    "regionId": "SA1",
+    "latitude": -37.664996,
+    "longitude": 140.414686,
+    "duids": ["SNUG1", "SNUGNL1"]
+  },
+  {
+    "facilityCode": "SNWYGJP2",
+    "facilityName": "Jindabyne Pump At Guthega",
+    "regionId": "NSW1",
+    "latitude": -36.434918,
+    "longitude": 148.63057,
+    "duids": ["SNOWYGJP"]
+  },
+  {
+    "facilityCode": "SRSF",
+    "facilityName": "Susan River",
+    "regionId": "QLD1",
+    "latitude": -25.419331,
+    "longitude": 152.741687,
+    "duids": ["SRSF1"]
+  },
+  {
+    "facilityCode": "STABESS",
+    "facilityName": "Stanwell",
+    "regionId": "QLD1",
+    "latitude": -23.513568,
+    "longitude": 150.31811,
+    "duids": ["STABESS1"]
+  },
+  {
+    "facilityCode": "STANVAC",
+    "facilityName": "Port Stanvac",
+    "regionId": "SA1",
+    "latitude": -35.110332,
+    "longitude": 138.49135,
+    "duids": ["PTSTAN1"]
+  },
+  {
+    "facilityCode": "STANWELL",
+    "facilityName": "Stanwell",
+    "regionId": "QLD1",
+    "latitude": -23.507452,
+    "longitude": 150.313355,
+    "duids": ["STAN-2", "STAN-1", "STAN-4", "STAN-3"]
+  },
+  {
+    "facilityCode": "STAPYLTON",
+    "facilityName": "Stapylton",
+    "regionId": "QLD1",
+    "latitude": -27.736111,
+    "longitude": 153.245931,
+    "duids": ["STAPYLTON1"]
+  },
+  {
+    "facilityCode": "STARFHILL",
+    "facilityName": "Starfish Hill",
+    "regionId": "SA1",
+    "latitude": -35.578983,
+    "longitude": 138.139653,
+    "duids": ["STARHLWF"]
+  },
+  {
+    "facilityCode": "STOCKYD",
+    "facilityName": "Stockyard Hill",
+    "regionId": "VIC1",
+    "latitude": -37.53568,
+    "longitude": 143.252548,
+    "duids": ["STOCKYD1"]
+  },
+  {
+    "facilityCode": "STUBSF",
+    "facilityName": "Stubbo",
+    "regionId": "NSW1",
+    "latitude": -32.26254,
+    "longitude": 149.589068,
+    "duids": ["STUBSF1", "STUBSF2"]
+  },
+  {
+    "facilityCode": "STWF",
+    "facilityName": "Silverton",
+    "regionId": "NSW1",
+    "latitude": -31.86095,
+    "longitude": 141.296349,
+    "duids": ["STWF1"]
+  },
+  {
+    "facilityCode": "SUNRSF1",
+    "facilityName": "Sunraysia",
+    "regionId": "NSW1",
+    "latitude": -34.804891,
+    "longitude": 143.491185,
+    "duids": ["SUNRSF1"]
+  },
+  {
+    "facilityCode": "SUNTPSF",
+    "facilityName": "Suntop",
+    "regionId": "NSW1",
+    "latitude": -32.583514,
+    "longitude": 148.826931,
+    "duids": ["SUNTPSF1"]
+  },
+  {
+    "facilityCode": "SUPERNODE2",
+    "facilityName": "Supernode 2",
+    "regionId": "QLD1",
+    "latitude": -27.449227,
+    "longitude": 153.112538,
+    "duids": ["SNB02"]
+  },
+  {
+    "facilityCode": "SWANBBF",
+    "facilityName": "Swanbank",
+    "regionId": "QLD1",
+    "latitude": -27.65619,
+    "longitude": 152.817139,
+    "duids": ["SWANBBF1"]
+  },
+  {
+    "facilityCode": "SWAN_E",
+    "facilityName": "Swanbank E",
+    "regionId": "QLD1",
+    "latitude": -27.655138,
+    "longitude": 152.817933,
+    "duids": ["SWAN_E"]
+  },
+  {
+    "facilityCode": "TABMILL2",
+    "facilityName": "Tableland Mill",
+    "regionId": "QLD1",
+    "latitude": -17.119813,
+    "longitude": 145.34513,
+    "duids": ["TABMILL2"]
+  },
+  {
+    "facilityCode": "TAHMOOR",
+    "facilityName": "Tahmoor",
+    "regionId": "NSW1",
+    "latitude": -34.249117,
+    "longitude": 150.577718,
+    "duids": ["TAHMOOR1"]
+  },
+  {
+    "facilityCode": "TALLAWAR",
+    "facilityName": "Tallawarra",
+    "regionId": "NSW1",
+    "latitude": -34.522808,
+    "longitude": 150.807237,
+    "duids": ["TALWA1"]
+  },
+  {
+    "facilityCode": "TALWB",
+    "facilityName": "Tallawarra B",
+    "regionId": "NSW1",
+    "latitude": -34.522808,
+    "longitude": 150.807237,
+    "duids": ["TALWB1"]
+  },
+  {
+    "facilityCode": "TARALGA",
+    "facilityName": "Taralga",
+    "regionId": "NSW1",
+    "latitude": -34.431428,
+    "longitude": 149.865258,
+    "duids": ["TARALGA1"]
+  },
+  {
+    "facilityCode": "TARBESS",
+    "facilityName": "Tarong",
+    "regionId": "QLD1",
+    "latitude": -26.780561,
+    "longitude": 151.910086,
+    "duids": ["TARBESS1"]
+  },
+  {
+    "facilityCode": "TARONG",
+    "facilityName": "Tarong",
+    "regionId": "QLD1",
+    "latitude": -26.784086,
+    "longitude": 151.914537,
+    "duids": ["TARONG#1", "TARONG#2", "TARONG#4", "TARONG#3"]
+  },
+  {
+    "facilityCode": "TARONGN",
+    "facilityName": "Tarong North",
+    "regionId": "QLD1",
+    "latitude": -26.774391,
+    "longitude": 151.914007,
+    "duids": ["TNPS1"]
+  },
+  {
+    "facilityCode": "TARRALEA",
+    "facilityName": "Tarraleah",
+    "regionId": "TAS1",
+    "latitude": -42.301224,
+    "longitude": 146.457294,
+    "duids": ["TARRALEA"]
+  },
+  {
+    "facilityCode": "TATIARA",
+    "facilityName": "Tataria",
+    "regionId": "SA1",
+    "latitude": -36.326977,
+    "longitude": 140.737035,
+    "duids": ["TATIARA1"]
+  },
+  {
+    "facilityCode": "TATURA",
+    "facilityName": "Tatura",
+    "regionId": "VIC1",
+    "latitude": -36.47915,
+    "longitude": 145.235037,
+    "duids": ["TATURA01"]
+  },
+  {
+    "facilityCode": "TB2SF",
+    "facilityName": "Tailem Bend 2",
+    "regionId": "SA1",
+    "latitude": -35.28,
+    "longitude": 139.49,
+    "duids": ["TB2B1", "TB2SF1"]
+  },
+  {
+    "facilityCode": "TBSF",
+    "facilityName": "Tailem Bend",
+    "regionId": "SA1",
+    "latitude": -35.271346,
+    "longitude": 139.488379,
+    "duids": ["TBSF1"]
+  },
+  {
+    "facilityCode": "TEMPB",
+    "facilityName": "Templers",
+    "regionId": "SA1",
+    "latitude": -34.46293,
+    "longitude": 138.764848,
+    "duids": ["TEMPB1"]
+  },
+  {
+    "facilityCode": "TERANGBESS",
+    "facilityName": "Terang",
+    "regionId": "VIC1",
+    "latitude": -38.231839,
+    "longitude": 142.933262,
+    "duids": ["TRGBESS1"]
+  },
+  {
+    "facilityCode": "TGNSS",
+    "facilityName": "Traralgon Network Support",
+    "regionId": "VIC1",
+    "latitude": -37.833513,
+    "longitude": 144.965955,
+    "duids": ["TGNSS1"]
+  },
+  {
+    "facilityCode": "THEDROP",
+    "facilityName": "The Drop",
+    "regionId": "NSW1",
+    "latitude": -35.973527,
+    "longitude": 145.999274,
+    "duids": ["THEDROP1"]
+  },
+  {
+    "facilityCode": "TIB",
+    "facilityName": "Torrens Island",
+    "regionId": "SA1",
+    "latitude": -34.802305,
+    "longitude": 138.520262,
+    "duids": ["TIB1"]
+  },
+  {
+    "facilityCode": "TIMWEST",
+    "facilityName": "Timboon West",
+    "regionId": "VIC1",
+    "latitude": -38.528351,
+    "longitude": 142.916231,
+    "duids": ["TIMWEST"]
+  },
+  {
+    "facilityCode": "TITREE",
+    "facilityName": "Veolia Ti Tree",
+    "regionId": "QLD1",
+    "latitude": -27.695551,
+    "longitude": 152.650313,
+    "duids": ["TITREE"]
+  },
+  {
+    "facilityCode": "TOORAWF",
+    "facilityName": "Toora",
+    "regionId": "VIC1",
+    "latitude": -38.653258,
+    "longitude": 146.340154,
+    "duids": ["TOORAWF"]
+  },
+  {
+    "facilityCode": "TORRIS",
+    "facilityName": "Torrens Island",
+    "regionId": "SA1",
+    "latitude": -34.80651,
+    "longitude": 138.523127,
+    "duids": ["TORRB2", "TORRB4", "TORRB3", "TORRB1"]
+  },
+  {
+    "facilityCode": "TOWER",
+    "facilityName": "Tower",
+    "regionId": "NSW1",
+    "latitude": -34.219461,
+    "longitude": 150.718012,
+    "duids": ["TOWER"]
+  },
+  {
+    "facilityCode": "TREVALLN",
+    "facilityName": "Trevallyn",
+    "regionId": "TAS1",
+    "latitude": -41.42262,
+    "longitude": 147.111785,
+    "duids": ["TREVALLN"]
+  },
+  {
+    "facilityCode": "TRIBUTE",
+    "facilityName": "Tribute",
+    "regionId": "TAS1",
+    "latitude": -41.815832,
+    "longitude": 145.650178,
+    "duids": ["TRIBUTE", "TRIBNL1"]
+  },
+  {
+    "facilityCode": "TULLYSM",
+    "facilityName": "Tully Sugar Mill",
+    "regionId": "QLD1",
+    "latitude": -17.937329,
+    "longitude": 145.92739,
+    "duids": ["TULLYSM1"]
+  },
+  {
+    "facilityCode": "TUMUT3",
+    "facilityName": "Tumut 3",
+    "regionId": "NSW1",
+    "latitude": -35.611138,
+    "longitude": 148.29175,
+    "duids": ["TUMUT3", "SNOWYP"]
+  },
+  {
+    "facilityCode": "TUNGATIN",
+    "facilityName": "Tungatinah",
+    "regionId": "TAS1",
+    "latitude": -42.296802,
+    "longitude": 146.456568,
+    "duids": ["TUNGATIN"]
+  },
+  {
+    "facilityCode": "TVCCPS",
+    "facilityName": "Tamar Valley",
+    "regionId": "TAS1",
+    "latitude": -41.140348,
+    "longitude": 146.904872,
+    "duids": ["TVCC201"]
+  },
+  {
+    "facilityCode": "ULBESS",
+    "facilityName": "Ulinda Park",
+    "regionId": "QLD1",
+    "latitude": -26.92635,
+    "longitude": 150.717472,
+    "duids": ["ULPBESS1"]
+  },
+  {
+    "facilityCode": "URANQ",
+    "facilityName": "Uranquinty",
+    "regionId": "NSW1",
+    "latitude": -35.180061,
+    "longitude": 147.21567,
+    "duids": ["URANQ13", "URANQ11", "URANQ12", "URANQ14"]
+  },
+  {
+    "facilityCode": "VALDORA",
+    "facilityName": "Sunshine Coast",
+    "regionId": "QLD1",
+    "latitude": -26.560094,
+    "longitude": 153.02574,
+    "duids": ["VALDORA1"]
+  },
+  {
+    "facilityCode": "VBB",
+    "facilityName": "Victorian Big Battery",
+    "regionId": "VIC1",
+    "latitude": -38.038278,
+    "longitude": 144.290383,
+    "duids": ["VBB1"]
+  },
+  {
+    "facilityCode": "VICMILL",
+    "facilityName": "Victoria Mill",
+    "regionId": "QLD1",
+    "latitude": -18.650208,
+    "longitude": 146.200866,
+    "duids": ["VICMILL1"]
+  },
+  {
+    "facilityCode": "VP",
+    "facilityName": "Vales Point B",
+    "regionId": "NSW1",
+    "latitude": -33.16078,
+    "longitude": 151.543985,
+    "duids": ["VP5", "VP6"]
+  },
+  {
+    "facilityCode": "VPGS",
+    "facilityName": "Valley Power Peaking",
+    "regionId": "VIC1",
+    "latitude": -38.253709,
+    "longitude": 146.588886,
+    "duids": ["VPGS6", "VPGS4", "VPGS2", "VPGS3", "VPGS1", "VPGS5"]
+  },
+  {
+    "facilityCode": "WAGGNSF",
+    "facilityName": "Wagga North",
+    "regionId": "NSW1",
+    "latitude": -35.070575,
+    "longitude": 147.438807,
+    "duids": ["WAGGNSF1"]
+  },
+  {
+    "facilityCode": "WALGRV",
+    "facilityName": "Wallgrove",
+    "regionId": "NSW1",
+    "latitude": -33.813917,
+    "longitude": 150.830827,
+    "duids": ["WALGRV1"]
+  },
+  {
+    "facilityCode": "WAMBOWF",
+    "facilityName": "Wambo",
+    "regionId": "QLD1",
+    "latitude": -26.603045,
+    "longitude": 151.246876,
+    "duids": ["WAMBOWF1", "WAMBOWF2"]
+  },
+  {
+    "facilityCode": "WANDBG",
+    "facilityName": "Wandoan South",
+    "regionId": "QLD1",
+    "latitude": -26.261526,
+    "longitude": 149.765738,
+    "duids": ["WANDB1"]
+  },
+  {
+    "facilityCode": "WANDSF",
+    "facilityName": "Wandoan",
+    "regionId": "QLD1",
+    "latitude": -26.248848,
+    "longitude": 149.765988,
+    "duids": ["WANDSF1"]
+  },
+  {
+    "facilityCode": "WARWSF",
+    "facilityName": "Warwick",
+    "regionId": "QLD1",
+    "latitude": -28.183037,
+    "longitude": 152.071764,
+    "duids": ["WARWSF2", "WARWSF1"]
+  },
+  {
+    "facilityCode": "WATERLWF",
+    "facilityName": "Waterloo",
+    "regionId": "SA1",
+    "latitude": -34.001298,
+    "longitude": 138.91088,
+    "duids": ["WATERLWF"]
+  },
+  {
+    "facilityCode": "WAUBRAWF",
+    "facilityName": "Waubra",
+    "regionId": "VIC1",
+    "latitude": -37.357446,
+    "longitude": 143.603659,
+    "duids": ["WAUBRAWF"]
+  },
+  {
+    "facilityCode": "WDBESS",
+    "facilityName": "Western Downs",
+    "regionId": "QLD1",
+    "latitude": -26.952278,
+    "longitude": 150.690528,
+    "duids": ["WDBESS1"]
+  },
+  {
+    "facilityCode": "WDBESS2",
+    "facilityName": "Western Downs 2",
+    "regionId": "QLD1",
+    "latitude": -26.951989,
+    "longitude": 150.694141,
+    "duids": ["WDBESS2"]
+  },
+  {
+    "facilityCode": "WDGPH",
+    "facilityName": "Western Downs",
+    "regionId": "QLD1",
+    "latitude": -26.955534,
+    "longitude": 150.67862,
+    "duids": ["WDGPH1"]
+  },
+  {
+    "facilityCode": "WDLNGN",
+    "facilityName": "Woodlawn",
+    "regionId": "NSW1",
+    "latitude": -35.05928,
+    "longitude": 149.5749,
+    "duids": ["WDLNGN01"]
+  },
+  {
+    "facilityCode": "WELLSF1",
+    "facilityName": "Wellington",
+    "regionId": "NSW1",
+    "latitude": -32.5207,
+    "longitude": 148.9675,
+    "duids": ["WELLSF1"]
+  },
+  {
+    "facilityCode": "WELNSF",
+    "facilityName": "Wellington North",
+    "regionId": "NSW1",
+    "latitude": -32.514353,
+    "longitude": 148.957634,
+    "duids": ["WELNSF1"]
+  },
+  {
+    "facilityCode": "WEMENSF1",
+    "facilityName": "Wemen",
+    "regionId": "VIC1",
+    "latitude": -34.799853,
+    "longitude": 142.547621,
+    "duids": ["WEMENSF1"]
+  },
+  {
+    "facilityCode": "WESTILLA",
+    "facilityName": "West Illawarra Leagues Club",
+    "regionId": "NSW1",
+    "latitude": -34.451645,
+    "longitude": 150.843037,
+    "duids": ["WESTILL1"]
+  },
+  {
+    "facilityCode": "WGWF",
+    "facilityName": "Willogoleche",
+    "regionId": "SA1",
+    "latitude": -33.413128,
+    "longitude": 138.845663,
+    "duids": ["WGWF1"]
+  },
+  {
+    "facilityCode": "WHIT1",
+    "facilityName": "Whitwood Road",
+    "regionId": "QLD1",
+    "latitude": -27.620454,
+    "longitude": 152.824409,
+    "duids": ["WHIT1"]
+  },
+  {
+    "facilityCode": "WHITSF",
+    "facilityName": "Whitsunday",
+    "regionId": "QLD1",
+    "latitude": -20.492712,
+    "longitude": 147.756358,
+    "duids": ["WHITSF1"]
+  },
+  {
+    "facilityCode": "WILGAPK",
+    "facilityName": "Wilga Park",
+    "regionId": "NSW1",
+    "latitude": -30.363284,
+    "longitude": 149.677422,
+    "duids": ["WILGAPK"]
+  },
+  {
+    "facilityCode": "WILGAPKB",
+    "facilityName": "Wilga Park B",
+    "regionId": "NSW1",
+    "latitude": -30.363284,
+    "longitude": 149.677422,
+    "duids": ["WILGB01"]
+  },
+  {
+    "facilityCode": "WILLHOV",
+    "facilityName": "William Hovel",
+    "regionId": "VIC1",
+    "latitude": -36.925216,
+    "longitude": 146.389418,
+    "duids": ["WILLHOV1"]
+  },
+  {
+    "facilityCode": "WINDHILL",
+    "facilityName": "Windy Hill",
+    "regionId": "QLD1",
+    "latitude": -17.590399,
+    "longitude": 145.52968,
+    "duids": ["WHILL1"]
+  },
+  {
+    "facilityCode": "WINGF1",
+    "facilityName": "Wingfield",
+    "regionId": "SA1",
+    "latitude": -34.835138,
+    "longitude": 138.548949,
+    "duids": ["WINGF1_1"]
+  },
+  {
+    "facilityCode": "WINGF2",
+    "facilityName": "Wingfield 2",
+    "regionId": "SA1",
+    "latitude": -34.835138,
+    "longitude": 138.548949,
+    "duids": ["WINGF2_1"]
+  },
+  {
+    "facilityCode": "WINTSF1",
+    "facilityName": "Winton",
+    "regionId": "VIC1",
+    "latitude": -36.503538,
+    "longitude": 146.124102,
+    "duids": ["WINTSF1"]
+  },
+  {
+    "facilityCode": "WIVENHOE",
+    "facilityName": "Wivenhoe",
+    "regionId": "QLD1",
+    "latitude": -27.372417,
+    "longitude": 152.63203,
+    "duids": ["PUMP2", "W/HOE#1", "PUMP1", "W/HOE#2"]
+  },
+  {
+    "facilityCode": "WKIEWA",
+    "facilityName": "West Kiewa",
+    "regionId": "VIC1",
+    "latitude": -36.759974,
+    "longitude": 147.185812,
+    "duids": ["WKIEWA1", "WKIEWA2"]
+  },
+  {
+    "facilityCode": "WLWLSF",
+    "facilityName": "Walla Walla",
+    "regionId": "NSW1",
+    "latitude": -35.747397,
+    "longitude": 146.96666,
+    "duids": ["WLWLSF1", "WLWLSF2"]
+  },
+  {
+    "facilityCode": "WNSF",
+    "facilityName": "Wangaratta",
+    "regionId": "VIC1",
+    "latitude": -36.326757,
+    "longitude": 146.359901,
+    "duids": ["WNSF1"]
+  },
+  {
+    "facilityCode": "WOLARSF",
+    "facilityName": "Wollar",
+    "regionId": "NSW1",
+    "latitude": -32.407631,
+    "longitude": 149.940737,
+    "duids": ["WOLARSF1"]
+  },
+  {
+    "facilityCode": "WOLLERT",
+    "facilityName": "Wollert",
+    "regionId": "VIC1",
+    "latitude": -37.591792,
+    "longitude": 145.043033,
+    "duids": ["WOLLERT1"]
+  },
+  {
+    "facilityCode": "WONWP",
+    "facilityName": "Wonthaggi",
+    "regionId": "VIC1",
+    "latitude": -38.60513,
+    "longitude": 145.546292,
+    "duids": ["WONWP"]
+  },
+  {
+    "facilityCode": "WOODLWN",
+    "facilityName": "Woodlawn",
+    "regionId": "NSW1",
+    "latitude": -35.081675,
+    "longitude": 149.570511,
+    "duids": ["WOODLWN1"]
+  },
+  {
+    "facilityCode": "WOOLGSF",
+    "facilityName": "Woolooga",
+    "regionId": "QLD1",
+    "latitude": -26.075843,
+    "longitude": 152.437448,
+    "duids": ["WOOLES1", "WOOLGSF1"]
+  },
+  {
+    "facilityCode": "WOOLNTH1",
+    "facilityName": "Woolnorth",
+    "regionId": "TAS1",
+    "latitude": -40.786606,
+    "longitude": 144.738536,
+    "duids": ["WOOLNTH1"]
+  },
+  {
+    "facilityCode": "WPWF",
+    "facilityName": "Wattle Point",
+    "regionId": "SA1",
+    "latitude": -35.110379,
+    "longitude": 137.705789,
+    "duids": ["WPWF"]
+  },
+  {
+    "facilityCode": "WRSF1",
+    "facilityName": "White Rock Solar Farm",
+    "regionId": "NSW1",
+    "latitude": -29.764429,
+    "longitude": 151.553007,
+    "duids": ["WRSF1"]
+  },
+  {
+    "facilityCode": "WRWF1",
+    "facilityName": "White Rock Wind Farm",
+    "regionId": "NSW1",
+    "latitude": -29.7718,
+    "longitude": 151.5755,
+    "duids": ["WRWF1"]
+  },
+  {
+    "facilityCode": "WSTWYSF",
+    "facilityName": "West Wyalong",
+    "regionId": "NSW1",
+    "latitude": -33.809655,
+    "longitude": 147.325015,
+    "duids": ["WSTWYSF1"]
+  },
+  {
+    "facilityCode": "WTAHB",
+    "facilityName": "Waratah Super Battery",
+    "regionId": "NSW1",
+    "latitude": -33.209781,
+    "longitude": 151.544911,
+    "duids": ["WTAHB1"]
+  },
+  {
+    "facilityCode": "WUNUSF",
+    "facilityName": "Wunghnu",
+    "regionId": "VIC1",
+    "latitude": -36.164387,
+    "longitude": 145.403731,
+    "duids": ["WUNUSF1"]
+  },
+  {
+    "facilityCode": "WYANGALA",
+    "facilityName": "Wyangala A",
+    "regionId": "NSW1",
+    "latitude": -33.968824,
+    "longitude": 148.948823,
+    "duids": ["WYANGALA"]
+  },
+  {
+    "facilityCode": "WYANGALB",
+    "facilityName": "Wyangala B",
+    "regionId": "NSW1",
+    "latitude": -33.968824,
+    "longitude": 148.948823,
+    "duids": ["WYANGALB"]
+  },
+  {
+    "facilityCode": "WYASF",
+    "facilityName": "Wyalong",
+    "regionId": "NSW1",
+    "latitude": -33.887269,
+    "longitude": 147.315314,
+    "duids": ["WYASF1"]
+  },
+  {
+    "facilityCode": "YABULU",
+    "facilityName": "Townsville",
+    "regionId": "QLD1",
+    "latitude": -19.20127,
+    "longitude": 146.618573,
+    "duids": ["YABULU", "YABULU2"]
+  },
+  {
+    "facilityCode": "YALLOURN",
+    "facilityName": "Yallourn W",
+    "regionId": "VIC1",
+    "latitude": -38.177589,
+    "longitude": 146.342556,
+    "duids": ["YWPS2", "YWPS3", "YWPS1", "YWPS4"]
+  },
+  {
+    "facilityCode": "YAMBUK",
+    "facilityName": "Yambuk",
+    "regionId": "VIC1",
+    "latitude": -38.305278,
+    "longitude": 142.018439,
+    "duids": ["YAMBUKWF"]
+  },
+  {
+    "facilityCode": "YARANSF",
+    "facilityName": "Yarranlea",
+    "regionId": "QLD1",
+    "latitude": -27.709261,
+    "longitude": 151.533038,
+    "duids": ["YARANSF1"]
+  },
+  {
+    "facilityCode": "YARWUN",
+    "facilityName": "Yarwun",
+    "regionId": "QLD1",
+    "latitude": -23.8309,
+    "longitude": 151.151136,
+    "duids": ["YARWUN_1"]
+  },
+  {
+    "facilityCode": "YATSF1",
+    "facilityName": "Yatpool",
+    "regionId": "VIC1",
+    "latitude": -34.396363,
+    "longitude": 142.173809,
+    "duids": ["YATSF1"]
+  },
+  {
+    "facilityCode": "YAWWF",
+    "facilityName": "Yawong",
+    "regionId": "VIC1",
+    "latitude": -36.471022,
+    "longitude": 143.361722,
+    "duids": ["YAWWF1"]
+  },
+  {
+    "facilityCode": "YENDONWF",
+    "facilityName": "Yendon",
+    "regionId": "VIC1",
+    "latitude": -37.630407,
+    "longitude": 144.023136,
+    "duids": ["YENDWF1"]
+  },
+  {
+    "facilityCode": "YSWF",
+    "facilityName": "Yaloak South",
+    "regionId": "VIC1",
+    "latitude": -37.716474,
+    "longitude": 144.241947,
+    "duids": ["YSWF1"]
+  },
+  {
+    "facilityCode": "YWNGAHYD",
+    "facilityName": "Yarrawonga",
+    "regionId": "VIC1",
+    "latitude": -36.009466,
+    "longitude": 145.999568,
+    "duids": ["YWNGAHYD"]
+  }
+]

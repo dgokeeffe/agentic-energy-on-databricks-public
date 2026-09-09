@@ -62,7 +62,7 @@ def test_sql_gate_rejects_failed_terminal_state_even_after_successful_transport(
     with pytest.raises(RuntimeError, match="ended in FAILED"):
         validator.execute_statement(
             "SELECT 1",
-            profile="daveok",
+            profile="DEFAULT",
             warehouse_id="warehouse",
             catalog="catalog",
             schema="schema",
@@ -86,7 +86,7 @@ def test_result_contract_checks_terminal_result_columns_and_counts() -> None:
 
 
 def test_static_asset_validator_reconciles_all_files() -> None:
-    assert validator.REQUIRED_PROFILE == "daveok"
+    assert validator.REQUIRED_PROFILE == "DEFAULT"
     result = validator.validate_assets()
     assert len(result["benchmarks"]) == 6
     assert len(result["dashboard_sql"]) == 6

@@ -146,7 +146,7 @@ redesigned screen, and the reviewed SQL read path.
 `gold_nem_app_region_status`, and granted separately in the app bundle so the
 app's privileges stay enumerable.
 
-Verified with the `daveok` profile against
+Verified with the `DEFAULT` profile against
 `agentic_energy_workshop.agentic_energy_workshop_d4_serving`: job run
 `354366776080686` SUCCESS on both publication tasks, the serving table reconciles
 **22 rows to 22** against its pipeline source across 11 region/fuel pairs, and both

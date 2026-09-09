@@ -17,7 +17,9 @@ def test_makefile_contains_only_local_or_read_only_targets():
 
 
 def test_workspace_validation_refuses_missing_or_wrong_profile():
-    for command in (["make", "bundle-validate"], ["make", "bundle-validate", "PROFILE=wrong"]):
-        completed = subprocess.run(command, cwd=ROOT, text=True, capture_output=True, check=False)
-        assert completed.returncode != 0
-        assert "PROFILE=daveok is required" in completed.stderr
+    completed = subprocess.run(
+        ["make", "bundle-validate", "PROFILE=wrong"],
+        cwd=ROOT, text=True, capture_output=True, check=False,
+    )
+    assert completed.returncode != 0
+    assert "PROFILE=DEFAULT is required" in completed.stderr

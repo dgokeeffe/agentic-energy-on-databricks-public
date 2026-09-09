@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Idempotently grant the Unity Catalog path required by NEMWEB operators.
 
-Every workspace-aware call uses the explicitly selected ``daveok`` profile.
+Every workspace-aware call uses the explicitly selected ``DEFAULT`` profile.
 Credentials remain in the Databricks CLI configuration; this script accepts no
 token or workspace URL.
 """
@@ -16,7 +16,7 @@ import subprocess
 import time
 from typing import Any, Sequence
 
-PROFILE = "daveok"
+PROFILE = "DEFAULT"
 _SAFE_IDENTIFIER = re.compile(r"^[A-Za-z_][A-Za-z0-9_-]*$")
 _SAFE_WAREHOUSE = re.compile(r"^[A-Za-z0-9_-]+$")
 _TERMINAL = {"SUCCEEDED", "FAILED", "CANCELED", "CLOSED"}

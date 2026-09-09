@@ -97,6 +97,8 @@ resources:
         # Auto Loader reads exactly the <parent>/snapshot or <parent>/live root
         # written by the lander. Keep this paired with nemweb.source_mode.
         nemweb.landing_path: ${var.landing_path}
+        nemweb.landing_catalog: ${var.catalog}
+        nemweb.landing_schema: ${var.schema}
         nemweb.market_timezone: Australia/Brisbane
         nemweb.critical_lookback_hours: ${var.critical_lookback_hours}
         nemweb.context_lookback_days: ${var.context_lookback_days}

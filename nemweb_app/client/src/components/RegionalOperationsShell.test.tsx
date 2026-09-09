@@ -47,6 +47,7 @@ const ready = (rows: RegionStatus[], overrides: Partial<Omit<ReadyState, 'kind' 
   predictionStale: false,
   evaluatedAtMs: Date.parse('2026-07-01T12:10:00+10:00'),
   fuelRows: null,
+  unitRows: null,
   ...overrides,
 });
 
@@ -213,11 +214,14 @@ describe('RegionalOperationsShell', () => {
     const integration = render(ready(twoIntervals, { stale: true, fuelRows: [fuel()] }));
     const prepared = render(ready(twoIntervals, { stale: true, mode: 'mock', fuelRows: [fuel()] }));
 
-    expect(integration).toContain('state-banner-danger');
+    // Class names changed from state-banner-* to notice-* when the three stacked
+    // full-width banners became one row of inline chips. The assertions are
+    // unchanged in substance: live staleness alarms, prepared staleness does not.
+    expect(integration).toContain('notice-alert');
     expect(integration).toContain('role="alert"');
-    expect(prepared).toContain('state-banner-info');
+    expect(prepared).toContain('notice-muted');
     expect(prepared).toContain('as expected for a prepared fixture');
-    expect(prepared).not.toContain('state-banner-danger');
+    expect(prepared).not.toContain('notice-alert');
     // The safety instruction itself must survive the change of emphasis.
     for (const html of [integration, prepared]) {
       expect(html).toContain('Do not treat these values as current');
@@ -257,7 +261,7 @@ describe('RegionalOperationsShell', () => {
 
   it('offers the investigation journal for the focused interval', () => {
     const html = render(ready(twoIntervals, { fuelRows: [fuel()] }));
-    expect(html).toContain('Open investigation journal');
-    expect(html).toContain('Record what you concluded while the evidence is visible');
+    expect(html).toContain('Investigate with Genie');
+    expect(html).toContain('Investigate the observation with Genie');
   });
 });

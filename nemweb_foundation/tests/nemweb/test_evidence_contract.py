@@ -41,7 +41,11 @@ EXPECTED_FIELDS = {
     "quality_expectation_passed_count", "quality_expectation_failed_count",
     "quality_expectation_result", "lander_outcome", "pipeline_outcome",
     "orchestration_outcome", "source_changed", "rows_changed",
-    "freshness_check_result", "availability_note",
+    "freshness_check_result", "availability_note", "landing_terminal_status",
+    "parser_rejection_count", "bronze_quarantine_count", "bronze_ingested_at",
+    "app_serving_schema", "app_region_status_row_count", "app_generation_row_count",
+    "app_serving_duplicate_count", "correction_selection_result",
+    "intervention_effective_run_result", "app_serving_outcome",
 }
 
 
@@ -204,7 +208,8 @@ def test_capture_scopes_relisted_archives_to_their_first_landing_owner():
 
         def execute_sql(self, sql, warehouse_id, catalog, schema, timeout_seconds):
             if "current_manifest AS" in sql:
-                assert f"manifests/{self.current_lander_run}.json" in sql
+                assert "landing_nem_files" in sql
+                assert self.current_lander_run in sql
                 names = ["report_family", "source_archive_sha256", "owner_count", "owner_run_ids"]
                 return {
                     "manifest": {"schema": {"columns": [{"name": name} for name in names]}},
@@ -661,7 +666,7 @@ def test_live_validator_requires_three_consecutive_complete_cycles(tmp_path):
                 freshness_check_result="PASS_SOURCE_CURRENT" if cycle == 0 else "PASS_NO_NEW_SOURCE",
             )))
     path = tmp_path / "live.json"
-    assert EVIDENCE_SCHEMA_VERSION == 2
+    assert EVIDENCE_SCHEMA_VERSION == 3
     assert all("bronze_interval_to_gold_lag_seconds" in row for row in all_rows)
     path.write_text(
         json.dumps({"schema_version": EVIDENCE_SCHEMA_VERSION, "rows": all_rows}),
@@ -683,7 +688,7 @@ def test_live_validator_requires_three_consecutive_complete_cycles(tmp_path):
         capture_output=True, text=True, check=False, env=validator_env,
     )
     assert old_contract.returncode != 0
-    assert "schema version must be 2" in old_contract.stderr
+    assert "schema version must be 3" in old_contract.stderr
 
     reused_update_rows = [
         {**row, "pipeline_update_id": "one-reused-update"}
@@ -775,7 +780,7 @@ def test_pipeline_events_uses_supported_filter_and_accepts_bare_list():
         captured["args"] = args
         return [{"origin": {"update_id": "u1"}, "event_type": "update_progress"}]
 
-    client = DatabricksCLI(profile="daveok", runner=runner)
+    client = DatabricksCLI(profile="DEFAULT", runner=runner)
     events = client.pipeline_events("p1", "u1")
 
     assert events and events[0]["origin"]["update_id"] == "u1"
@@ -795,7 +800,7 @@ def test_pipeline_events_respects_the_250_event_page_cap():
         captured["args"] = args
         return []
 
-    DatabricksCLI(profile="daveok", runner=runner).pipeline_events("p1", "u1")
+    DatabricksCLI(profile="DEFAULT", runner=runner).pipeline_events("p1", "u1")
     args = captured["args"]
     cap = int(args[args.index("--max-results") + 1])
     assert cap <= 250

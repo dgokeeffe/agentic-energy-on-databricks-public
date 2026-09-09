@@ -9,8 +9,11 @@ The implementation may use dedicated NEMWEB Databricks resources.
 
 The primary value is fresh, understandable market data. Metric views, Genie and
 AI/BI dashboards consume that data, but must not distract from making the core
-five-minute path reliable. The executable lead-agent brief is
-[`../../goal.md`](../../goal.md).
+five-minute path reliable. The original lead-agent brief is
+[`../../goal.md`](../../goal.md) — now **historical**: the migration it describes was
+delivered, and the source repository's workspace no longer exists. Its fixed decisions
+and completion criteria still bind; its instruction to adapt from a local path does
+not.
 
 ## Finish criterion
 
@@ -49,7 +52,7 @@ below so the workshop path remains coherent.
 - Use modern `pyspark.pipelines` APIs. Migrate remaining legacy `dp.read` or DLT
   forms instead of extending them.
 - Support both a deterministic, versioned workshop snapshot and live NEMWEB.
-- Use the explicit Databricks profile `daveok` for workspace-aware validation.
+- Use the explicit Databricks profile `DEFAULT` for workspace-aware validation.
 - The NEMWEB delivery includes medallion data, metric views, semantic metadata,
   Genie instructions/examples/evaluation and AI/BI dashboards. ML forecasting
   and the custom application are outside this migration.
@@ -130,7 +133,7 @@ snapshot path.
 
 ### 7. Five-minute live proof
 
-- Facilitators validate from `nemweb_foundation/` with `databricks bundle validate --strict -t dev --profile daveok`.
+- Facilitators validate from `nemweb_foundation/` with `databricks bundle validate --strict -t dev --profile DEFAULT`.
 - Exercise the lander, pipeline dependencies, retries and correction path in the
   selected workspace environment.
 - Capture at least three consecutive cycles using the finish-criterion evidence.

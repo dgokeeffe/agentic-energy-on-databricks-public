@@ -14,6 +14,10 @@ from pyspark.sql import functions as F
     "valid_gold_unit_dispatch_key",
     "interval_end IS NOT NULL AND duid IS NOT NULL AND actual_generation_mw IS NOT NULL",
 )
+@dp.expect_or_fail(
+    "known_dimension_match_status",
+    "dimension_match_status IN ('REGION_AND_FUEL', 'REGION_ONLY', 'FUEL_ONLY', 'UNMATCHED')",
+)
 def gold_nem_unit_dispatch_5min():
     scada = spark.read.table("silver_nem_dispatch_unit_scada").alias("s")
     facilities = spark.read.table("silver_nem_facility_dimension").alias("f")

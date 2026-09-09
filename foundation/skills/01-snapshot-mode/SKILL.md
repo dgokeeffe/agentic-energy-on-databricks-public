@@ -26,7 +26,7 @@ Confirm all of the following before a workspace run:
 - both periodic jobs are paused;
 - the selected catalog, schema, Volume, warehouse, identity, and permissions
   match the approved development target; and
-- every workspace-aware command selects `--profile daveok`.
+- every workspace-aware command selects `--profile DEFAULT`.
 
 Snapshot and live data occupy separate sibling roots with permanent mode
 markers. Do not delete, migrate, or combine an older parent-root layout.

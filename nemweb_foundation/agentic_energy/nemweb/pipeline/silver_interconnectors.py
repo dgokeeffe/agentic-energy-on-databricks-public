@@ -4,6 +4,7 @@ from pyspark import pipelines as dp
 from pyspark.sql import functions as F
 
 from agentic_energy.nemweb.pipeline.silver_common import latest_correction, with_effective_run
+from agentic_energy.nemweb.source_registry import get_subject_by_key
 
 _KEY = ("interval_end", "interconnector_id", "intervention")
 
@@ -15,7 +16,8 @@ _KEY = ("interval_end", "interconnector_id", "intervention")
 )
 @dp.expect_or_drop("valid_interconnector_key", "interval_end IS NOT NULL AND interconnector_id IS NOT NULL AND intervention IS NOT NULL")
 def silver_nem_interconnector_flow():
-    latest = latest_correction(spark.read.table("bronze_nem_dispatch_interconnector_res"), _KEY)
+    latest = latest_correction(spark.read.table("bronze_nem_dispatch_interconnector_res"), _KEY,
+                               correction_order=get_subject_by_key("dispatch_interconnector_res").correction_order)
     selected = latest.select(
         "interval_end", "interconnector_id", "intervention", "metered_mw_flow",
         "mw_flow", "mw_losses", "marginal_value", "violation_degree",

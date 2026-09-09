@@ -45,7 +45,7 @@ completed stage does not authorise the next one.
 - Call Current SCADA output `actual_generation_mw`; reserve target and
   availability for the daily T+1 product.
 - Treat snapshot or prepared material as non-live.
-- Select `--profile daveok` for every workspace-aware command.
+- Select `--profile DEFAULT` for every workspace-aware command.
 
 Stop on an unexpected identity, target, permission, source contract, or missing
 approval. Use the published prepared substitute rather than improvising.

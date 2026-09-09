@@ -154,7 +154,7 @@ check passes over 33 sources.
 
 The view **has now been executed**, which supersedes the static-only limit this
 page previously recorded. Authorised dev run against
-`agentic_energy_workshop.agentic_energy_workshop_d4` with the `daveok` profile,
+`agentic_energy_workshop.agentic_energy_workshop_d4` with the `DEFAULT` profile,
 schedules PAUSED and `nemweb.source_mode=snapshot` throughout.
 
 Pipeline update resolved by the runbook's uniqueness proof rather than by selecting

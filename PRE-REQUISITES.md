@@ -43,7 +43,7 @@ The facilitator must:
 - stop rather than guess when the selected profile, target workspace, Unity
   Catalog resources, permissions, or policy do not match the approved setup.
 
-Every workspace-aware facilitator command must select `--profile daveok`
+Every workspace-aware facilitator command must select `--profile DEFAULT`
 explicitly. Do not use an implicit profile, set a default profile as a
 substitute, deploy the bundle, run jobs, or unpause schedules during
 preparation.
@@ -99,8 +99,8 @@ The facilitator must then run only these validation commands, with the profile
 shown on every workspace-aware command:
 
 ```bash
-databricks auth describe --profile daveok
-(cd nemweb_foundation && databricks bundle validate --strict -t dev --profile daveok)
+databricks auth describe --profile DEFAULT
+(cd nemweb_foundation && databricks bundle validate --strict -t dev --profile DEFAULT)
 ```
 
 Stop if `daveok` is absent, unauthenticated, points to an unexpected workspace,

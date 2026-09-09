@@ -102,6 +102,16 @@ variables:
     description: Group allowed to view and run the workshop job
   facilitator_group:
     description: Group allowed to manage the workshop job
+  live_evidence_resource_prefix:
+    description: Isolated live-evidence resource prefix; required for target live_evidence
+  live_evidence_schema:
+    description: Pre-existing isolated pipeline and Delta landing schema
+  live_evidence_landing_schema:
+    description: Pre-existing isolated managed-Volume schema
+  live_evidence_landing_volume:
+    description: Isolated managed Volume name
+  live_evidence_app_serving_schema:
+    description: Pre-existing isolated app-serving schema
 
 # Values are intentionally supplied through BUNDLE_VAR_* environment
 # variables or --var. No workspace, catalog, schema, or principal is committed.
@@ -130,6 +140,13 @@ targets:
   live_evidence:
     mode: development
     variables:
+      resource_prefix: ${var.live_evidence_resource_prefix}
+      schema: ${var.live_evidence_schema}
+      landing_schema: ${var.live_evidence_landing_schema}
+      landing_volume: ${var.live_evidence_landing_volume}
+      app_serving_schema: ${var.live_evidence_app_serving_schema}
+      nemweb_mode: live
+      allow_live_nemweb: "true"
       volume_reader_principal: ${workspace.current_user.userName}
       volume_writer_principal: ${workspace.current_user.userName}
 

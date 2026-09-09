@@ -95,12 +95,12 @@ The bundle contains:
 
 Schedules deploy paused. Do not unpause them until snapshot, bundle, pipeline,
 SQL, Genie and dashboard gates have passed. Every workspace-aware command must
-use the explicitly selected `daveok` profile.
+use the explicitly selected `DEFAULT` profile.
 
 Bundle value placeholders are in [`env.example`](env.example). Facilitators
 follow [`PRE-REQUISITES.md`](PRE-REQUISITES.md), copy it to the ignored `.env`
 file with `cp -f env.example .env`, replace every placeholder with an approved
-non-secret value, and explicitly select `--profile daveok` for validation.
+non-secret value, and explicitly select `--profile DEFAULT` for validation.
 Never rely on an implicit Databricks profile.
 
 Facilitators follow the numbered stages in
@@ -118,7 +118,7 @@ exact pipeline update ID and query source, Bronze, Silver and Gold watermarks:
 
 ```bash
 uv run --project nemweb_foundation python nemweb_foundation/scripts/capture_nemweb_evidence.py \
-  --profile daveok \
+  --profile DEFAULT \
   --warehouse-id "$BUNDLE_VAR_warehouse_id" \
   --catalog "$BUNDLE_VAR_catalog" \
   --schema "$BUNDLE_VAR_schema" \
@@ -153,7 +153,7 @@ updating analyst assets:
 ```bash
 uv run --project nemweb_foundation python nemweb_foundation/scripts/validate_nemweb_genie.py
 uv run --project nemweb_foundation python nemweb_foundation/scripts/validate_nemweb_genie.py --execute \
-  --profile daveok --warehouse-id "$BUNDLE_VAR_warehouse_id" \
+  --profile DEFAULT --warehouse-id "$BUNDLE_VAR_warehouse_id" \
   --catalog "$BUNDLE_VAR_catalog" --schema "$BUNDLE_VAR_schema"
 ```
 

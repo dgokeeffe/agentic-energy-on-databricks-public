@@ -47,10 +47,10 @@ def test_grant_script_rejects_unsafe_principal_and_implicit_profile() -> None:
     assert "principal" in unsafe.stderr
 
     wrong_profile = subprocess.run(
-        [*BASE, "--profile", "DEFAULT", "operator"],
+        [*BASE, "--profile", "daveok", "operator"],
         capture_output=True,
         text=True,
         check=False,
     )
     assert wrong_profile.returncode != 0
-    assert "--profile daveok" in wrong_profile.stderr
+    assert "--profile DEFAULT" in wrong_profile.stderr

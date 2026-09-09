@@ -7,15 +7,15 @@
 # attendee branch has its primary endpoint with scale-to-zero enabled.
 #
 # Usage:
-#   PROFILE=daveok PROJECT_ID=<project> ATTENDEE_SLUG=<slug> \
+#   PROFILE=DEFAULT PROJECT_ID=<project> ATTENDEE_SLUG=<slug> \
 #     bash workshop/lakebase/scripts/provision-attendee-endpoint.sh
 #
 #   DRY_RUN=1 ... to print the planned commands without creating anything.
 set -euo pipefail
 
-: "${PROFILE:?Set PROFILE=daveok explicitly}"
+: "${PROFILE:?Set PROFILE=DEFAULT explicitly}"
 if [[ "$PROFILE" != "daveok" ]]; then
-  echo "PROFILE=daveok is required" >&2
+  echo "PROFILE=DEFAULT is required" >&2
   exit 2
 fi
 

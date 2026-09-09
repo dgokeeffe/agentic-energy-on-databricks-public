@@ -1,325 +1,609 @@
-# Goal: complete the NEMWEB Lakeflow and analyst workflow end to end
+# Goal: deliver app-first NEMWEB Delta landing and prove it live
 
 ## Mission
 
-Act as the lead coding agent and execute the NEMWEB migration described in
-[`miniwiki/features/full-nemweb-lakeflow.md`](miniwiki/features/full-nemweb-lakeflow.md)
-from repository discovery through tested Databricks operation.
-
-Adapt the relevant implementation directly from:
-
-```text
-/Users/david.okeeffe/Repos/australian-energy-nemweb-analytics
-```
-
-into:
+Complete the app-first NEMWEB Delta-landing implementation in:
 
 ```text
 /Users/david.okeeffe/Repos/agentic-energy-challenge
 ```
 
-The result must give workshop users governed NEMWEB data, metric definitions,
-Genie guidance and an AI/BI dashboard without requiring them to use a coding
-agent or the separate omnigent workflow.
+Use these repositories as read-only references:
 
-Do not stop at scaffolding, copied files, a successful bundle validation, or a
-green pipeline status. Work through the evidence required by the completion
-criteria below.
+```text
+/Users/david.okeeffe/Repos/australian-energy-nemweb-analytics
+/Users/david.okeeffe/Repos/8-gridsense-intelligence-hub
+```
 
-## Authoritative completion criteria
+Replace the app-critical NEMWEB ingestion path with a reliable, app-scoped design:
 
-This goal is complete only when all required repository deliverables are present
-and the live NEMWEB path has demonstrated that newly available dispatch data
-reaches the main analyst-facing Gold subjects on a five-minute operating
-cadence.
+```text
+NEMWEB HTTP or deterministic snapshot
+  → scheduled Spark Python landing Job
+  → append-only Delta landing tables
+  → Lakeflow Bronze
+  → correction-aware Silver
+  → five-minute Gold
+  → app-serving Delta tables
+  → nemweb_app
+```
 
-The critical Gold subjects are:
+The implementation must populate and prove the two existing application contracts:
 
-1. regional dispatch price and demand;
-2. unit/facility dispatch and availability;
-3. SCADA generation enriched with region and fuel type;
-4. binding dispatch constraints; and
-5. interconnector flows.
+1. `gold_nem_app_region_status`;
+2. `gold_nem_scada_generation_5min`.
 
-At least three consecutive five-minute cycles must be evidenced. For each
-applicable subject and cycle, capture:
+This is an app-first change. Do not rework bids, trading, settlement, market notices, ML, dashboards, Genie, or unrelated workshop material unless an app-critical dependency requires a narrowly scoped adjustment.
 
-- newest available NEMWEB source interval;
-- Bronze ingestion timestamp or watermark;
-- Gold publication timestamp or watermark;
-- source-to-Gold lag;
-- landed, Bronze, Silver and Gold row counts;
-- duplicate-natural-key result;
-- data-quality/expectation result; and
-- lander, pipeline and orchestration outcome.
+## Current authorisation
 
-A cycle in which AEMO publishes no changed row is valid only when the source
-watermark and freshness check prove that there was nothing new to ingest. Never
-fabricate rows to make a cadence check pass. Report source publication lag
-separately from the pipeline's five-minute processing cadence.
+The user authorises this task to:
 
-The goal also requires the semantic and workshop assets listed below to exist
-and be validated before the final live proof. The five-minute Gold proof is the
-final closure gate.
+- edit and test the repository implementation;
+- run deterministic local tests and builds;
+- run strict Databricks bundle validation with `--profile DEFAULT`;
+- after local verification and independent review, deploy the isolated `live_evidence` target using `--profile DEFAULT`;
+- fetch public live NEMWEB data through the deployed landing Job;
+- run the required context Job once; and
+- manually execute three critical live cycles and query their results.
 
-## Fixed decisions
+This authorisation does not permit:
 
-Treat these as decided unless direct repository evidence makes one impossible:
+- committing, pushing, opening a pull request, merging, or publishing;
+- deploying any target other than the approved isolated `live_evidence` target;
+- changing grants beyond bundle-managed definitions already required by that isolated target;
+- unpausing a schedule;
+- enabling a continuous pipeline;
+- using a destructive full refresh;
+- modifying either reference repository; or
+- recording private workspace URLs, tenant identifiers, credentials, tokens, or participant data.
 
-- A dedicated NEMWEB Lakeflow implementation is allowed in this repository.
-- Replace the current local JSONL pipeline as the primary runtime rather than
-  preserving it as a competing production path.
-- Retain a deterministic, versioned and attributed NEMWEB snapshot mode for
-  local tests and reliable workshop demonstrations.
-- Support live NEMWEB Current reports. Current/archive history and longer MMSDM
-  backfill may be added, but historical breadth must not delay the live critical
-  path.
-- Adapt source code directly where useful, preserving applicable copyright,
-  NOTICE and attribution requirements.
-- Copy source, tests and resource definitions deliberately. Do not copy
-  generated wheels, `.databricks` deployment state, logs, coverage output,
-  caches, compiled frontend assets or credentials.
-- Use modern `pyspark.pipelines` APIs. Migrate legacy `import dlt`, `dp.read`,
-  `dlt.read`, `LIVE.*` and other legacy forms rather than extending them.
-- Use the explicitly selected Databricks CLI profile `daveok` for every
-  workspace-aware command. Never rely on an implicit/default profile.
-- Include governed Gold assets, metric views, table/column semantics, Genie
-  instructions and examples, benchmark/evaluation questions, and an AI/BI
-  dashboard linked to the Genie experience.
-- ML forecasting and the custom application from the reference repository are
-  outside scope.
-- BOM, ABS, CER, OpenElectricity and other non-NEMWEB feeds are outside the
-  critical path unless a recorded analyst requirement proves they are needed.
+All schedules must remain paused. Run the live cycles manually.
 
-## Required repository deliverables
+## Task graph
 
-1. A reviewed source-to-destination migration manifest covering the NEMWEB
-   lander, parser, schemas, transformations, checks, tests and bundle resources.
-2. Licence, NOTICE and AEMO attribution updates required by directly adapted
-   source or checked-in sample data.
-3. Parameterised Declarative Automation Bundle resources for the NEMWEB landing
-   Volume, file lander, Lakeflow pipeline, five-minute orchestration and analyst
-   assets.
-4. A safe, idempotent NEMWEB ZIP/CSV lander that handles report sections,
-   versions, duplicate files, corrections/supersessions, bounded polling and
-   observable failures.
-5. A deterministic snapshot containing the critical report families and useful
-   malformed, duplicate, correction and schema-drift cases.
-6. Bronze tables retaining source file, report, version, event time and
-   ingestion metadata.
-7. Silver contracts with report-specific natural keys, latest-correction
-   semantics, type/unit/time normalization, dimension joins and measurable
-   quality handling.
-8. Five-minute-grain Gold tables or views for all critical subjects. Do not
-   expose only 30-minute and daily aggregates; those may be additional products.
-9. Source-appropriate Gold or curated context for slower domains such as bids,
-   registration/facilities, trading/settlement and market notices where the
-   reference implementation is working and useful to analysts.
-10. Unity Catalog comments, relationships and metric views defining units,
-    signs, dispatch versus settlement grain, intervention treatment, market
-    timezone and freshness.
-11. Genie instructions, reusable SQL expressions, example SQL and benchmark
-    questions over a deliberately small curated set of Gold/metric assets.
-12. Automated checks for the important benchmark questions and generated SQL or
-    reconciled query results.
-13. An AI/BI dashboard whose SQL is tested against the target schema before the
-    dashboard is created or updated, with the Genie experience linked.
-14. Focused unit/integration tests, strict bundle validation and dated end-to-end
-    evidence under `docs/test-evidence/`.
-15. Updated README/deployment documentation sufficient for another workshop
-    operator to understand snapshot mode, live mode, expected cadence,
-    configuration, validation, operation and troubleshooting.
+```mermaid
+flowchart TD
+    T0["T0 — Reconcile repository state<br/>Read instructions, Git status, miniwiki, and existing changes"]
+    T1["T1 — Confirm app contracts<br/>Region status and fuel generation"]
+    T2["T2 — Produce migration manifest<br/>Reference files, licences, schemas, and behaviours"]
 
-## Mandatory subagent execution model
+    T3["T3 — Add source registry<br/>Folders, files, sections, schemas, and natural keys"]
+    T4["T4 — Harden NEMWEB parser<br/>Direct/nested ZIPs, MMS sections, encoding, and quarantine"]
 
-Use subagents throughout this goal. The lead agent owns scope, integration,
-evidence and final synthesis; it must not delegate accountability.
+    T5["T5 — Implement Delta landing core<br/>Record IDs, append-only writes, and run manifests"]
+    T6["T6 — Add snapshot landing<br/>Same contract without network access"]
+    T7["T7 — Add live retrieval<br/>Lookback, retries, checksums, and fail-closed subjects"]
 
-Before execution, list available agents and use only executable, non-disabled
-agents. For the multi-phase run, make exactly one top-level asynchronous
-subagent workflow call and orchestrate all children inside it. Keep only one
-writer active in a shared checkout at a time. Read-only scouts and reviewers may
-run in parallel. If parallel writers are genuinely necessary, give each an
-isolated worktree and integrate deliberately.
+    T8["T8 — Wire landing Job<br/>Spark Python task, bundle variables, permissions, schedules paused"]
+    T9["T9 — Rewire app Bronze inputs<br/>DispatchIS, SCADA, and registration only"]
 
-### Stage A — context and evidence, in parallel
+    T10["T10 — Verify Silver/Gold semantics<br/>Corrections, interventions, AEST, UTC, and signed SCADA"]
+    T11["T11 — Verify app serving<br/>Region status and generation by fuel"]
 
-Launch:
+    T12["T12 — Run deterministic checks<br/>Focused tests, full suites, builds, and static checks"]
+    T13["T13 — Independent review<br/>Security/data, edge cases, and regression"]
+    T14["T14 — Remediate findings<br/>One writer, then repeat affected checks"]
 
-- **`scout`** — inspect both repositories, current Git state, applicable
-  instructions, bundle resources, enabled/disabled reference tables, tests,
-  known failures and exact source-to-destination integration points. Require a
-  concise manifest-oriented report plus clarification questions.
-- **`researcher`** — verify only version-sensitive external facts needed for the
-  implementation: current Lakeflow APIs, bundle schemas, Genie/AI/BI APIs,
-  NEMWEB formats/corrections and attribution. Prefer primary sources and return
-  dated citations plus unresolved questions.
+    T15["T15 — Verify daveok identity<br/>Expected workspace, CLI version, and variables"]
+    T16["T16 — Strict bundle validation<br/>No deployment yet"]
+    T17["T17 — Deploy live_evidence<br/>Schedules paused; no full refresh"]
+    T18["T18 — Run context once<br/>Build registration dependencies"]
 
-Do not let either agent edit files.
+    T19A["T19a — Live cycle 1"]
+    T19B["T19b — Live cycle 2<br/>Approximately five minutes later"]
+    T19C["T19c — Live cycle 3<br/>Approximately five minutes later"]
 
-### Stage B — implementation plan
+    T20["T20 — Reconcile evidence<br/>Landing → Bronze → Silver → Gold → app serving"]
+    T21["T21 — Final adjudication<br/>Check every criterion and unsupported claim"]
+    T22["T22 — Record handoff<br/>Miniwiki, files, commands, evidence, and residual risk"]
 
-Launch **`planner`** after Stage A. Give it the two reports, this goal and the
-full NEMWEB miniwiki page. Require:
+    T0 --> T1
+    T0 --> T2
+    T1 --> T3
+    T2 --> T3
+    T2 --> T4
 
-- a file/table migration manifest;
-- a dependency-ordered implementation plan;
-- critical versus slower-data classification;
-- explicit tests and commands for each phase;
-- deployment and rollback considerations;
-- stop conditions and residual risks; and
-- a mapping from every completion criterion to evidence.
+    T3 --> T5
+    T4 --> T5
+    T5 --> T6
+    T5 --> T7
 
-The lead agent must reject or revise any plan that treats commented-out
-reference libraries as working, omits five-minute Gold grain, uses legacy DLT
-APIs, or claims cadence from configuration alone.
+    T6 --> T8
+    T7 --> T8
+    T8 --> T9
+    T9 --> T10
+    T10 --> T11
 
-### Stage C — sequential implementation workers
+    T11 --> T12
+    T12 --> T13
+    T13 --> T14
+    T14 --> T12
 
-Use **`worker`** agents sequentially in the shared checkout, or isolated
-worktrees when separation is valuable. Give each worker a bounded file list,
-done criteria and required checks. Suggested slices are:
+    T13 -->|No blocking findings| T15
+    T15 --> T16
+    T16 --> T17
+    T17 --> T18
+    T18 --> T19A
+    T19A --> T19B
+    T19B --> T19C
 
-1. migration manifest, provenance and bundle foundation;
-2. lander/parser plus deterministic snapshot and tests;
-3. critical Bronze tables;
-4. critical Silver contracts;
-5. critical five-minute Gold subjects;
-6. slower NEMWEB analyst context;
-7. metric views and semantic metadata;
-8. Genie assets, benchmark/evaluation checks and AI/BI dashboard; and
-9. operational documentation and evidence tooling.
+    T19C --> T20
+    T20 --> T21
+    T21 -->|Blocking finding| T14
+    T21 -->|Accepted| T22
+```
 
-A worker must return changed files, tests run, results, remaining risks and the
-next dependency. Do not start the next writer until the previous output and diff
-have been reviewed and integrated.
+### Parallelism and gates
 
-### Stage D — independent review after substantial slices
+- T1 and T2 may run in parallel as read-only investigations.
+- T3 and T4 may be analysed in parallel, but use one writer in the shared checkout.
+- T13 reviews may run in parallel against a stable diff.
+- T19a–T19c must remain sequential to demonstrate three distinct NEMWEB cycles.
+- Do not begin workspace work until T12–T14 are green.
+- Do not claim completion until T20 and T21 pass.
 
-Use available specialised read-only reviewers where relevant:
+## Repository safety
 
-- **`security-data-reviewer`** for URL/network controls, ZIP handling, path
-  safety, credentials, UC boundaries, correction semantics and data leakage;
-- **`edge-case-reviewer`** for malformed reports, multi-section CSV, schema
-  drift, duplicates, late corrections, missing dimensions, negative/null
-  values, interventions and interval/timezone boundaries;
-- **`regression-reviewer`** for bundle resources, existing tests, workshop docs,
-  fixtures, callers and deployment regressions; and
-- **`reviewer`** as the fallback general code/plan reviewer.
+Before editing:
 
-Run independent read-only reviews in parallel when they examine the same stable
-slice. Feed actionable findings to one subsequent worker for fixes. Re-run the
-focused checks after every fix pass.
+1. Read all applicable `AGENTS.md` files.
+2. Read `README.md`, `PRE-REQUISITES.md`, `foundation/AGENTS.md`, `foundation/Instructions.md`, and the repository requirement, plan, implementation, miniwiki, and NEMWEB skills.
+3. Read `miniwiki/now.md` and `miniwiki/features/full-nemweb-lakeflow.md`.
+4. Inspect the current Git status and diff.
+5. Preserve all unrelated work.
 
-### Stage E — final adjudication
+At the time this goal was prepared, unrelated changes existed in:
 
-Use **`verification-adjudicator`** if available, otherwise a fresh `reviewer`, to
-compare repository artifacts and captured results against every item in this
-file. It must identify unsupported claims, missing commands, missing table
-subjects and residual risks. The lead agent may claim completion only after all
-blocking findings are resolved or clearly demonstrated to be external source
-unavailability rather than an implementation gap.
+- `miniwiki/features/full-nemweb-lakeflow.md`;
+- `workshop/exercises/`.
 
-## Dependency-ordered work
+This file, `goal.md`, is intentionally replaced by the current goal. Do not overwrite, revert, stage, or absorb the other unrelated changes. If new overlapping changes appear, stop and report the conflict.
 
-1. Validate the miniwiki and inspect Git status without overwriting unrelated
-   work.
-2. Produce the migration/provenance manifest.
-3. Establish bundle variables, Volume, lander, pipeline and orchestration.
-4. Build the deterministic snapshot path and parser tests.
-5. Implement critical Bronze, Silver and five-minute Gold contracts.
-6. Implement slower NEMWEB analyst context that is required by the curated
-   questions.
-7. Implement metric views and semantic metadata from stable Gold contracts.
-8. Implement Genie configuration, examples, benchmark checks and dashboard.
-9. Run all local tests, builds and static/bundle checks.
-10. Execute workspace validation using `daveok`.
-11. When the user explicitly instructs the executing session to run this goal
-    end to end, deploy the selected dev target, run the live path and gather the
-    three-cycle completion evidence. The repository file alone is not authority
-    for an unrelated session to modify an external workspace.
-12. Run final independent adjudication and update the miniwiki handoff.
+The reference repositories also have unrelated changes. Treat them as read-only and inspect their Git diffs before relying on uncommitted code.
 
-## Required validation
+## Required Databricks preparation
 
-Run relevant focused checks throughout, then the complete applicable suite:
+Before writing pipeline or bundle code, load the current official skills for:
+
+- Databricks core and CLI/profile handling;
+- Lakeflow Spark Declarative Pipelines; and
+- Databricks Asset Bundles.
+
+Read the exact modern Python references for streaming tables, materialised views, expectations, Delta streaming reads, and pipeline bundle configuration before implementation.
+
+Use modern `pyspark.pipelines` APIs only. Do not introduce:
+
+- `import dlt`;
+- `dlt.read` or `dlt.read_stream`;
+- `dp.read` or `dp.read_stream`;
+- `LIVE.*`;
+- manual `writeStream.start()` inside a declarative pipeline; or
+- deprecated continuous-pipeline configuration.
+
+## Fixed data semantics
+
+Preserve these contracts:
+
+- NEM market intervals are interval-ending fixed AEST, UTC+10 with no daylight saving.
+- Processing, retrieval, landing, ingestion, and publication timestamps are UTC instants.
+- Bronze retains source versions and corrections.
+- A repeated identical source record is idempotent.
+- A changed archive or source row remains distinguishable as a correction.
+- Both intervention rows remain governed.
+- Default app analysis uses `is_effective_run`.
+- `Dispatch_SCADA` is signed actual output in MW.
+- Negative battery or dispatchable-load values are valid.
+- Five-minute SCADA is not availability or curtailment.
+- Facility region and fuel enrichment comes from governed NEMWEB registration data.
+- Unknown DUIDs survive with explicit unknown or partial-enrichment status.
+- Snapshot and live data remain isolated and cannot be confused.
+- Snapshot rows are never live evidence.
+- No failed or partial landing run becomes visible as a complete app refresh.
+
+## App-critical source scope
+
+Implement and validate only these NEMWEB subjects.
+
+### DispatchIS_Reports
+
+- `DISPATCH,PRICE`;
+- `DISPATCH,REGIONSUM`;
+- `DISPATCH,CONSTRAINT`;
+- `DISPATCH,INTERCONNECTORRES`.
+
+### Dispatch_SCADA
+
+- `DISPATCH,UNIT_SCADA`.
+
+### Registration context
+
+- `PARTICIPANT_REGISTRATION,DUDETAILSUMMARY`;
+- `PARTICIPANT_REGISTRATION,DUALLOC`;
+- `PARTICIPANT_REGISTRATION,GENUNITS`.
+
+Do not infer that every table present in a reference repository is deployed or working. In particular, the folder-oriented custom DataSource in `australian-energy-nemweb-analytics` is a design reference, not code to copy wholesale: its dispatch chain is disabled in that repository, its filename offset requires hardening, and partial parse failures are not sufficiently fail-closed for this application.
+
+Use GridSense for the simple separation between external HTTP ingestion and Lakeflow transformation, not for its two-hour retention, heuristic fuel classification, mutable correction handling, or limited test coverage.
+
+## Required architecture
+
+### 1. Central source registry
+
+Create one source-of-truth registry for every app-critical subject. It must define, as applicable:
+
+- report family;
+- CURRENT folder;
+- filename prefix and suffix;
+- MMS section group, name, and version;
+- landing table;
+- source fields and types;
+- required fields;
+- natural key;
+- correction ordering fields;
+- expected cadence; and
+- app dependency.
+
+Derive discovery, parsing, routing, and tests from this registry. Do not duplicate folder-to-section mappings across the lander and Bronze modules.
+
+### 2. Parser
+
+Adapt the useful parser behaviour from `australian-energy-nemweb-analytics`, while preserving the stronger safety properties already present in this repository.
+
+The parser must:
+
+- support the real direct and, where relevant, nested NEMWEB ZIP shapes;
+- validate archive paths, member types, expansion limits, and compression ratios;
+- parse all CSV members and interleaved C/I/D/F records;
+- route data by explicit MMS section identity;
+- preserve source headers and unexpected columns;
+- report malformed records rather than silently skipping them;
+- make encoding behaviour explicit and covered by fixtures;
+- retain negative prices, negative flow, and negative SCADA values; and
+- preserve raw source identity and row number.
+
+Do not silently fall back to an untyped all-string business schema.
+
+### 3. Delta landing Job
+
+Implement a Spark Python landing task outside the declarative pipeline.
+
+It must:
+
+- support `snapshot` and `live` modes;
+- use bounded listing, download, retry, response-size, and lookback limits;
+- download each source ZIP once per cycle;
+- retain immutable raw ZIP/checksum and manifest evidence where already required;
+- create deterministic source-record identifiers;
+- write app-critical source rows to Delta;
+- use append-only commits for source versions;
+- avoid overwriting corrections;
+- prevent duplicate insertion on retries;
+- record the landing run, source files, row counts, rejected rows, and status;
+- expose only successful complete runs to downstream Bronze processing;
+- fail the critical cycle if any required app subject is missing or fails; and
+- distinguish “no new source” from a failed or partial source.
+
+Do not use a mutable `MERGE` that overwrites historical source versions. If `MERGE` is used for run metadata, it must not destroy source history.
+
+### 4. Lakeflow bridge
+
+Keep existing published Bronze table names and dataset types wherever possible.
+
+Rewire only the app-critical Bronze definitions to read the Delta landing sources. Preserve their current expectations and provenance columns.
+
+The Lakeflow pipeline must not perform HTTP requests.
+
+Do not change a streaming table into a materialised view in place. If an incompatible dataset-type or checkpoint migration is unavoidable, stop and present a non-destructive migration plan instead of using a full refresh.
+
+### 5. Silver, Gold, and app serving
+
+Keep existing Silver and Gold contracts unless a demonstrated landing-schema difference requires a small correction.
+
+Prove:
+
+- PRICE and REGIONSUM join on interval, region, and intervention;
+- latest valid corrections are selected deterministically;
+- both intervention rows remain available;
+- exactly one effective run exists for ordinary app analysis;
+- SCADA deduplicates by interval and DUID without deleting negative output;
+- registration is evaluated at the governed data-derived instant;
+- unknown registration joins do not drop SCADA rows;
+- generation aggregates at interval, region, and fuel;
+- constraints and interconnector values remain market-wide in the app contract;
+- the app query filters `is_effective_run = TRUE`; and
+- the generation query does not claim intervention, availability, settlement, or curtailment semantics.
+
+## Expected implementation surfaces
+
+Confirm the exact list after inspection, but expect to add or modify:
+
+- `nemweb_foundation/agentic_energy/nemweb/source_registry.py`;
+- `nemweb_foundation/agentic_energy/nemweb/delta_lander.py`;
+- `nemweb_foundation/scripts/land_nemweb_delta.py`;
+- `nemweb_foundation/agentic_energy/nemweb/lander.py`;
+- `nemweb_foundation/agentic_energy/nemweb/parser.py`;
+- `nemweb_foundation/agentic_energy/nemweb/pipeline/io.py`;
+- `nemweb_foundation/agentic_energy/nemweb/pipeline/bronze_dispatchis.py`;
+- `nemweb_foundation/agentic_energy/nemweb/pipeline/bronze_scada.py`;
+- `nemweb_foundation/agentic_energy/nemweb/pipeline/bronze_registration.py`;
+- `nemweb_foundation/resources/nemweb_lander.job.yml`;
+- `nemweb_foundation/resources/nemweb.pipeline.yml`;
+- evidence, bundle-contract, parser, landing, Bronze, snapshot, and app-contract tests; and
+- `NOTICE.md` or `DATA_LICENSES.md` only where direct adaptation requires an attribution update.
+
+Do not modify generated wheels, bundle state, caches, compiled frontend assets, or the reference repositories.
+
+## Ordered execution
+
+### T0 — Reconcile repository state
+
+Read all routed instructions, the current miniwiki, Git status, and Git diff. Record unrelated changes and stop on overlap.
+
+### T1 — Confirm app dependencies
+
+Trace both app queries through app-serving, Gold, Silver, Bronze, landing, registration, and bundle resources. Produce the exact dependency list.
+
+### T2 — Produce migration and provenance manifest
+
+Map every adapted concept or file from both reference repositories to its destination. Record licence and attribution implications. Distinguish committed reference code, uncommitted reference work, disabled code, and demo-only code.
+
+### T3 — Add the source registry
+
+Add a single registry for the eight app-critical source sections. Test registry completeness, unique destinations, natural keys, required fields, and source cadence.
+
+### T4 — Harden parser behaviour
+
+Add failing real-shape fixtures and tests first, then support the required direct/nested ZIP and MMS section behaviour without weakening existing archive safety.
+
+### T5 — Implement Delta landing core
+
+Add deterministic source-record IDs, append-only table writes, idempotent retry behaviour, run manifests, required-subject reconciliation, and partial-run isolation.
+
+### T6 — Implement snapshot landing
+
+Run the existing deterministic snapshot through the same Delta landing contract. Keep snapshot and live roots, tables, or run classifications unambiguous.
+
+### T7 — Implement live retrieval
+
+Use the source registry for bounded CURRENT discovery. Retain checksums, publication/retrieval timestamps, retries, error details safe for logs, and complete-run checks.
+
+### T8 — Wire the landing Job
+
+Add the Spark Python task and required bundle settings. Keep schedules paused and preserve the existing orchestration dependency order.
+
+### T9 — Rewire app-critical Bronze
+
+Switch only the selected DispatchIS, SCADA, and registration Bronze tables to the successful Delta landing sources. Preserve names, types, expectations, and provenance.
+
+### T10 — Verify Silver and Gold
+
+Prove corrections, interventions, AEST/UTC handling, signed values, facility enrichment, and natural-key uniqueness remain correct.
+
+### T11 — Verify app serving
+
+Reconcile both Gold sources to their app-serving tables and reviewed app queries. Ensure the app receives the required fields and no unsupported semantic claim is introduced.
+
+### T12 — Run deterministic local verification
+
+Run focused tests throughout, then the complete required suites, builds, static checks, and `git diff --check`.
+
+### T13 — Run independent review
+
+Review the stable diff for security/data correctness, malformed-input and correction edge cases, and caller/bundle/app regressions.
+
+### T14 — Remediate findings
+
+Use one writer to fix accepted findings. Repeat every affected focused and complete check. Return to review if the fix changes behaviour materially.
+
+### T15 — Verify workspace identity
+
+Check the CLI version and `DEFAULT` authentication. Stop if the profile identifies an unexpected workspace or the selected variables do not describe an isolated target.
+
+### T16 — Validate the bundle
+
+Run strict bundle validation against the approved profile and target. Do not deploy until it passes.
+
+### T17 — Deploy `live_evidence`
+
+Deploy only the isolated `live_evidence` target. Keep schedules paused and do not use a full refresh.
+
+### T18 — Build registration context
+
+Run the context Job once, resolve the exact pipeline update, poll it to a terminal state, and verify registration dependencies before critical cycles.
+
+### T19 — Run three live cycles
+
+Run the critical refresh manually three times, approximately five minutes apart. Resolve and poll each exact pipeline update and retain cycle-specific evidence.
+
+### T20 — Reconcile end to end
+
+For each cycle, reconcile source listing, landed rows, Bronze, Silver, Gold, app serving, quality metrics, duplicate checks, and timestamps.
+
+### T21 — Final adjudication
+
+Compare the implementation and evidence with every completion criterion. Reject unsupported live, cadence, correction, intervention, or app-readiness claims.
+
+### T22 — Record the handoff
+
+Update the applicable miniwiki page with the objective, changed files, commands and results, evidence, uncertainty, workspace state, and next action.
+
+## Subagent execution
+
+Before delegation, load the pi-subagents guide and list executable agents.
+
+Use exactly one top-level asynchronous workflow for the multi-agent work.
+
+Recommended workflow:
+
+1. In parallel, use read-only scouts for:
+   - the target repository and app contracts;
+   - `australian-energy-nemweb-analytics`;
+   - GridSense; and
+   - requirements and migration-manifest review.
+2. Use a planner to turn those reports into the exact file/table plan.
+3. Use one sequential writer in the shared checkout for implementation slices:
+   - registry and parser;
+   - Delta landing;
+   - bundle and Lakeflow bridge; and
+   - evidence and documentation.
+4. Against stable diffs, run independent read-only reviewers in parallel:
+   - `security-data-reviewer`;
+   - `edge-case-reviewer`; and
+   - `regression-reviewer`.
+5. Return findings to the same sequential writer for remediation.
+6. Use `verification-adjudicator` for the final acceptance decision.
+
+The parent agent owns scope, workspace authority, integration, test execution, evidence, and the final conclusion.
+
+## Deterministic tests
+
+Add or retain focused tests for:
+
+- registry completeness and uniqueness;
+- one folder ZIP fanning out to every required section;
+- direct and nested ZIP layouts;
+- multiple CSV members;
+- malformed record and footer handling;
+- explicit encoding behaviour;
+- unknown columns and schema drift;
+- duplicate source files;
+- identical checksum relisting;
+- same filename with changed checksum;
+- deterministic record identity;
+- retry idempotency;
+- partial-run invisibility;
+- required-subject failure;
+- correction ordering;
+- intervention preservation and effective-run selection;
+- fixed-AEST interval boundaries;
+- UTC processing timestamps;
+- signed prices, flows, and SCADA values;
+- unknown DUID preservation;
+- unchanged snapshot Gold results;
+- pipeline dependency wiring;
+- bundle task order and paused schedules; and
+- both app-serving schemas and queries.
+
+Where possible, demonstrate red/green behaviour against the previous ingestion implementation rather than merely adding tests that pass both versions.
+
+## Required local validation
+
+Run focused checks throughout, followed by:
 
 ```bash
 python3 scripts/validate-miniwiki.py
 uv run --extra test python -m pytest
 rm -rf dist && uv build --wheel --out-dir dist
+(
+  cd nemweb_foundation
+  uv run python scripts/validate_nemweb_snapshot.py
+  python3 scripts/check_modern_pipeline_apis.py
+  rm -rf dist && uv build --wheel --out-dir dist
+)
 git diff --check
-databricks bundle validate --strict -t dev --profile daveok
 ```
 
-Also validate that:
+Also run the relevant `nemweb_app` typecheck, unit tests, build, and smoke tests if any app query contract or generated type changes.
 
-- the Databricks CLI meets the version required by the loaded Databricks skills;
-- every pipeline source file uses supported modern APIs;
-- all critical table dependencies are included in the bundle;
-- snapshot runs are deterministic and idempotent;
-- duplicate and correction tests prove the selected natural-key behavior;
-- each dashboard SQL query succeeds through the CLI before dashboard creation or
-  update;
-- metric-view measures reconcile to their Gold sources;
-- Genie benchmark SQL/results reconcile to governed assets; and
-- live evidence queries inspect data watermarks, not only resource state.
+Report exact commands, exit codes, failures, fixes, and residual risk.
 
-For deployed pipeline runs, poll the specific update to terminal state and
-extract underlying errors from pipeline events. Do not infer success from the
-top-level pipeline state. Avoid a destructive full refresh unless its data-loss
-impact is understood and the executing user explicitly requests it.
+## Workspace gate
 
-## Evidence artifact
+Before any workspace operation:
 
-Write a dated file such as:
+1. Confirm the Databricks CLI satisfies the loaded skill’s minimum version.
+2. Run `databricks auth describe --profile DEFAULT`.
+3. Stop if the profile is absent, unauthenticated, or points to an unexpected workspace.
+4. Confirm bundle variables name an isolated live-evidence schema, landing resources, and app-serving schema.
+5. Ensure every schedule is PAUSED.
+6. Run strict validation with `--profile DEFAULT`.
 
-```text
-docs/test-evidence/nemweb-e2e-YYYY-MM-DD.md
-```
+Do not include workspace URLs or tenant identifiers in committed evidence.
 
-Include:
+## Deployment and live proof
 
-- commit/worktree state and relevant source versions;
-- adapted-file/provenance summary;
-- exact validation commands and outcomes;
-- snapshot reconciliation results;
-- deployed resource names without secrets or private tenant details;
-- tested dashboard and benchmark queries;
-- the three-cycle watermark/latency table for every critical Gold subject;
-- failures encountered and fixes applied;
-- unresolved external limitations; and
-- the final adjudicator's finding summary.
+After local checks and independent review pass:
 
-Do not include tokens, credentials, private workspace URLs or sensitive tenant
-identifiers.
+1. Deploy only the isolated `live_evidence` target.
+2. Keep every schedule paused.
+3. Do not use a full refresh.
+4. Run the context Job once to build registration dependencies.
+5. Verify it completed successfully and its exact pipeline update is terminal.
+6. Manually run the critical refresh three times, approximately five minutes apart.
+7. For every cycle, resolve and poll the exact pipeline update. Do not infer success from the pipeline’s top-level state.
+8. If a cycle overlaps or queues, preserve the five-minute source evidence and report actual processing latency rather than changing the schedule or fabricating cadence.
 
-## Stop and report rather than guessing when
+For each cycle, capture:
 
-- reference licensing or attribution cannot be satisfied;
-- `daveok` is missing, unauthenticated or points to an unexpected workspace;
-- required UC, SQL warehouse, pipeline, Genie or dashboard capabilities are not
-  available in the selected environment;
-- source report semantics or natural keys cannot be established from code,
-  fixtures or primary AEMO evidence;
-- a destructive refresh or incompatible schema replacement would be required;
-- live NEMWEB is unavailable long enough that three-cycle evidence cannot be
-  gathered; or
-- unrelated working-tree changes overlap files a worker needs to replace.
+- NEMWEB source filename and newest source interval;
+- archive checksum;
+- landing run ID and status;
+- landed row count by required subject;
+- rejected or quarantined count;
+- Bronze, Silver, Gold, and app-serving row counts;
+- Bronze and Gold watermarks;
+- source publication, landing, ingestion, and Gold publication timestamps;
+- source-to-Gold and landed-to-Gold lag;
+- duplicate-natural-key result;
+- correction-selection result;
+- intervention and effective-run result;
+- Lakeflow expectation result; and
+- landing Job, pipeline update, orchestration Job, and app-serving task outcome.
 
-A stop report must give the exact blocker, evidence collected, safe work already
-completed and the smallest next action. It must not label the overall goal
-complete.
+A no-new-source cycle is valid only when the source listing and existing watermark prove there was nothing new. A partial or failed landing is not a successful cycle.
+
+## Completion criteria
+
+The goal is complete only when:
+
+1. The app-scoped registry covers every required source subject.
+2. The same parser contract supports snapshot and live inputs.
+3. Landing writes append-only, replayable Delta source versions.
+4. Retries do not duplicate rows.
+5. Corrections remain distinguishable and reach Silver/Gold deterministically.
+6. Failed or partial runs cannot appear as complete app data.
+7. Existing fixed-AEST, UTC, correction, intervention, signed-SCADA, and enrichment contracts pass.
+8. Both app-serving tables contain reconciled rows.
+9. All focused and complete local checks pass.
+10. Strict bundle validation passes.
+11. Three sequential live cycles satisfy the evidence contract.
+12. Independent review and final adjudication have no unresolved blocking findings.
+13. Schedules remain paused.
+14. No destructive full refresh, secret exposure, unrelated-file overwrite, commit, push, merge, or deployment outside `live_evidence` occurred.
+
+## Stop conditions
+
+Stop and report rather than guessing if:
+
+- existing uncommitted work overlaps a required file;
+- reference code licensing or attribution is unclear;
+- real NEMWEB file structure contradicts the registry or parser contract;
+- the implementation would require changing an existing dataset type in place;
+- a full refresh appears necessary;
+- `daveok` identifies an unexpected workspace;
+- the target is not isolated;
+- required permissions or serverless capabilities are unavailable;
+- NEMWEB egress is blocked or the public source is unavailable;
+- a required subject is missing;
+- live landing is partial;
+- three-cycle evidence cannot be obtained; or
+- a reviewer finds unresolved data-loss, correction, intervention, timezone, security, or app-contract risk.
+
+A blocked live source does not justify labelling the implementation complete.
 
 ## Final response contract
 
-The lead agent's final response must state:
+Report:
 
-1. what was implemented;
-2. changed files and major Databricks resources;
-3. validation and live commands actually run;
-4. the three-cycle five-minute Gold evidence;
-5. Genie, metric-view and dashboard verification results;
-6. independent review findings and their disposition;
-7. residual risks or source/workspace limitations; and
-8. whether the authoritative completion criteria are met.
+1. implemented architecture;
+2. changed files;
+3. landing and Lakeflow table graph;
+4. tests and commands actually run;
+5. bundle validation and deployment actions;
+6. three-cycle evidence;
+7. app-serving reconciliation;
+8. independent review findings and disposition;
+9. schedules and workspace state left behind;
+10. residual risks; and
+11. whether every completion criterion is met.

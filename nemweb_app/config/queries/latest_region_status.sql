@@ -1,5 +1,6 @@
 -- AppKit Analytics read path over the run-specific regular Delta serving table.
 -- Keeping the identifier in reviewed SQL prevents callers from selecting another object.
+-- @param region_status_table STRING = agentic_energy_workshop.agentic_energy_workshop_d4_serving.gold_nem_app_region_status
 SELECT
   region_id,
   interval_end,
@@ -20,7 +21,7 @@ SELECT
   prediction_scored_at,
   prediction_source_freshness,
   prediction_missing_feature_status
-FROM agentic_energy_workshop.agentic_energy_workshop_d4_serving.gold_nem_app_region_status
+FROM IDENTIFIER(:region_status_table)
 WHERE is_effective_run = TRUE
 ORDER BY interval_end DESC, region_id
 LIMIT 100
