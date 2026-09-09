@@ -43,10 +43,16 @@ The facilitator must:
 - stop rather than guess when the selected profile, target workspace, Unity
   Catalog resources, permissions, or policy do not match the approved setup.
 
-Every workspace-aware facilitator command must select `--profile daveok`
-explicitly. Do not use an implicit profile, set a default profile as a
-substitute, deploy the bundle, run jobs, or unpause schedules during
-preparation.
+Every workspace-aware facilitator command must select its profile explicitly.
+Do not use an implicit profile, set a default profile as a substitute, deploy the
+bundle, run jobs, or unpause schedules during preparation.
+
+The profile name is workspace-specific and is not fixed by this repository. The
+examples below use `daveok`; a workspace whose CLI configuration names the
+profile differently substitutes that name. `PROFILE` selects it in the Makefile,
+`nemweb_foundation/scripts/deploy.sh`, and `scripts/deploy-workshop.sh`, and
+defaults to `DEFAULT`. What matters is that the name is always passed explicitly,
+never left implicit.
 
 ### Participant
 

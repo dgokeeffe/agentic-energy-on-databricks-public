@@ -50,7 +50,8 @@ record the decision for one stage before opening the next.
 
 The prompts do not grant permission. Deployment, job execution, live source
 access, and schedule changes each require current human authorisation. Every
-workspace-aware command must select `--profile daveok`. Stop if the profile,
+workspace-aware command must select its profile explicitly, for example
+`--profile "$PROFILE"`. Stop if the profile,
 workspace, identity, target resources, or permissions differ from the approved
 setup.
 

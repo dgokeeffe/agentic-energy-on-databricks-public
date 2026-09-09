@@ -8,8 +8,9 @@ authoritative executable step is
 this page is the gate sequence around it. Run the script rather than copying its
 commands.
 
-Every workspace-aware command selects `--profile daveok` explicitly. Never rely on
-an implicit or default profile.
+Every workspace-aware command selects its profile explicitly. Never rely on an
+implicit or default profile. The name is workspace-specific: the examples below
+use `daveok`, and `PROFILE` overrides it in the scripts and Makefile.
 
 ## Gate 1 — local and identity
 

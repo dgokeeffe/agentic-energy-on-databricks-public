@@ -95,12 +95,13 @@ The bundle contains:
 
 Schedules deploy paused. Do not unpause them until snapshot, bundle, pipeline,
 SQL, Genie and dashboard gates have passed. Every workspace-aware command must
-use the explicitly selected `daveok` profile.
+use an explicitly selected profile.
 
 Bundle value placeholders are in [`env.example`](env.example). Facilitators
 follow [`PRE-REQUISITES.md`](PRE-REQUISITES.md), copy it to the ignored `.env`
 file with `cp -f env.example .env`, replace every placeholder with an approved
-non-secret value, and explicitly select `--profile daveok` for validation.
+non-secret value, and explicitly select the workspace profile for validation
+(`PROFILE`, default `DEFAULT`; the examples use `daveok`).
 Never rely on an implicit Databricks profile.
 
 Facilitators follow the numbered stages in

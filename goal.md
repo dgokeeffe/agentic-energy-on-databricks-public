@@ -81,8 +81,9 @@ Treat these as decided unless direct repository evidence makes one impossible:
   caches, compiled frontend assets or credentials.
 - Use modern `pyspark.pipelines` APIs. Migrate legacy `import dlt`, `dp.read`,
   `dlt.read`, `LIVE.*` and other legacy forms rather than extending them.
-- Use the explicitly selected Databricks CLI profile `daveok` for every
-  workspace-aware command. Never rely on an implicit/default profile.
+- Use an explicitly selected Databricks CLI profile for every workspace-aware
+  command; `PROFILE` chooses it and the examples use `daveok`. Never rely on an
+  implicit/default profile.
 - Include governed Gold assets, metric views, table/column semantics, Genie
   instructions and examples, benchmark/evaluation questions, and an AI/BI
   dashboard linked to the Genie experience.
