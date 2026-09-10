@@ -8,6 +8,13 @@
       ]
     },
     {
+      "name": "ds_spikes",
+      "displayName": "Effective regional dispatch-price spikes",
+      "queryLines": [
+        "SELECT interval_end, region_id, rrp_aud_per_mwh, is_price_spike, CASE WHEN is_price_spike THEN 1 ELSE 0 END AS price_spike_flag, spike_threshold_aud_per_mwh, price_status, spike_freshness_status, source_publication_lag_seconds, administered_price_cap_flag, market_suspended_flag, source_publication_at, gold_published_at FROM gold_nem_dispatch_price_spike_5min WHERE interval_end >= TIMESTAMPADD(DAY, -2, (SELECT MAX(interval_end) FROM gold_nem_dispatch_price_spike_5min)) AND is_effective_run = true;"
+      ]
+    },
+    {
       "name": "ds_generation",
       "displayName": "SCADA generation by fuel",
       "queryLines": [
@@ -75,7 +82,8 @@
             "name": "scope-note",
             "multilineTextboxSpec": {
               "lines": [
-                "Effective intervention runs are selected by default. Times are interval-ending AEST (UTC+10, no DST). SCADA is actual MW, not dispatch target or availability. Authoritative unit target and availability are daily T+1 only. Interconnector values retain AEMO source sign."
+                "Effective intervention runs are selected by default. Times are interval-ending AEST (UTC+10, no DST). SCADA is actual MW, not dispatch target or availability. Authoritative unit target and availability are daily T+1 only. Interconnector values retain AEMO source sign.",
+                "A dispatch-price spike is dispatch price strictly above the governed threshold in AUD/MWh, so a price exactly at the threshold is not a spike. The threshold is workshop-configured in reviewed metadata and is not an AEMO-published spike definition. Negative dispatch prices are valid and are never spikes; a missing price shows as UNKNOWN_PRICE. Non-spiking intervals stay visible so no spikes is distinguishable from no data, and a STALE freshness label means the spike must not be treated as current."
               ]
             }
           },
@@ -244,6 +252,164 @@
         },
         {
           "widget": {
+            "name": "kpi-spike-count",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_spikes",
+                  "fields": [
+                    {
+                      "name": "sum(price_spike_flag)",
+                      "expression": "SUM(`price_spike_flag`)"
+                    },
+                    {
+                      "name": "interval_end",
+                      "expression": "`interval_end`"
+                    }
+                  ],
+                  "disaggregated": false,
+                  "orders": [
+                    {
+                      "direction": "ASC",
+                      "expression": "`interval_end`"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(price_spike_flag)",
+                  "displayName": "Spiking five-minute intervals",
+                  "format": {
+                    "type": "number-plain",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 0
+                    }
+                  }
+                },
+                "period": {
+                  "fieldName": "interval_end"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Dispatch-price spikes (strictly above threshold)"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 6,
+            "width": 4,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "spike-intervals",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ds_spikes",
+                  "fields": [
+                    {
+                      "name": "interval_end",
+                      "expression": "`interval_end`"
+                    },
+                    {
+                      "name": "region_id",
+                      "expression": "`region_id`"
+                    },
+                    {
+                      "name": "rrp_aud_per_mwh",
+                      "expression": "`rrp_aud_per_mwh`"
+                    },
+                    {
+                      "name": "is_price_spike",
+                      "expression": "`is_price_spike`"
+                    },
+                    {
+                      "name": "spike_threshold_aud_per_mwh",
+                      "expression": "`spike_threshold_aud_per_mwh`"
+                    },
+                    {
+                      "name": "price_status",
+                      "expression": "`price_status`"
+                    },
+                    {
+                      "name": "spike_freshness_status",
+                      "expression": "`spike_freshness_status`"
+                    },
+                    {
+                      "name": "administered_price_cap_flag",
+                      "expression": "`administered_price_cap_flag`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "interval_end",
+                    "displayName": "Interval end (AEST)"
+                  },
+                  {
+                    "fieldName": "region_id",
+                    "displayName": "Region"
+                  },
+                  {
+                    "fieldName": "rrp_aud_per_mwh",
+                    "displayName": "Dispatch price (AUD/MWh)"
+                  },
+                  {
+                    "fieldName": "is_price_spike",
+                    "displayName": "Spike"
+                  },
+                  {
+                    "fieldName": "spike_threshold_aud_per_mwh",
+                    "displayName": "Threshold (AUD/MWh)"
+                  },
+                  {
+                    "fieldName": "price_status",
+                    "displayName": "Price status"
+                  },
+                  {
+                    "fieldName": "spike_freshness_status",
+                    "displayName": "Freshness"
+                  },
+                  {
+                    "fieldName": "administered_price_cap_flag",
+                    "displayName": "Administered cap"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Regional dispatch price with spike flag, highest first"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 6,
+            "width": 8,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
             "name": "price-trend",
             "queries": [
               {
@@ -300,7 +466,7 @@
           },
           "position": {
             "x": 0,
-            "y": 6,
+            "y": 10,
             "width": 6,
             "height": 5
           }
@@ -363,7 +529,7 @@
           },
           "position": {
             "x": 6,
-            "y": 6,
+            "y": 10,
             "width": 6,
             "height": 5
           }
@@ -416,7 +582,7 @@
           },
           "position": {
             "x": 0,
-            "y": 11,
+            "y": 15,
             "width": 6,
             "height": 5
           }
@@ -480,7 +646,7 @@
           },
           "position": {
             "x": 6,
-            "y": 11,
+            "y": 15,
             "width": 6,
             "height": 5
           }
@@ -546,7 +712,7 @@
           },
           "position": {
             "x": 0,
-            "y": 16,
+            "y": 20,
             "width": 6,
             "height": 6
           }
@@ -609,7 +775,7 @@
           },
           "position": {
             "x": 6,
-            "y": 16,
+            "y": 20,
             "width": 6,
             "height": 6
           }
@@ -683,7 +849,7 @@
           },
           "position": {
             "x": 0,
-            "y": 22,
+            "y": 26,
             "width": 12,
             "height": 6
           }
@@ -773,7 +939,7 @@
           },
           "position": {
             "x": 0,
-            "y": 28,
+            "y": 32,
             "width": 12,
             "height": 6
           }
@@ -854,6 +1020,19 @@
                   ],
                   "disaggregated": false
                 }
+              },
+              {
+                "name": "spike_interval",
+                "query": {
+                  "datasetName": "ds_spikes",
+                  "fields": [
+                    {
+                      "name": "interval_end",
+                      "expression": "`interval_end`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
               }
             ],
             "spec": {
@@ -880,6 +1059,10 @@
                   {
                     "fieldName": "market_day",
                     "queryName": "t1_interval"
+                  },
+                  {
+                    "fieldName": "interval_end",
+                    "queryName": "spike_interval"
                   }
                 ]
               },
@@ -938,6 +1121,19 @@
                   ],
                   "disaggregated": false
                 }
+              },
+              {
+                "name": "spike_region",
+                "query": {
+                  "datasetName": "ds_spikes",
+                  "fields": [
+                    {
+                      "name": "region_id",
+                      "expression": "`region_id`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
               }
             ],
             "spec": {
@@ -959,6 +1155,11 @@
                     "fieldName": "region_id",
                     "displayName": "Region",
                     "queryName": "t1_region"
+                  },
+                  {
+                    "fieldName": "region_id",
+                    "displayName": "Region",
+                    "queryName": "spike_region"
                   }
                 ]
               },

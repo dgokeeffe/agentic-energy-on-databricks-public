@@ -1,0 +1,9 @@
+{
+  "metadata_version": 1,
+  "rule": "absolute",
+  "threshold_aud_per_mwh": 300.0,
+  "boundary": "strict",
+  "stale_after_seconds": 900,
+  "rationale": "300 AUD/MWh is a workshop-configured reporting level, not an AEMO-published spike definition: it was the pre-2022 administered price cap and remains a conventional high-price reporting level, while the Market Price Cap is far higher. Change this file, not the pipeline code, to move the level; the rule fingerprint changes with it so a past result stays explainable.",
+  "comment": "Applies to regional DISPATCHIS dispatch price (RRP) in AUD/MWh at interval-ending five-minute AEST grain. It is not settlement price, not TradingIS, and not a forecast. Negative dispatch prices are valid market outcomes and are never spikes. The boundary is strict, so a price exactly equal to the threshold is not a spike."
+}

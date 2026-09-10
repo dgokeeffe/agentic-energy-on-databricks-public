@@ -48,6 +48,72 @@ initial pipeline, semantic, benchmark and dashboard SQL gates.
 - Keep market notices omitted until a bounded plain-text parser, fixture and
   correction contract are independently proven.
 
+## Session handoff — 2026-09-10: dispatch-price spike detector
+
+**Issue #3 implemented on `feat/governed-dispatch-price-spike-detector`, not
+committed.** The rule that
+[`features/price-spike-detector.md`](features/price-spike-detector.md) had blocked
+for definition review is now agreed and recorded there: absolute
+`rrp_aud_per_mwh > 300.0` AUD/MWh, **strict** boundary, threshold carried in
+`resources/metadata/spike_rule.json` rather than code. No relative
+trailing-median rule was approved; that stays a separate definition review.
+
+New governed surface: `gold_nem_dispatch_price_spike_5min`,
+`nem_dispatch_price_spike_metrics`, an alert-ready benchmark
+(`07_regional_price_spikes.sql`, now 7 benchmarks), and a `ds_spikes` dashboard
+panel under the KPI row.
+
+**The ordering is the substance, not the threshold.** Corrections resolve first,
+then the effective intervention run is selected, and only then is the threshold
+applied. In any other order a superseded value or a non-effective run creates a
+spike that never happened. Freshness labels rows and never filters them, and
+non-spiking intervals are retained, so "no spikes" stays distinguishable from
+"no data".
+
+**A green suite was not evidence.** Relaxing the Gold view's boundary from `>` to
+`>=` passed all 348 tests untouched: the offline tests proved the Python rule
+while the published answer comes from the Spark module, and nothing tied the two
+together. Four static contract tests now bind the Gold view to the reviewed rule.
+Each of four mutations — boundary, threshold, skipped correction resolution,
+dropped effective-run filter — was re-run and confirmed to fail. Same shape as the
+2026-09-08 facility-dimension lesson one layer out: tested code and deployed code
+had diverged on exactly the reviewed decision.
+
+**Evidence.** 363 passed with 37 subtests after the PR #27 review fixes below (353
+before); static asset gate reports 7 benchmarks, 6 Genie assets, 7 dashboard
+statements; safety 434 files, miniwiki 19 pages, links 120 files, `git diff
+--check` clean.
+
+**Code review of PR #27 found one real defect the whole suite missed.** A
+non-finite threshold in the rule metadata failed *open*. `json.loads` accepts the
+non-standard `NaN`, `Infinity` and `-Infinity` literals and returns floats, so the
+`isinstance` check in `load_spike_rule` admitted them: `NaN` made every comparison
+false and silently disabled the detector, reporting a real spike as no spike,
+while `-Infinity` flagged every interval including a valid negative price. Nothing
+raised, the fingerprint still looked orderly, and the SQL boundary gate could not
+catch the `NaN` case because no row violated it. The loader now requires
+`math.isfinite`. Two guards were also strengthened: the freshness label had no
+drift guard, so flipping the staleness comparison or swapping the `STALE`/`CURRENT`
+literals inverted every label while passing the suite; and the
+no-inlined-threshold check was a substring ban on `"300"` that fired on any
+comment or date containing those digits, now an AST numeric-constant check. Each
+fix was mutation-verified to fail before and pass after. The fingerprint is
+unchanged, so no published result is invalidated. Detail in
+[`features/price-spike-detector.md`](features/price-spike-detector.md).
+
+**Not run.** No SQL executed and no dashboard rendered — the Gold view, metric
+view, benchmark and dashboard datasets are contract-tested only. The `--execute`
+gate and any deployment need workspace authorisation.
+
+**Still open.** The 300 AUD/MWh rationale is **unverified against current AEMO
+documentation** (no network access to AEMO sources in the implementing session)
+and must be confirmed before it is quoted to participants as market fact. The
+snapshot fixture contains no interval above the threshold, so an end-to-end
+non-zero spike count needs a thickened or live window. The spike metric was
+deliberately not added to the Genie space asset set. Code review is complete and
+its findings are addressed; **human sign-off on PR #27 is still required before
+merge**, and no merge, push to `main`, or deployment has been authorised.
+
 ## Session handoff — 2026-09-09: repository split resolved
 
 **Two repositories existed with no shared Git history, and the workshop exercises

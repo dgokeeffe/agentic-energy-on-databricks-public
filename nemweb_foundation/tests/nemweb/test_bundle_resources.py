@@ -111,6 +111,7 @@ def test_pipeline_is_serverless_triggered_and_includes_all_source_files():
         "gold_unit_solution.py",
         "gold_app_region_status.py",
         "gold_additional_aggregates.py",
+        "gold_price_spikes.py",
         "bronze_bids.py",
         "silver_bids.py",
         "gold_bids.py",
