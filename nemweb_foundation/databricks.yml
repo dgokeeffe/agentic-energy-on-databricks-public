@@ -67,6 +67,15 @@ variables:
   allow_live_nemweb:
     description: Deployment-controlled approval gate; set true only with explicit operator approval
     default: "false"
+  spike_baseline_multiple:
+    description: >-
+      Multiple of the trailing 288-interval regional median at which a five-minute
+      dispatch price is flagged as a spike.
+
+      Deliberately has no default. The threshold is a market judgement, not an
+      engineering constant, so an operator must state it; the pipeline refuses to
+      start rather than adopt a number nobody chose. This is not an AEMO market
+      setting and must not be presented as one.
   critical_lookback_hours:
     description: Bounded lookback for five-minute Current report discovery
     default: "2"

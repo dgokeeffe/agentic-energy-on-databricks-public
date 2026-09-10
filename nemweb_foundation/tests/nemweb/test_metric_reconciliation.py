@@ -27,6 +27,12 @@ EXPECTED_EXPRESSIONS = {
         "estimated_demand_energy_mwh": "SUM(total_demand_mw) * 5.0 / 60.0",
         "five_minute_interval_count": "COUNT(1)",
     },
+    "nem_dispatch_price_spike_metrics": {
+        "spike_interval_count": "COUNT_IF(is_price_spike)",
+        "decided_interval_count": "COUNT(is_price_spike)",
+        "five_minute_interval_count": "COUNT(1)",
+        "maximum_dispatch_price_aud_per_mwh": "MAX(rrp_aud_per_mwh)",
+    },
     "nem_unit_output_metrics": {
         "average_actual_generation_mw": "AVG(source.actual_generation_mw)",
         "maximum_actual_generation_mw": "MAX(source.actual_generation_mw)",
@@ -70,6 +76,15 @@ SOURCE_ROWS = {
         {"rrp_aud_per_mwh": 50.0, "total_demand_mw": 1000.0, "is_effective_run": True},
         {"rrp_aud_per_mwh": 70.0, "total_demand_mw": 1100.0, "is_effective_run": True},
         {"rrp_aud_per_mwh": 999.0, "total_demand_mw": 9999.0, "is_effective_run": False},
+    ],
+    # The NULL row is the point of this fixture: an interval whose baseline was
+    # incomplete must raise five_minute_interval_count without being counted as
+    # either a spike or a decided non-spike.
+    "nem_dispatch_price_spike_metrics": [
+        {"is_price_spike": True, "rrp_aud_per_mwh": 900.0, "is_effective_run": True},
+        {"is_price_spike": False, "rrp_aud_per_mwh": 50.0, "is_effective_run": True},
+        {"is_price_spike": None, "rrp_aud_per_mwh": 80.0, "is_effective_run": True},
+        {"is_price_spike": True, "rrp_aud_per_mwh": 9999.0, "is_effective_run": False},
     ],
     "nem_unit_output_metrics": [
         {"actual_generation_mw": 12.0},
@@ -117,6 +132,12 @@ EXPECTED_RESULTS = {
         "estimated_demand_energy_mwh": 175.0,
         "five_minute_interval_count": 2,
     },
+    "nem_dispatch_price_spike_metrics": {
+        "spike_interval_count": 1,
+        "decided_interval_count": 2,
+        "five_minute_interval_count": 3,
+        "maximum_dispatch_price_aud_per_mwh": 900.0,
+    },
     "nem_unit_output_metrics": {
         "average_actual_generation_mw": 4.5,
         "maximum_actual_generation_mw": 12.0,
@@ -158,11 +179,25 @@ EXPECTED_RESULTS = {
 def direct_gold_aggregate(view: str, rows: list[dict]) -> dict[str, float]:
     if view in {
         "nem_region_dispatch_metrics",
+        "nem_dispatch_price_spike_metrics",
         "nem_binding_constraint_metrics",
         "nem_interconnector_flow_metrics",
         "nem_unit_availability_t1_metrics",
     }:
         rows = [row for row in rows if row["is_effective_run"]]
+
+    if view == "nem_dispatch_price_spike_metrics":
+        return {
+            # COUNT_IF counts only true; COUNT(col) counts non-NULL. SQL NULL
+            # semantics are the whole reason an undecidable interval cannot be
+            # mistaken for a decided non-spike.
+            "spike_interval_count": sum(1 for r in rows if r["is_price_spike"] is True),
+            "decided_interval_count": sum(
+                1 for r in rows if r["is_price_spike"] is not None
+            ),
+            "five_minute_interval_count": len(rows),
+            "maximum_dispatch_price_aud_per_mwh": max(r["rrp_aud_per_mwh"] for r in rows),
+        }
 
     if view == "nem_region_dispatch_metrics":
         return {
@@ -247,6 +282,7 @@ def test_effective_run_filters_exclude_non_effective_rows_from_reconciliation() 
     }
     assert filtered_views == {
         "nem_region_dispatch_metrics",
+        "nem_dispatch_price_spike_metrics",
         "nem_binding_constraint_metrics",
         "nem_interconnector_flow_metrics",
         "nem_unit_availability_t1_metrics",
@@ -254,6 +290,78 @@ def test_effective_run_filters_exclude_non_effective_rows_from_reconciliation() 
     # Each filtered fixture includes an adversarial high-value non-effective row;
     # the reconciled results above prove it contributes to none of the measures.
     assert all(any(not row["is_effective_run"] for row in SOURCE_ROWS[name]) for name in filtered_views)
+
+
+def test_an_undecidable_spike_interval_is_never_counted_as_an_absent_spike() -> None:
+    """The Gold NULL must survive aggregation, or the measure lies by omission.
+
+    A spike rate computed against the total interval count treats "we could not
+    tell" as "no spike", which understates risk exactly when the baseline is
+    incomplete. The view therefore publishes decided_interval_count as the only
+    valid denominator, and says so in the measure comment.
+    """
+
+    rows = SOURCE_ROWS["nem_dispatch_price_spike_metrics"]
+    actual = direct_gold_aggregate("nem_dispatch_price_spike_metrics", rows)
+    assert actual["spike_interval_count"] == 1
+    assert actual["decided_interval_count"] == 2
+    assert actual["five_minute_interval_count"] == 3
+    # The undecidable row is visible in the total but absent from both verdicts.
+    assert (
+        actual["five_minute_interval_count"] > actual["decided_interval_count"]
+    ), "the fixture must retain an undecidable interval"
+
+    spike = metric_definitions()["nem_dispatch_price_spike_metrics"]
+    measures = {measure["name"]: measure for measure in spike["measures"]}
+    assert measures["spike_interval_count"]["expr"] == "COUNT_IF(is_price_spike)"
+    # COUNT(col) skips NULL; COUNT(1) and COUNT(*) do not.
+    assert measures["decided_interval_count"]["expr"] == "COUNT(is_price_spike)"
+    assert "never by five_minute_interval_count" in measures["decided_interval_count"]["comment"]
+
+
+def test_the_spike_view_exposes_price_formation_basis_as_a_dimension() -> None:
+    """Administered prices must be separable, not silently merged into spikes."""
+
+    spike = metric_definitions()["nem_dispatch_price_spike_metrics"]
+    dimensions = {dimension["name"] for dimension in spike["dimensions"]}
+    assert "price_formation_basis" in dimensions
+    assert "intervention artefacts" in spike["comment"] or any(
+        "intervention artefact" in dimension.get("comment", "")
+        for dimension in spike["dimensions"]
+    )
+
+
+def test_no_spike_measure_divides_by_the_total_interval_count() -> None:
+    """The understatement this guards against is silent, so it is asserted.
+
+    A spike rate over five_minute_interval_count counts undecidable intervals in
+    the denominator, which reports less risk exactly when the baseline is
+    incomplete. decided_interval_count is the only valid denominator, and no
+    measure may bake in the wrong one.
+    """
+
+    spike = metric_definitions()["nem_dispatch_price_spike_metrics"]
+    for measure in spike["measures"]:
+        expression = measure["expr"].replace(" ", "")
+        assert "/five_minute_interval_count" not in expression, measure["name"]
+        assert "/COUNT(1)" not in expression, measure["name"]
+        assert "/COUNT(*)" not in expression, measure["name"]
+    # Both counts must remain published, or a consumer cannot compute a rate at
+    # all and will reach for the wrong denominator themselves.
+    names = {measure["name"] for measure in spike["measures"]}
+    assert {"spike_interval_count", "decided_interval_count"} <= names
+
+
+def test_no_measure_expression_carries_an_unresolved_sql_parameter() -> None:
+    """A metric view cannot take a named parameter; the threshold lives in Gold.
+
+    If a measure ever grows a ``:placeholder`` the view would be created with a
+    literal colon token and silently mis-evaluate.
+    """
+
+    for view, definition in metric_definitions().items():
+        for measure in definition["measures"]:
+            assert ":" not in measure["expr"], (view, measure["name"])
 
 
 def test_mw_to_mwh_conversion_is_exactly_five_minutes() -> None:

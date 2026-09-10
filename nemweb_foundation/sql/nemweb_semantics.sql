@@ -15,6 +15,14 @@ FROM (
   FROM gold_nem_region_dispatch_5min
   GROUP BY ALL HAVING COUNT(*) > 1
 );
+-- The spike view is already filtered to effective runs, so intervention is not
+-- part of its key: one row per region and interval is the contract.
+SELECT assert_true(COUNT(*) = 0, 'gold_nem_dispatch_price_spike_5min candidate key is not unique')
+FROM (
+  SELECT interval_end, region_id
+  FROM gold_nem_dispatch_price_spike_5min
+  GROUP BY ALL HAVING COUNT(*) > 1
+);
 SELECT assert_true(COUNT(*) = 0, 'gold_nem_unit_dispatch_5min candidate key is not unique')
 FROM (
   SELECT interval_end, duid FROM gold_nem_unit_dispatch_5min
@@ -99,6 +107,25 @@ COMMENT ON COLUMN gold_nem_region_dispatch_5min.source_publication_at IS
   'NEMWEB listing/HTTP publication timestamp captured by the lander; retrieval time is retained as an explicitly labelled fallback when the listing supplies no timestamp.';
 COMMENT ON COLUMN gold_nem_region_dispatch_5min.gold_published_at IS
   'Timestamp when Lakeflow published this Gold row; compare with source_publication_at while respecting its source_publication_basis lineage.';
+
+COMMENT ON TABLE gold_nem_dispatch_price_spike_5min IS
+  'Governed relative dispatch-price spike flag at five-minute interval-ending AEST (UTC+10, no DST) grain, derived from effective runs of gold_nem_region_dispatch_5min. A spike is a price at or above spike_baseline_multiple times the median of the 288 intervals immediately preceding it for the same region; the judged interval is excluded from its own baseline. This is dispatch, not settlement. The threshold is an operator-supplied market judgement, not an AEMO market setting, and must not be cited as one. is_price_spike is NULL, never false, wherever no comparison could be made.';
+COMMENT ON COLUMN gold_nem_dispatch_price_spike_5min.interval_end IS
+  'End of the five-minute dispatch interval in NEM market time (AEST, UTC+10, no DST), not the interval start.';
+COMMENT ON COLUMN gold_nem_dispatch_price_spike_5min.rrp_aud_per_mwh IS
+  'Regional reference dispatch price in Australian dollars per megawatt-hour; not a settlement price.';
+COMMENT ON COLUMN gold_nem_dispatch_price_spike_5min.is_price_spike IS
+  'True when rrp_aud_per_mwh is at or above the trailing median times spike_baseline_multiple; the comparison is inclusive. NULL means no comparison was made, either because fewer than spike_baseline_intervals prior intervals exist for the region or because the trailing median is zero or negative, where the ratio is undefined or inverts. NULL is not false: do not read it as the absence of a spike, and do not coalesce it to false in aggregation.';
+COMMENT ON COLUMN gold_nem_dispatch_price_spike_5min.trailing_median_price_aud_per_mwh IS
+  'Median dispatch price over the 288 intervals immediately preceding this one for the same region, excluding this interval. NULL until the window is complete.';
+COMMENT ON COLUMN gold_nem_dispatch_price_spike_5min.spike_baseline_intervals IS
+  'Number of preceding intervals forming the baseline; 288 is 24 hours at five-minute grain. Recorded on every row so a flagged interval carries the rule that fired.';
+COMMENT ON COLUMN gold_nem_dispatch_price_spike_5min.spike_baseline_multiple IS
+  'Operator-supplied multiple of the trailing median at which a price is flagged. Sourced from the nemweb.spike_baseline_multiple pipeline setting, which has no default. Not an AEMO market setting.';
+COMMENT ON COLUMN gold_nem_dispatch_price_spike_5min.price_formation_basis IS
+  'How the price was formed: ADMINISTERED when an administered price cap applied, SUSPENDED when the market was suspended, otherwise MARKET. Administered and suspended prices are intervention artefacts, not market scarcity signals; separate them before reading a spike count as price risk.';
+COMMENT ON COLUMN gold_nem_dispatch_price_spike_5min.is_effective_run IS
+  'Always true. The view is filtered to effective runs, so its key is interval_end and region_id without intervention.';
 
 COMMENT ON TABLE gold_nem_unit_dispatch_5min IS
   'Per-DUID actual SCADA output at five-minute interval-ending AEST grain. actual_generation_mw is measured output, never dispatch target or availability; Current NEMWEB publishes no five-minute unit availability. DUID has a logical nullable many-to-one relationship to silver_nem_facility_dimension. UNKNOWN region/fuel is retained by design. Estimated energy uses MW times 5/60 hours.';

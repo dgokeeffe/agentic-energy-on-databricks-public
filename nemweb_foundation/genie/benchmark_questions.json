@@ -54,6 +54,15 @@
       "expected_columns": ["region_id", "fuel_type", "average_dispatch_target_mw", "average_availability_mw", "mean_absolute_scada_target_variance_mw", "newest_t1_source_publication_at"],
       "result_expectation": {"minimum_row_count": 1},
       "explanation": "Availability and dispatch target are daily T+1 UNIT_SOLUTION fields, never Current five-minute availability."
+    },
+    {
+      "id": "dispatch-price-spikes",
+      "question": "Which NEM regions had the most five-minute dispatch-price spikes in the last 24 hours, and how many intervals could actually be judged?",
+      "sql_file": "sql/genie_benchmarks/07_dispatch_price_spikes.sql",
+      "assets": ["nem_dispatch_price_spike_metrics"],
+      "expected_columns": ["region_id", "price_formation_basis", "spike_interval_count", "decided_interval_count", "five_minute_interval_count", "maximum_dispatch_price_aud_per_mwh", "newest_gold_publication_at"],
+      "result_expectation": {"minimum_row_count": 1},
+      "explanation": "Returning decided_interval_count beside spike_interval_count proves an incomplete trailing baseline is reported as undecided rather than as an absence of spikes. Grouping by price_formation_basis keeps administered and suspended prices separable from market-formed scarcity. The threshold is operator-supplied and is not an AEMO market setting."
     }
   ]
 }

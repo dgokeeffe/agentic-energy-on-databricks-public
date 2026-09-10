@@ -13,6 +13,42 @@ from dataclasses import dataclass
 from agentic_energy.nemweb.contracts import mode_landing_root
 
 
+#: Trailing baseline for the dispatch-price spike rule: 24 hours of five-minute
+#: intervals. Fixed rather than configurable so the published measure cannot be
+#: made to mean different things in different deployments.
+SPIKE_BASELINE_INTERVALS = 288
+
+
+def spike_baseline_multiple(spark_session) -> float:
+    """Read the governed spike multiple. There is deliberately no default.
+
+    The threshold is a market judgement, not an engineering constant, so the
+    pipeline refuses to start rather than silently adopt a number nobody chose.
+    It is read here instead of on :class:`PipelineConfig` because exactly one
+    Gold view needs it, while every Bronze table needs the landing settings.
+    """
+
+    try:
+        raw = spark_session.conf.get("nemweb.spike_baseline_multiple")
+    except (KeyError, TypeError) as exc:
+        raise ValueError(
+            "nemweb.spike_baseline_multiple must be set; the dispatch-price "
+            "spike measure has no default threshold"
+        ) from exc
+    if raw is None or not str(raw).strip():
+        raise ValueError(
+            "nemweb.spike_baseline_multiple must be set; the dispatch-price "
+            "spike measure has no default threshold"
+        )
+    try:
+        multiple = float(raw)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("nemweb.spike_baseline_multiple must be a number") from exc
+    if multiple <= 0:
+        raise ValueError("nemweb.spike_baseline_multiple must be greater than zero")
+    return multiple
+
+
 @dataclass(frozen=True)
 class PipelineConfig:
     """Validated settings injected by ``resources/nemweb.pipeline.yml``."""

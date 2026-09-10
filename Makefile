@@ -1,7 +1,7 @@
 PYTHON ?= python3
 PROFILE ?= DEFAULT
 
-.PHONY: setup miniwiki test foundation-test foundation-snapshot modern-apis build app-install app-typegen app-test app-dev-mock ticket-verify ml-test lakebase-test links safety bundle-validate bundle-validate-live-evidence facilitator-lakebase-preflight facilitator-lakebase-smoke validate-local validate-readonly
+.PHONY: setup miniwiki test foundation-test foundation-snapshot modern-apis mutation-spike build app-install app-typegen app-test app-dev-mock ticket-verify ml-test lakebase-test links safety bundle-validate bundle-validate-live-evidence facilitator-lakebase-preflight facilitator-lakebase-smoke validate-local validate-readonly
 
 setup:
 	bash scripts/setup-dev.sh
@@ -26,6 +26,13 @@ foundation-snapshot:
 
 modern-apis:
 	$(PYTHON) nemweb_foundation/scripts/check_modern_pipeline_apis.py
+
+# Injects ten known defects into the dispatch-price spike rule one at a time and
+# requires each to be caught by the specific test written for it. A green suite
+# does not prove a test would fail if the code were wrong; this does. Sources are
+# restored even on failure.
+mutation-spike:
+	$(PYTHON) nemweb_foundation/scripts/mutation_guard_spike_rule.py
 
 build:
 	rm -rf dist nemweb_foundation/dist nemweb_ml/dist
@@ -55,14 +62,15 @@ ml-test:
 lakebase-test:
 	uv run --extra test $(PYTHON) -m pytest workshop/lakebase/tests -q
 
-# Eight bundle variables have no default and no value is committed, so this
-# target sources the operator's local .env (see env.example). Without it the
+# Nine foundation bundle variables have no default and no value is committed, so
+# this target sources the operator's local .env (see env.example). Without it the
 # first required variable fails validation before the bundle is reached.
 bundle-validate:
 	@test "$(PROFILE)" = "DEFAULT" || (echo 'PROFILE=DEFAULT is required' >&2; exit 2)
 	@test -f .env || (echo 'Missing .env. Copy env.example to .env and set every BUNDLE_VAR_ value.' >&2; exit 2)
 	set -a; . ./.env; set +a; \
 	  for v in resource_prefix catalog schema app_serving_schema landing_volume warehouse_id participant_group facilitator_group \
+	           spike_baseline_multiple \
 	           mlflow_experiment_name uc_model_name training_table feature_table prediction_table; do \
 	    eval "val=\$$BUNDLE_VAR_$$v"; \
 	    test -n "$$val" || { echo "Missing BUNDLE_VAR_$$v in .env (required, no default)" >&2; exit 2; }; \
@@ -81,7 +89,7 @@ bundle-validate-live-evidence:
 	  done; \
 	  (cd nemweb_foundation && databricks bundle validate --strict -t live_evidence --profile $(PROFILE))
 
-validate-local: miniwiki links safety test foundation-snapshot modern-apis build app-test
+validate-local: miniwiki links safety test foundation-snapshot modern-apis mutation-spike build app-test
 
 facilitator-lakebase-preflight:
 	@test "$(PROFILE)" = "DEFAULT" || (echo 'PROFILE=DEFAULT is required' >&2; exit 2)

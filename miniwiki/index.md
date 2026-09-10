@@ -29,8 +29,13 @@ installation. The repository-owned workflow is documented in
   Genie → Review evidence and uncertainty → Save investigation → Follow up), the
   prepared Genie-analysis prototype, and the live two-agent collision in this
   checkout. **Read before editing `nemweb_app/`.**
-- [`features/price-spike-detector.md`](features/price-spike-detector.md) — a
-  downstream analytics idea that depends on the NEMWEB Gold contracts.
+- [`features/price-spike-detector.md`](features/price-spike-detector.md) — the
+  governed relative dispatch-price spike measure: the agreed rule, why the
+  threshold has no default, and the `median()`-over-a-`ROWS`-frame defect found by
+  executing it rather than reading the documentation.
+- [`features/price-spike-test-results.md`](features/price-spike-test-results.md)
+  — the evidence record for that measure, including what a green suite does **not**
+  establish.
 - [`features/genie-miniwiki-integration.md`](features/genie-miniwiki-integration.md)
   — the lightweight miniwiki technique; the concrete analyst delivery now lives
   in the full NEMWEB feature page.
