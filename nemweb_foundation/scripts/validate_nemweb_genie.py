@@ -41,6 +41,63 @@ REQUIRED_TOPICS = {
     "t1-unit-availability",
 }
 
+# Governed contract sources a refusal is allowed to quote. `DATA-CONTRACT.md` is
+# owned by this package, but `DATA_LICENSES.md` lives at the repository root
+# (``ROOT.parent``), i.e. deliberately outside the packaging boundary. That
+# crossing is why the sources are a named registry resolved here rather than a
+# relative path carried in benchmark_questions.json: validate_assets() already
+# rejects `..` in any `sql_file` path, and the same prohibition must hold for
+# refusal metadata. A `contract_source` outside this registry is an error.
+CONTRACT_SOURCES: dict[str, Path] = {
+    "DATA-CONTRACT.md": ROOT / "DATA-CONTRACT.md",
+    "DATA_LICENSES.md": ROOT.parent / "DATA_LICENSES.md",
+}
+# Refusal topics that must always be present. `market-notice-cause` is
+# deliberately EXCLUDED: the exercise documents it as the "cut if time runs
+# short" refusal, so dropping it must not require editing this validator.
+REQUIRED_REFUSAL_TOPICS = frozenset(
+    {
+        "five-minute-curtailment",
+        "constraint-marginal-value-by-region",
+        "interconnector-import-export-direction",
+        "snapshot-price-as-live-spot",
+        "bid-recommendation",
+    }
+)
+# The permitted `unsupported_because` enum, taken from the refusal catalogue as
+# authored. A new class must be added here consciously, not invented in JSON.
+REFUSAL_CLASSES = frozenset(
+    {
+        "deliberate_omission",
+        "no_governed_dimension",
+        "no_governed_mapping",
+        "no_published_field",
+        "out_of_scope_decision_support",
+        "snapshot_not_live",
+    }
+)
+REFUSAL_REQUIRED_FIELDS = (
+    "id",
+    "space_question_id",
+    "question",
+    "contract_source",
+    "contract_section",
+    "contract_quote",
+    "unsupported_because",
+    "refusal_reason",
+    "near_miss_of",
+)
+# A refusal must reach the executor under no circumstance; these keys are what
+# the --execute path consumes, so their presence on a refusal is a hard error.
+REFUSAL_FORBIDDEN_FIELDS = ("sql_file", "expected_columns", "result_expectation")
+SPACE_QUESTION_ID = re.compile(r"^[0-9a-f]{32}$")
+MINIMUM_REFUSAL_COUNT = 4
+MINIMUM_REFUSAL_NEAR_MISS_COVERAGE = 4
+# "I cannot answer that" is exactly the inadequate answer this exercise exists
+# to rule out, so a refusal reason must be long enough to name a reason.
+MINIMUM_REFUSAL_REASON_CHARS = 80
+MARKDOWN_HEADING = re.compile(r"^(#{2,})\s+(.*\S)\s*$")
+
 
 def _read_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
@@ -53,6 +110,123 @@ def render_benchmark_sql(sql: str, catalog: str, schema: str) -> str:
     if "{{" in rendered or "}}" in rendered:
         raise ValueError("unresolved SQL template placeholder")
     return rendered
+
+
+def _normalise_contract_text(text: str) -> str:
+    """Collapse every whitespace run to a single space.
+
+    This is mandatory, not cosmetic. The governed contract markdown hard-wraps
+    prose mid-sentence, so a cited sentence longer than one wrapped line spans a
+    newline plus indentation and cannot be found by a raw substring match against
+    the file as written. As authored, two of the six quotes
+    (`bid-recommendation` and `snapshot-price-as-live-spot`) fail a raw match and
+    pass only once normalised; the remaining four fit a single source line today
+    and would break the moment either contract is re-wrapped. Normalising both
+    the section body and the quote compares the sentence rather than the line
+    wrapping, and, because it is applied per section, still refuses a quote that
+    only matches outside the section it claims.
+    """
+    return " ".join(text.split())
+
+
+def contract_sections(path: Path) -> dict[str, str]:
+    """Split a markdown file into ``{"## Heading": normalised_body}``.
+
+    Only level-2-or-deeper headings start a section, and the returned key keeps
+    the literal heading line (hashes included) so a refusal cites it verbatim.
+    Bodies are normalised and scoped to their own section, so a quote is matched
+    only inside the section it claims to come from and cannot silently drift to
+    a coincidental match elsewhere in the file.
+    """
+    sections: dict[str, str] = {}
+    heading: str | None = None
+    body: list[str] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        match = MARKDOWN_HEADING.match(line)
+        if match:
+            if heading is not None:
+                sections[heading] = _normalise_contract_text("\n".join(body))
+            heading = f"{match.group(1)} {match.group(2)}"
+            body = []
+            continue
+        if heading is not None:
+            body.append(line)
+    if heading is not None:
+        sections[heading] = _normalise_contract_text("\n".join(body))
+    return sections
+
+
+def validate_refusals(
+    refusals: list[dict[str, Any]], benchmark_ids: set[str]
+) -> list[dict[str, Any]]:
+    """Statically validate the refusal catalogue against the governed contracts.
+
+    Every refusal must quote a real sentence from a named section of a named
+    governed source. That is the check an invented rule cannot pass.
+    """
+    if len(refusals) < MINIMUM_REFUSAL_COUNT:
+        raise ValueError(f"at least {MINIMUM_REFUSAL_COUNT} refusal questions are required")
+    ids = [item.get("id") for item in refusals]
+    if len(ids) != len(set(ids)):
+        raise ValueError("refusal IDs are duplicate")
+    missing_topics = sorted(REQUIRED_REFUSAL_TOPICS - set(ids))
+    if missing_topics:
+        raise ValueError(f"refusal catalogue omits required topics: {missing_topics}")
+    colliding = sorted(set(ids) & benchmark_ids)
+    if colliding:
+        raise ValueError(f"refusal IDs collide with benchmark IDs: {colliding}")
+    space_ids = [item.get("space_question_id") for item in refusals]
+    if len(space_ids) != len(set(space_ids)):
+        raise ValueError("refusal space_question_id values are duplicate")
+
+    sections_cache: dict[str, dict[str, str]] = {}
+    covered_near_misses: set[str] = set()
+    for item in refusals:
+        name = item.get("id") or "<unnamed>"
+        for field in REFUSAL_REQUIRED_FIELDS:
+            value = item.get(field)
+            if not isinstance(value, str) or not value.strip():
+                raise ValueError(f"refusal {name} lacks a non-empty {field}")
+        present_forbidden = [field for field in REFUSAL_FORBIDDEN_FIELDS if field in item]
+        if present_forbidden:
+            raise ValueError(
+                f"refusal {name} must not carry executable benchmark keys: {present_forbidden}"
+            )
+        if not SPACE_QUESTION_ID.fullmatch(item["space_question_id"]):
+            raise ValueError(f"refusal {name} space_question_id is not a 32-character hex ID")
+        if item["unsupported_because"] not in REFUSAL_CLASSES:
+            raise ValueError(
+                f"refusal {name} uses unknown unsupported_because {item['unsupported_because']!r}"
+            )
+        if len(item["refusal_reason"].strip()) < MINIMUM_REFUSAL_REASON_CHARS:
+            raise ValueError(
+                f"refusal {name} reason must name a reason, not merely decline "
+                f"(at least {MINIMUM_REFUSAL_REASON_CHARS} characters)"
+            )
+        source = item["contract_source"]
+        if source not in CONTRACT_SOURCES:
+            raise ValueError(f"refusal {name} cites unknown contract source {source!r}")
+        if source not in sections_cache:
+            sections_cache[source] = contract_sections(CONTRACT_SOURCES[source])
+        sections = sections_cache[source]
+        section = item["contract_section"]
+        if section not in sections:
+            raise ValueError(f"refusal {name} cites missing section {section!r} in {source}")
+        if _normalise_contract_text(item["contract_quote"]) not in sections[section]:
+            raise ValueError(
+                f"refusal {name} quote is not present in {source} section {section!r}"
+            )
+        near_miss = item["near_miss_of"]
+        if near_miss not in benchmark_ids:
+            raise ValueError(f"refusal {name} near_miss_of {near_miss!r} is not a benchmark ID")
+        covered_near_misses.add(near_miss)
+
+    if len(covered_near_misses) < MINIMUM_REFUSAL_NEAR_MISS_COVERAGE:
+        raise ValueError(
+            f"refusals must sit adjacent to at least {MINIMUM_REFUSAL_NEAR_MISS_COVERAGE} "
+            f"distinct benchmarks; only {len(covered_near_misses)} covered"
+        )
+    return list(refusals)
 
 
 def validate_assets() -> dict[str, Any]:
@@ -77,7 +251,13 @@ def validate_assets() -> dict[str, Any]:
             raise ValueError(f"benchmark {item['id']} must be catalog/schema parameterised")
         if not item.get("expected_columns") or "result_expectation" not in item:
             raise ValueError(f"benchmark {item['id']} lacks a result contract")
+        _check_expectation_asserts_something(item)
         benchmark_sql.append({"benchmark": item, "sql": sql})
+
+    # Refusals live under their own key precisely because they carry no
+    # sql_file/expected_columns/result_expectation, so the loop above never sees
+    # them and the --execute path can never submit one.
+    refusals = validate_refusals(benchmark_doc.get("refusals", []), set(ids))
 
     genie = _read_json(GENIE_SPACE)
     tables = genie.get("data_sources", {}).get("tables", [])
@@ -111,6 +291,7 @@ def validate_assets() -> dict[str, Any]:
         "benchmarks": benchmark_sql,
         "dashboard_sql": dashboard_sql,
         "genie_asset_count": len(identifiers),
+        "refusals": refusals,
     }
 
 
@@ -188,7 +369,61 @@ def _result_row_count(response: dict[str, Any]) -> int:
     raise RuntimeError("successful SQL response did not expose a row count")
 
 
+def _check_expectation_asserts_something(item: dict[str, Any]) -> None:
+    """Reject a ``result_expectation`` that asserts nothing.
+
+    This is a class rule over the expectation's keys, not a carve-out for any
+    single benchmark ID. An expectation is substantive when it pins an exact
+    ``row_count``, demands at least one row, or asserts a grain via
+    ``distinct_key_columns``. ``minimum_row_count: 0`` alone is trivially true
+    for every possible result, so on its own it is vacuous; the same expectation
+    combined with ``distinct_key_columns`` is row-count-independent yet still
+    asserts grain, and is therefore allowed.
+    """
+    expectation = item["result_expectation"]
+    if not isinstance(expectation, dict):
+        raise ValueError(f"benchmark {item['id']} result_expectation must be an object")
+    asserts_row_count = "row_count" in expectation or expectation.get("minimum_row_count", 0) > 0
+    asserts_grain = bool(expectation.get("distinct_key_columns"))
+    if not (asserts_row_count or asserts_grain):
+        raise ValueError(
+            f"benchmark {item['id']} result_expectation {expectation!r} asserts nothing; "
+            "pin a row_count, require at least one row, or assert distinct_key_columns"
+        )
+    key_columns = expectation.get("distinct_key_columns", [])
+    if key_columns:
+        unknown = [column for column in key_columns if column not in item["expected_columns"]]
+        if unknown:
+            raise ValueError(
+                f"benchmark {item['id']} distinct_key_columns {unknown} are not expected columns"
+            )
+
+
+def _check_result_grain(item: dict[str, Any], response: dict[str, Any]) -> None:
+    """Assert the declared key columns are unique across the returned rows."""
+    key_columns = item["result_expectation"].get("distinct_key_columns", [])
+    if not key_columns:
+        return
+    # _check_benchmark_result has already asserted the actual columns equal
+    # expected_columns exactly and in order, so these positions are the
+    # positions in every data_array row.
+    positions = [item["expected_columns"].index(column) for column in key_columns]
+    rows = response.get("result", {}).get("data_array") or []
+    seen: set[tuple[Any, ...]] = set()
+    for row in rows:
+        if not isinstance(row, list) or len(row) <= max(positions):
+            raise RuntimeError(f"benchmark {item['id']} returned a row narrower than its columns")
+        key = tuple(row[position] for position in positions)
+        if key in seen:
+            raise RuntimeError(
+                f"benchmark {item['id']} repeats key {key!r} for {key_columns}; "
+                "the declared grain is not unique"
+            )
+        seen.add(key)
+
+
 def _check_benchmark_result(item: dict[str, Any], response: dict[str, Any]) -> None:
+    _check_expectation_asserts_something(item)
     expected_columns = item["expected_columns"]
     actual_columns = _result_columns(response)
     if actual_columns != expected_columns:
@@ -199,6 +434,7 @@ def _check_benchmark_result(item: dict[str, Any], response: dict[str, Any]) -> N
         raise RuntimeError(f"benchmark {item['id']} row count {count} != {expectation['row_count']}")
     if count < expectation.get("minimum_row_count", 0):
         raise RuntimeError(f"benchmark {item['id']} row count {count} is below its minimum")
+    _check_result_grain(item, response)
 
 
 def main() -> int:
@@ -218,6 +454,7 @@ def main() -> int:
     assets = validate_assets()
     print(
         f"Static assets valid: {len(assets['benchmarks'])} benchmarks, "
+        f"{len(assets['refusals'])} contract-cited refusals, "
         f"{assets['genie_asset_count']} Genie assets, {len(assets['dashboard_sql'])} dashboard statements."
     )
     if not args.execute:
