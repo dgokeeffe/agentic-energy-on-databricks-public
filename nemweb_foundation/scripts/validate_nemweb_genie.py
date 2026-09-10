@@ -39,6 +39,7 @@ REQUIRED_TOPICS = {
     "binding-constraints",
     "interconnector-source-sign",
     "t1-unit-availability",
+    "dispatch-price-spikes",
 }
 
 

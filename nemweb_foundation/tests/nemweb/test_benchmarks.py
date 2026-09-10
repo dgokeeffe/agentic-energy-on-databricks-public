@@ -20,7 +20,7 @@ BENCHMARKS = json.loads((ROOT / "genie/benchmark_questions.json").read_text())["
 
 def test_benchmark_catalog_covers_every_required_question() -> None:
     assert {item["id"] for item in BENCHMARKS} == validator.REQUIRED_TOPICS
-    assert len(BENCHMARKS) == 6
+    assert len(BENCHMARKS) == 7
     for item in BENCHMARKS:
         assert item["question"]
         assert item["expected_columns"]
@@ -41,6 +41,13 @@ def test_benchmarks_encode_semantics_not_only_table_presence() -> None:
     assert "nem_binding_constraint_metrics" in sql_by_id["binding-constraints"]
     assert "source_sign" in sql_by_id["interconnector-source-sign"]
     assert "nem_unit_availability_t1_metrics" in sql_by_id["t1-unit-availability"]
+    spikes = sql_by_id["dispatch-price-spikes"]
+    assert "nem_dispatch_price_spike_metrics" in spikes
+    # The denominator must travel with the numerator, or an incomplete trailing
+    # baseline is indistinguishable from a period with no spikes.
+    assert "measure(spike_interval_count)" in spikes
+    assert "measure(decided_interval_count)" in spikes
+    assert "price_formation_basis" in spikes
 
 
 def test_template_rendering_is_bounded_and_complete() -> None:
@@ -92,6 +99,6 @@ def test_static_asset_validator_reconciles_all_files() -> None:
     assert not hasattr(validator, "REQUIRED_PROFILE")
     assert "explicit --profile" in validator.PROFILE_REQUIRED_MESSAGE
     result = validator.validate_assets()
-    assert len(result["benchmarks"]) == 6
+    assert len(result["benchmarks"]) == 7
     assert len(result["dashboard_sql"]) == 6
-    assert result["genie_asset_count"] == 6
+    assert result["genie_asset_count"] == 7

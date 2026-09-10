@@ -55,14 +55,15 @@ ml-test:
 lakebase-test:
 	uv run --extra test $(PYTHON) -m pytest workshop/lakebase/tests -q
 
-# Eight bundle variables have no default and no value is committed, so this
-# target sources the operator's local .env (see env.example). Without it the
+# Nine foundation bundle variables have no default and no value is committed, so
+# this target sources the operator's local .env (see env.example). Without it the
 # first required variable fails validation before the bundle is reached.
 bundle-validate:
 	@test "$(PROFILE)" = "DEFAULT" || (echo 'PROFILE=DEFAULT is required' >&2; exit 2)
 	@test -f .env || (echo 'Missing .env. Copy env.example to .env and set every BUNDLE_VAR_ value.' >&2; exit 2)
 	set -a; . ./.env; set +a; \
 	  for v in resource_prefix catalog schema app_serving_schema landing_volume warehouse_id participant_group facilitator_group \
+	           spike_baseline_multiple \
 	           mlflow_experiment_name uc_model_name training_table feature_table prediction_table; do \
 	    eval "val=\$$BUNDLE_VAR_$$v"; \
 	    test -n "$$val" || { echo "Missing BUNDLE_VAR_$$v in .env (required, no default)" >&2; exit 2; }; \

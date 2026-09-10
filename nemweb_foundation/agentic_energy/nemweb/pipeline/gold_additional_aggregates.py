@@ -1,7 +1,13 @@
 """Additional 30-minute and daily products derived after five-minute Gold contracts."""
 
 from pyspark import pipelines as dp
+from pyspark.sql import Window
 from pyspark.sql import functions as F
+
+from agentic_energy.nemweb.pipeline.config import (
+    SPIKE_BASELINE_INTERVALS,
+    spike_baseline_multiple,
+)
 
 
 def _effective_region_dispatch():
@@ -52,6 +58,88 @@ def gold_nem_dispatch_price_daily():
         F.max("interval_end").alias("source_interval_watermark"),
         F.max("source_publication_at").alias("source_publication_at"),
     ).withColumn("gold_published_at", F.current_timestamp())
+
+
+@dp.materialized_view(
+    name="gold_nem_dispatch_price_spike_5min",
+    comment=(
+        "Relative dispatch-price spike flag at interval-ending five-minute AEST grain, "
+        "derived only from effective five-minute dispatch runs. A spike is a price at or "
+        "above spike_baseline_multiple times the median of the preceding "
+        "288 intervals for the same region; the judged interval is excluded from its own "
+        "baseline. is_price_spike is NULL, never false, when the baseline is incomplete or "
+        "non-positive, because no comparison was made. price_formation_basis separates "
+        "administered and suspended intervals from market-formed prices; an administered "
+        "price is an intervention artefact, not a scarcity signal."
+    ),
+    table_properties={
+        "quality": "gold",
+        "grain": "five_minutes",
+        "derived.from": "gold_nem_region_dispatch_5min",
+    },
+    cluster_by=["region_id", "interval_end"],
+)
+def gold_nem_dispatch_price_spike_5min():
+    multiple = spike_baseline_multiple(spark)
+    # Strictly preceding rows: -1 excludes the interval being judged, so a spike
+    # can never inflate the baseline it is measured against.
+    baseline = (
+        Window.partitionBy("region_id")
+        .orderBy("interval_end")
+        .rowsBetween(-SPIKE_BASELINE_INTERVALS, -1)
+    )
+    source = _effective_region_dispatch().select(
+        "interval_end",
+        F.col("interval_end").alias("source_interval_watermark"),
+        "region_id",
+        "intervention",
+        "is_effective_run",
+        "rrp_aud_per_mwh",
+        F.when(F.col("market_suspended_flag") == 1, F.lit("SUSPENDED"))
+        .when(F.col("administered_price_cap_flag") == 1, F.lit("ADMINISTERED"))
+        .otherwise(F.lit("MARKET"))
+        .alias("price_formation_basis"),
+        "source_publication_at",
+    )
+    # UNVERIFIED AT RUNTIME: F.median() over a ROWS frame has never been executed
+    # here. The Databricks median reference allows OVER, but percentile functions
+    # are documented elsewhere as RANGE-only and this pipeline has no precedent
+    # (every other window use is row_number()). If the first authorised run raises
+    # on the frame, replace only this median with collect_list over the same frame
+    # plus percentile_approx on the array; the rule and its tests do not change.
+    # See miniwiki/features/price-spike-detector.md.
+    #
+    # count() over the same frame proves the window is full. Without it a partial
+    # window still yields a median, and an early interval would be judged against
+    # a handful of rows as though it had a full day of history.
+    measured = source.select(
+        "*",
+        F.median("rrp_aud_per_mwh").over(baseline).alias("_baseline_median"),
+        F.count("rrp_aud_per_mwh").over(baseline).alias("_baseline_rows"),
+    )
+    complete_baseline = F.col("_baseline_rows") >= F.lit(SPIKE_BASELINE_INTERVALS)
+    return measured.select(
+        "interval_end",
+        "source_interval_watermark",
+        "region_id",
+        "intervention",
+        "is_effective_run",
+        "rrp_aud_per_mwh",
+        "price_formation_basis",
+        F.when(complete_baseline, F.col("_baseline_median"))
+        .alias("trailing_median_price_aud_per_mwh"),
+        F.lit(SPIKE_BASELINE_INTERVALS).alias("spike_baseline_intervals"),
+        F.lit(multiple).alias("spike_baseline_multiple"),
+        # A non-positive baseline yields NULL, not false: a ratio against zero is
+        # undefined, and against a negative median it inverts, so the most extreme
+        # negative price in a window would otherwise report as a positive spike.
+        F.when(
+            complete_baseline & (F.col("_baseline_median") > 0),
+            F.col("rrp_aud_per_mwh") >= F.col("_baseline_median") * F.lit(multiple),
+        ).alias("is_price_spike"),
+        "source_publication_at",
+        F.current_timestamp().alias("gold_published_at"),
+    )
 
 
 @dp.materialized_view(

@@ -80,6 +80,24 @@ resources:
                 ]
               },
               {
+                "identifier": "${var.catalog}.${var.schema}.nem_dispatch_price_spike_metrics",
+                "description": [
+                  "Relative five-minute dispatch-price spike counts. A spike is a price at or above an operator-supplied multiple of the trailing 288-interval (24h) regional median, excluding the judged interval; the threshold is a deployment setting and not an AEMO market setting. Measure columns require MEASURE(). is_price_spike is NULL, never false, where the baseline was incomplete or non-positive: divide spike_interval_count by decided_interval_count, never by five_minute_interval_count, or undecided intervals read as an absence of spikes. Filter price_formation_basis to MARKET before describing a count as market price risk, because ADMINISTERED and SUSPENDED prices are intervention artefacts."
+                ],
+                "column_configs": [
+                  {
+                    "column_name": "price_formation_basis",
+                    "enable_format_assistance": true,
+                    "enable_entity_matching": true
+                  },
+                  {
+                    "column_name": "region_id",
+                    "enable_format_assistance": true,
+                    "enable_entity_matching": true
+                  }
+                ]
+              },
+              {
                 "identifier": "${var.catalog}.${var.schema}.nem_binding_constraint_metrics",
                 "description": [
                   "Effective-run binding constraints at five-minute interval-ending AEST grain. Binding is the governed MARGINALVALUE <> 0 derivation; measure columns require MEASURE()."

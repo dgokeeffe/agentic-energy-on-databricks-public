@@ -42,6 +42,27 @@ byte hashes, and dated disposition indexes were not retained.
 | Binding constraints | `DispatchIS_Reports`: `CONSTRAINT` | Five minute | `gold_nem_binding_constraints_5min` | interval end, constraint ID, intervention |
 | Interconnector flows | `DispatchIS_Reports`: `INTERCONNECTORRES` | Five minute | `gold_nem_interconnector_flows_5min` | interval end, interconnector ID, intervention |
 | Authoritative unit target/availability | `Next_Day_Dispatch`: `UNIT_SOLUTION` | Daily T+1 | `gold_nem_unit_dispatch_availability_t1` | interval end, DUID, intervention |
+| Relative dispatch-price spike | Derived from `gold_nem_region_dispatch_5min` effective runs | Five minute | `gold_nem_dispatch_price_spike_5min` | interval end, region (already effective-filtered) |
+
+A dispatch-price spike is a derived judgement, not a NEMWEB field, so its
+definition is part of this contract:
+
+- A price is a spike when `rrp_aud_per_mwh` is **at or above** (inclusive)
+  `spike_baseline_multiple` times the median of the **288 intervals immediately
+  preceding it** for the same region. 288 five-minute intervals is 24 hours.
+- The judged interval is **excluded from its own baseline**, so a spike can never
+  inflate the baseline it is measured against.
+- `spike_baseline_multiple` is supplied per deployment through
+  `nemweb.spike_baseline_multiple` and **has no default**. It is a market
+  judgement, **not an AEMO market setting**, and must never be cited as one.
+- `is_price_spike` is `NULL`, never `false`, when the baseline holds fewer than
+  288 intervals or its median is zero or negative — a ratio against zero is
+  undefined and against a negative median it inverts. **`NULL` is not `false`:**
+  consumers must not coalesce it, and must divide spike counts by
+  `decided_interval_count`, never by the total interval count.
+- `price_formation_basis` separates `ADMINISTERED` and `SUSPENDED` intervals from
+  `MARKET` ones. Administered and suspended prices are intervention artefacts;
+  counting them as market scarcity overstates genuine price risk.
 
 `DISPATCHIS` is fetched once per cycle and all interleaved sections in every CSV
 member are parsed. The old first-member `parse_dispatchis_zip()` implementation

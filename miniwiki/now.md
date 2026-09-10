@@ -48,6 +48,72 @@ initial pipeline, semantic, benchmark and dashboard SQL gates.
 - Keep market notices omitted until a bounded plain-text parser, fixture and
   correction contract are independently proven.
 
+## Session handoff — 2026-09-10: governed dispatch-price spike measure
+
+**The measure was already scoped and deliberately blocked; the block was the
+point.** [`features/price-spike-detector.md`](features/price-spike-detector.md)
+had said since before this session "do not begin implementation until the human
+reviewer records the agreed rule", with the decision pending. The blocker was
+never engineering — it was that nobody had agreed what a spike *is*. All seven of
+that page's open questions are now settled and recorded there.
+
+**The rule.** Relative, not absolute: a price is a spike at or above
+`spike_baseline_multiple` times the median of the 288 preceding intervals (24h)
+for the same region, excluding the judged interval. `is_price_spike` is `NULL`,
+never `false`, on incomplete or non-positive baselines.
+
+**The threshold is a required parameter with no default anywhere.** Web searches
+for the AEMO market price cap and the AER reporting threshold returned fabricated
+rule citations and mutually contradictory figures; they were discarded and **no
+number from them appears in the diff**. `nemweb.spike_baseline_multiple` must be
+supplied per deployment, and the pipeline refuses to start without it.
+
+**Two defects the design had to avoid, both found by reading rather than assuming.**
+`administered_price_cap_flag` and `market_suspended_flag` were already on
+`gold_nem_region_dispatch_5min` and used by **no** measure; a price pinned at an
+administered cap is an intervention artefact, so counting it as scarcity
+overstates price risk. Hence `price_formation_basis`. Separately, a spike rate
+divided by the total interval count would read an incomplete baseline as an
+absence of spikes, so the metric view publishes `decided_interval_count` as the
+only valid denominator and says so in the measure comment.
+
+**Where the logic lives, and why it is split.** A trailing median is a window
+function; a metric view `expr:` must be an aggregate, and
+`test_metric_reconciliation.py` pins measure expressions verbatim, so neither the
+window nor the threshold can live there. The window is a Gold materialized view
+(`gold_nem_dispatch_price_spike_5min`) and the metric view only aggregates it.
+The pure function and the deployed PySpark are tested separately, because
+[`decisions/facility-dimension-as-of.md`](decisions/facility-dimension-as-of.md)
+records a defect where those two diverged on exactly one substituted input.
+
+**Evidence.** Foundation 301 passed; root 356 passed with 37 subtests (the root
+run includes the foundation tests); miniwiki 19 pages, links 120 files, safety 432
+files, modern-API 33 sources, snapshot manifest SHA-256 `9d2e577a…` with
+`live_evidence: false`, `git diff --check` clean. `databricks bundle validate
+-t dev` resolves with the new variable and the setting reaches the pipeline
+configuration as `nemweb.spike_baseline_multiple`. **Both test layers were
+mutation-checked** — eight deliberate defects introduced one at a time, each
+caught by the test written for it.
+
+**One unverified mechanism, called out rather than smoothed over.** `F.median()`
+over a `ROWS BETWEEN` frame has **never been executed**. The Databricks `median`
+reference says it can be invoked with `OVER`, but percentile functions are
+documented elsewhere as accepting only `RANGE` frames, and this repository has no
+precedent — every existing window use is `row_number()`. PySpark could not be
+installed in the authoring environment, so the plan was not analysed. The first
+authorised dev run must confirm the view analyses; the documented fallback is
+`collect_list` plus `percentile_approx`, which changes only the median mechanism
+and leaves the rule, tests and governed surfaces intact.
+
+**Not done, and not claimable.** Nothing is committed, deployed, or run in a
+workspace. `make bundle-validate` stops at its `.env` gate, so the
+workspace-aware half is unverified here. **The snapshot fixture is ~2h and the
+baseline needs 24h, so `is_price_spike` is `NULL` for every fixture row** — the
+rule is proven by unit tests and not demonstrated end-to-end on data. Do not
+shorten the window to make a demo light up. A new Genie *sample question* was not
+added, because sample ids are `uuid5` values whose slug scheme is not in the
+repository and could not be recovered; the table and benchmark are registered.
+
 ## Session handoff — 2026-09-09: repository split resolved
 
 **Two repositories existed with no shared Git history, and the workshop exercises

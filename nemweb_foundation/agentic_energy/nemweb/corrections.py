@@ -8,6 +8,7 @@ fast local tests. Bronze is never changed by these functions.
 from __future__ import annotations
 
 from datetime import datetime
+from statistics import median
 from typing import Any, Iterable, Mapping, Sequence
 
 from agentic_energy.nemweb.contracts import ContractError, parse_market_time
@@ -28,6 +29,18 @@ def _integer(row: Mapping[str, Any], name: str, default: int = 0) -> int:
         return int(value)
     except (TypeError, ValueError) as exc:
         raise ContractError(f"ordering field {name!r} is not an integer") from exc
+
+
+def _price(row: Mapping[str, Any], name: str) -> float:
+    """Read a required price. A missing price is never treated as zero."""
+
+    value = row.get(name)
+    if value is None or str(value).strip() == "":
+        raise ContractError(f"price field {name!r} is empty")
+    try:
+        return float(value)
+    except (TypeError, ValueError) as exc:
+        raise ContractError(f"price field {name!r} is not a number") from exc
 
 
 def _instant(value: Any, name: str) -> datetime:
@@ -108,6 +121,92 @@ def mark_effective_intervention(
         key = tuple(str(row[field]).strip() for field in key_fields_without_intervention)
         row["is_effective_run"] = _integer(row, "intervention") == highest[key]
     return materialised
+
+
+def price_formation_basis(row: Mapping[str, Any]) -> str:
+    """Classify how a dispatch price was formed.
+
+    A price pinned at an administered cap, or set while the market is suspended,
+    is an intervention artefact rather than a market scarcity signal. Callers
+    must be able to separate the two; adding them together overstates genuine
+    price risk. Suspension is reported ahead of the administered cap because a
+    suspended market can carry both flags.
+    """
+
+    if _integer(row, "market_suspended_flag") == 1:
+        return "SUSPENDED"
+    if _integer(row, "administered_price_cap_flag") == 1:
+        return "ADMINISTERED"
+    return "MARKET"
+
+
+def _spike_verdict(
+    price: float, baseline: list[float], baseline_intervals: int, baseline_multiple: float
+) -> tuple[float | None, bool | None]:
+    """Resolve the trailing median and spike flag, or withhold both.
+
+    The flag is ``None`` rather than ``False`` whenever the comparison cannot be
+    made, so "not yet known" is never read as "checked, no spike".
+    """
+
+    if len(baseline) < baseline_intervals:
+        return None, None
+    median_price = median(baseline)
+    # NEM prices go negative. A ratio against a zero or negative baseline is
+    # meaningless: -500 > 2 * -100 is arithmetically true and market nonsense.
+    if median_price <= 0:
+        return median_price, None
+    return median_price, price >= median_price * baseline_multiple
+
+
+def mark_price_spikes(
+    rows: Iterable[Mapping[str, Any]],
+    *,
+    baseline_intervals: int,
+    baseline_multiple: float,
+) -> list[dict[str, Any]]:
+    """Flag five-minute dispatch prices above a trailing regional baseline.
+
+    The baseline is the median of the ``baseline_intervals`` rows immediately
+    preceding each interval for the same region, and strictly excludes the
+    interval being judged so a spike can never inflate the baseline it is
+    measured against. The comparison is inclusive (``>=``): a price exactly on
+    the multiple is a spike.
+
+    Only effective runs are considered, matching every other default regional
+    aggregation. Rows are returned in region and interval order; inputs are not
+    modified.
+    """
+
+    if baseline_intervals < 1:
+        raise ContractError("baseline_intervals must be at least 1")
+    if baseline_multiple <= 0:
+        raise ContractError("baseline_multiple must be greater than zero")
+
+    effective = [dict(row) for row in rows if row.get("is_effective_run")]
+    effective.sort(
+        key=lambda row: (
+            _required_text(row, "region_id"),
+            _instant(row.get("interval_end"), "interval_end"),
+        )
+    )
+
+    history: dict[str, list[float]] = {}
+    for row in effective:
+        region = _required_text(row, "region_id")
+        price = _price(row, "rrp_aud_per_mwh")
+        baseline = history.setdefault(region, [])
+        median_price, is_spike = _spike_verdict(
+            price, baseline, baseline_intervals, baseline_multiple
+        )
+        row["trailing_median_price_aud_per_mwh"] = median_price
+        row["is_price_spike"] = is_spike
+        row["spike_baseline_intervals"] = baseline_intervals
+        row["spike_baseline_multiple"] = baseline_multiple
+        row["price_formation_basis"] = price_formation_basis(row)
+        baseline.append(price)
+        del baseline[:-baseline_intervals]
+    return effective
 
 
 def canonical_fuel_type(raw: Any) -> str:

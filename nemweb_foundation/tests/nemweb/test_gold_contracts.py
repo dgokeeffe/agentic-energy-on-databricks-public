@@ -17,6 +17,7 @@ GOLD_DATASETS = {
         "gold_nem_dispatch_price_30min",
         "gold_nem_dispatch_price_daily",
         "gold_nem_interconnector_flow_30min",
+        "gold_nem_dispatch_price_spike_5min",
     },
 }
 
@@ -111,3 +112,60 @@ def test_additional_aggregates_default_to_effective_five_minute_gold() -> None:
     assert source.count('F.expr("INTERVAL 1 MICROSECOND")') == 3
     assert "30 minutes" in source
     assert "five-minute Gold table remains the primary product" in source
+
+
+def test_the_deployed_spike_window_excludes_the_interval_it_judges() -> None:
+    """The deployed PySpark must match the tested pure function, not merely resemble it.
+
+    ``miniwiki/decisions/facility-dimension-as-of.md`` records a defect where a
+    well-tested pure function was reimplemented in PySpark with one input
+    substituted, so the tests confirmed the assumption rather than the deployed
+    behaviour. The frame end is that input here: ``rowsBetween(-288, 0)`` would let
+    each price enter the median it is judged against and mask real spikes, while
+    every pure-function test kept passing.
+    """
+
+    source = (PIPELINE / "gold_additional_aggregates.py").read_text()
+    assert "rowsBetween(-SPIKE_BASELINE_INTERVALS, -1)" in source
+    assert "rowsBetween(-SPIKE_BASELINE_INTERVALS, 0)" not in source
+    # The window length is the shared constant, never a literal re-typed here.
+    assert "rowsBetween(-288" not in source
+    assert "from agentic_energy.nemweb.pipeline.config import (" in source
+
+
+def test_the_deployed_spike_threshold_is_never_a_literal() -> None:
+    """A hard-coded multiple would defeat the no-default decision silently."""
+
+    source = (PIPELINE / "gold_additional_aggregates.py").read_text()
+    assert "multiple = spike_baseline_multiple(spark)" in source
+    assert "F.lit(multiple)" in source
+
+
+def test_the_spike_flag_is_withheld_rather_than_false_when_undecidable() -> None:
+    """NULL and false are different claims; the deployed CASE must keep them apart.
+
+    ``F.when(...)`` with no ``.otherwise(...)`` yields NULL, which is the intent.
+    An ``.otherwise(F.lit(False))`` would assert that a comparison was made and
+    failed, on intervals where none was possible.
+    """
+
+    source = (PIPELINE / "gold_additional_aggregates.py").read_text()
+    spike = source[source.index("def gold_nem_dispatch_price_spike_5min") :]
+    spike = spike[: spike.index("@dp.materialized_view")]
+    assert "otherwise(F.lit(False))" not in spike
+    assert "_baseline_rows" in spike, "window completeness must be measured"
+    assert 'F.col("_baseline_median") > 0' in spike, "non-positive baseline withheld"
+
+
+def test_the_spike_view_separates_administered_prices_from_market_prices() -> None:
+    """An administered or suspended price is an intervention artefact.
+
+    Counting it as market scarcity overstates genuine price risk, so the basis is
+    carried as a dimension rather than being dropped or silently merged.
+    """
+
+    source = (PIPELINE / "gold_additional_aggregates.py").read_text()
+    assert 'F.lit("ADMINISTERED")' in source
+    assert 'F.lit("SUSPENDED")' in source
+    assert 'F.lit("MARKET")' in source
+    assert "price_formation_basis" in source

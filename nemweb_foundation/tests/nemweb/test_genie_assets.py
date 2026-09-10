@@ -62,6 +62,7 @@ def test_genie_exposes_only_a_small_governed_asset_set() -> None:
     assert set(value.rsplit(".", 1)[-1] for value in identifiers) == {
         "gold_nem_region_dispatch_5min",
         "nem_region_dispatch_metrics",
+        "nem_dispatch_price_spike_metrics",
         "nem_scada_generation_metrics",
         "nem_binding_constraint_metrics",
         "nem_interconnector_flow_metrics",

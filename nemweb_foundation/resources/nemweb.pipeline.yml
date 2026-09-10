@@ -101,6 +101,10 @@ resources:
         nemweb.landing_schema: ${var.schema}
         nemweb.market_timezone: Australia/Brisbane
         nemweb.critical_lookback_hours: ${var.critical_lookback_hours}
+        # No default anywhere in the bundle. gold_nem_dispatch_price_spike_5min
+        # raises if this is unset, so the measure cannot publish against an
+        # unstated threshold.
+        nemweb.spike_baseline_multiple: ${var.spike_baseline_multiple}
         nemweb.context_lookback_days: ${var.context_lookback_days}
       permissions:
         - level: CAN_RUN

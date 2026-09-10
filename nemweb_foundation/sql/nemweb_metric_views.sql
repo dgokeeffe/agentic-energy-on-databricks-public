@@ -47,6 +47,48 @@ measures:
     comment: "Effective regional five-minute observations."
 $$;
 
+-- Spike detection needs a trailing window, which a metric view measure cannot
+-- express: expr must be an aggregate. The window therefore lives in
+-- gold_nem_dispatch_price_spike_5min and this view only aggregates its result.
+CREATE OR REPLACE VIEW nem_dispatch_price_spike_metrics
+WITH METRICS
+LANGUAGE YAML
+AS $$
+version: 1.1
+source: gold_nem_dispatch_price_spike_5min
+filter: is_effective_run = true
+comment: "Relative dispatch-price spike counts at interval-ending five-minute AEST (UTC+10, no DST) grain. A spike is a price at or above an operator-supplied multiple of the trailing 288-interval regional median, excluding the judged interval. Prices are dispatch AUD/MWh, not settlement. The threshold is a market judgement supplied per deployment, not an AEMO market setting. Intervals where no comparison could be made are counted separately and are never counted as absent spikes; always read spike_interval_count against decided_interval_count."
+dimensions:
+  - name: interval_end
+    expr: interval_end
+    comment: "End of the five-minute NEM dispatch interval in fixed AEST, never interval start."
+  - name: region_id
+    expr: region_id
+    comment: "AEMO NEM region. Each region carries its own trailing baseline."
+  - name: price_formation_basis
+    expr: price_formation_basis
+    comment: "ADMINISTERED, SUSPENDED or MARKET. Administered and suspended prices are intervention artefacts; exclude them before reading a spike count as market price risk."
+  - name: source_publication_at
+    expr: source_publication_at
+    comment: "AEMO publication time; compare separately with Gold publication time for freshness."
+  - name: gold_published_at
+    expr: gold_published_at
+    comment: "Lakeflow Gold publication time."
+measures:
+  - name: spike_interval_count
+    expr: COUNT_IF(is_price_spike)
+    comment: "Intervals flagged as a spike. Excludes undecidable intervals, which are NULL rather than false."
+  - name: decided_interval_count
+    expr: COUNT(is_price_spike)
+    comment: "Intervals where the comparison could be made. Divide spike_interval_count by this, never by five_minute_interval_count, or an incomplete baseline reads as an absence of spikes."
+  - name: five_minute_interval_count
+    expr: COUNT(1)
+    comment: "Effective regional five-minute observations, decided or not."
+  - name: maximum_dispatch_price_aud_per_mwh
+    expr: MAX(rrp_aud_per_mwh)
+    comment: "Maximum regional dispatch price in AUD/MWh; never settlement price."
+$$;
+
 CREATE OR REPLACE VIEW nem_unit_output_metrics
 WITH METRICS
 LANGUAGE YAML

@@ -123,6 +123,7 @@ def test_metric_yaml_uses_supported_v11_shape_and_curated_sources() -> None:
     metrics = metric_definitions()
     expected = {
         "nem_region_dispatch_metrics": "gold_nem_region_dispatch_5min",
+        "nem_dispatch_price_spike_metrics": "gold_nem_dispatch_price_spike_5min",
         "nem_unit_output_metrics": "gold_nem_unit_dispatch_5min",
         "nem_scada_generation_metrics": "gold_nem_scada_generation_5min",
         "nem_binding_constraint_metrics": "gold_nem_binding_constraints_5min",
