@@ -30,6 +30,7 @@ import {
   formatPrice,
   mostExposedRegion,
   regionCapture,
+  registrationAttribution,
   weakestCapture,
   type RegionPriceRow,
 } from '../domain/fuelCapture';
@@ -362,6 +363,7 @@ function ReadyRegionalOperations({ state }: { state: ReadyState }) {
 
         <FuelValueCapture
           capture={capture}
+          attribution={state.fuelRows ? registrationAttribution(state.fuelRows) : undefined}
           regions={regions}
           selectedRegion={selectedRegion}
           onRegionChange={setRequestedRegion}

@@ -5,7 +5,10 @@
     "fuelType": "Battery",
     "actualGenerationMw": 140,
     "facilityCount": 6,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:25:00+10:00",
@@ -13,7 +16,10 @@
     "fuelType": "Black coal",
     "actualGenerationMw": 5810,
     "facilityCount": 12,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:25:00+10:00",
@@ -21,7 +27,10 @@
     "fuelType": "Hydro",
     "actualGenerationMw": 228,
     "facilityCount": 5,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:25:00+10:00",
@@ -29,7 +38,10 @@
     "fuelType": "Natural Gas",
     "actualGenerationMw": 88,
     "facilityCount": 7,
-    "partiallyEnrichedFacilityCount": 1
+    "partiallyEnrichedFacilityCount": 1,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:25:00+10:00",
@@ -37,7 +49,10 @@
     "fuelType": "Solar",
     "actualGenerationMw": 1290,
     "facilityCount": 21,
-    "partiallyEnrichedFacilityCount": 3
+    "partiallyEnrichedFacilityCount": 3,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:25:00+10:00",
@@ -45,7 +60,10 @@
     "fuelType": "UNKNOWN",
     "actualGenerationMw": 21,
     "facilityCount": 2,
-    "partiallyEnrichedFacilityCount": 2
+    "partiallyEnrichedFacilityCount": 2,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:25:00+10:00",
@@ -53,7 +71,10 @@
     "fuelType": "Wind",
     "actualGenerationMw": 366,
     "facilityCount": 11,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:25:00+10:00",
@@ -61,7 +82,10 @@
     "fuelType": "Battery",
     "actualGenerationMw": 95,
     "facilityCount": 4,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:25:00+10:00",
@@ -69,7 +93,10 @@
     "fuelType": "Natural Gas",
     "actualGenerationMw": 140,
     "facilityCount": 6,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:25:00+10:00",
@@ -77,7 +104,10 @@
     "fuelType": "Solar",
     "actualGenerationMw": 505,
     "facilityCount": 9,
-    "partiallyEnrichedFacilityCount": 1
+    "partiallyEnrichedFacilityCount": 1,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:25:00+10:00",
@@ -85,7 +115,10 @@
     "fuelType": "Wind",
     "actualGenerationMw": 505,
     "facilityCount": 14,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:25:00+10:00",
@@ -93,7 +126,10 @@
     "fuelType": "Battery",
     "actualGenerationMw": 82,
     "facilityCount": 5,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:25:00+10:00",
@@ -101,7 +137,10 @@
     "fuelType": "Brown coal",
     "actualGenerationMw": 3902,
     "facilityCount": 8,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:25:00+10:00",
@@ -109,7 +148,10 @@
     "fuelType": "Hydro",
     "actualGenerationMw": 172,
     "facilityCount": 4,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:25:00+10:00",
@@ -117,7 +159,10 @@
     "fuelType": "Solar",
     "actualGenerationMw": 705,
     "facilityCount": 12,
-    "partiallyEnrichedFacilityCount": 1
+    "partiallyEnrichedFacilityCount": 1,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:25:00+10:00",
@@ -125,7 +170,10 @@
     "fuelType": "Wind",
     "actualGenerationMw": 790,
     "facilityCount": 16,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:20:00+10:00",
@@ -133,7 +181,10 @@
     "fuelType": "Battery",
     "actualGenerationMw": -205,
     "facilityCount": 6,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:20:00+10:00",
@@ -141,7 +192,10 @@
     "fuelType": "Black coal",
     "actualGenerationMw": 5762,
     "facilityCount": 12,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:20:00+10:00",
@@ -149,7 +203,10 @@
     "fuelType": "Hydro",
     "actualGenerationMw": 141,
     "facilityCount": 5,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:20:00+10:00",
@@ -157,7 +214,10 @@
     "fuelType": "Natural Gas",
     "actualGenerationMw": 44,
     "facilityCount": 7,
-    "partiallyEnrichedFacilityCount": 1
+    "partiallyEnrichedFacilityCount": 1,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:20:00+10:00",
@@ -165,7 +225,10 @@
     "fuelType": "Solar",
     "actualGenerationMw": 1385,
     "facilityCount": 21,
-    "partiallyEnrichedFacilityCount": 3
+    "partiallyEnrichedFacilityCount": 3,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:20:00+10:00",
@@ -173,7 +236,10 @@
     "fuelType": "UNKNOWN",
     "actualGenerationMw": 20,
     "facilityCount": 2,
-    "partiallyEnrichedFacilityCount": 2
+    "partiallyEnrichedFacilityCount": 2,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:20:00+10:00",
@@ -181,7 +247,10 @@
     "fuelType": "Wind",
     "actualGenerationMw": 358,
     "facilityCount": 11,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:20:00+10:00",
@@ -189,7 +258,10 @@
     "fuelType": "Battery",
     "actualGenerationMw": -240,
     "facilityCount": 4,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:20:00+10:00",
@@ -197,7 +269,10 @@
     "fuelType": "Natural Gas",
     "actualGenerationMw": 118,
     "facilityCount": 6,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:20:00+10:00",
@@ -205,7 +280,10 @@
     "fuelType": "Solar",
     "actualGenerationMw": 560,
     "facilityCount": 9,
-    "partiallyEnrichedFacilityCount": 1
+    "partiallyEnrichedFacilityCount": 1,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:20:00+10:00",
@@ -213,7 +291,10 @@
     "fuelType": "Wind",
     "actualGenerationMw": 470,
     "facilityCount": 14,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:20:00+10:00",
@@ -221,7 +302,10 @@
     "fuelType": "Battery",
     "actualGenerationMw": -225,
     "facilityCount": 5,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:20:00+10:00",
@@ -229,7 +313,10 @@
     "fuelType": "Brown coal",
     "actualGenerationMw": 3875,
     "facilityCount": 8,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:20:00+10:00",
@@ -237,7 +324,10 @@
     "fuelType": "Hydro",
     "actualGenerationMw": 68,
     "facilityCount": 4,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:20:00+10:00",
@@ -245,7 +335,10 @@
     "fuelType": "Solar",
     "actualGenerationMw": 780,
     "facilityCount": 12,
-    "partiallyEnrichedFacilityCount": 1
+    "partiallyEnrichedFacilityCount": 1,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:20:00+10:00",
@@ -253,7 +346,10 @@
     "fuelType": "Wind",
     "actualGenerationMw": 742,
     "facilityCount": 16,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:15:00+10:00",
@@ -261,7 +357,10 @@
     "fuelType": "Battery",
     "actualGenerationMw": -185,
     "facilityCount": 6,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:15:00+10:00",
@@ -269,7 +368,10 @@
     "fuelType": "Black coal",
     "actualGenerationMw": 5795,
     "facilityCount": 12,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:15:00+10:00",
@@ -277,7 +379,10 @@
     "fuelType": "Hydro",
     "actualGenerationMw": 162,
     "facilityCount": 5,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:15:00+10:00",
@@ -285,7 +390,10 @@
     "fuelType": "Natural Gas",
     "actualGenerationMw": 62,
     "facilityCount": 7,
-    "partiallyEnrichedFacilityCount": 1
+    "partiallyEnrichedFacilityCount": 1,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:15:00+10:00",
@@ -293,7 +401,10 @@
     "fuelType": "Solar",
     "actualGenerationMw": 1320,
     "facilityCount": 21,
-    "partiallyEnrichedFacilityCount": 3
+    "partiallyEnrichedFacilityCount": 3,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:15:00+10:00",
@@ -301,7 +412,10 @@
     "fuelType": "UNKNOWN",
     "actualGenerationMw": 21,
     "facilityCount": 2,
-    "partiallyEnrichedFacilityCount": 2
+    "partiallyEnrichedFacilityCount": 2,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:15:00+10:00",
@@ -309,7 +423,10 @@
     "fuelType": "Wind",
     "actualGenerationMw": 371,
     "facilityCount": 11,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:15:00+10:00",
@@ -317,7 +434,10 @@
     "fuelType": "Battery",
     "actualGenerationMw": -210,
     "facilityCount": 4,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:15:00+10:00",
@@ -325,7 +445,10 @@
     "fuelType": "Natural Gas",
     "actualGenerationMw": 152,
     "facilityCount": 6,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:15:00+10:00",
@@ -333,7 +456,10 @@
     "fuelType": "Solar",
     "actualGenerationMw": 540,
     "facilityCount": 9,
-    "partiallyEnrichedFacilityCount": 1
+    "partiallyEnrichedFacilityCount": 1,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:15:00+10:00",
@@ -341,7 +467,10 @@
     "fuelType": "Wind",
     "actualGenerationMw": 498,
     "facilityCount": 14,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:15:00+10:00",
@@ -349,7 +478,10 @@
     "fuelType": "Battery",
     "actualGenerationMw": -195,
     "facilityCount": 5,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:15:00+10:00",
@@ -357,7 +489,10 @@
     "fuelType": "Brown coal",
     "actualGenerationMw": 3898,
     "facilityCount": 8,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:15:00+10:00",
@@ -365,7 +500,10 @@
     "fuelType": "Hydro",
     "actualGenerationMw": 92,
     "facilityCount": 4,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:15:00+10:00",
@@ -373,7 +511,10 @@
     "fuelType": "Solar",
     "actualGenerationMw": 742,
     "facilityCount": 12,
-    "partiallyEnrichedFacilityCount": 1
+    "partiallyEnrichedFacilityCount": 1,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:15:00+10:00",
@@ -381,7 +522,10 @@
     "fuelType": "Wind",
     "actualGenerationMw": 768,
     "facilityCount": 16,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:10:00+10:00",
@@ -389,7 +533,10 @@
     "fuelType": "Battery",
     "actualGenerationMw": -120,
     "facilityCount": 6,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:10:00+10:00",
@@ -397,7 +544,10 @@
     "fuelType": "Black coal",
     "actualGenerationMw": 5840,
     "facilityCount": 12,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:10:00+10:00",
@@ -405,7 +555,10 @@
     "fuelType": "Hydro",
     "actualGenerationMw": 205,
     "facilityCount": 5,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:10:00+10:00",
@@ -413,7 +566,10 @@
     "fuelType": "Natural Gas",
     "actualGenerationMw": 96,
     "facilityCount": 7,
-    "partiallyEnrichedFacilityCount": 1
+    "partiallyEnrichedFacilityCount": 1,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:10:00+10:00",
@@ -421,7 +577,10 @@
     "fuelType": "Solar",
     "actualGenerationMw": 1180,
     "facilityCount": 21,
-    "partiallyEnrichedFacilityCount": 3
+    "partiallyEnrichedFacilityCount": 3,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:10:00+10:00",
@@ -429,7 +588,10 @@
     "fuelType": "UNKNOWN",
     "actualGenerationMw": 21,
     "facilityCount": 2,
-    "partiallyEnrichedFacilityCount": 2
+    "partiallyEnrichedFacilityCount": 2,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:10:00+10:00",
@@ -437,7 +599,10 @@
     "fuelType": "Wind",
     "actualGenerationMw": 388,
     "facilityCount": 11,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:10:00+10:00",
@@ -445,7 +610,10 @@
     "fuelType": "Battery",
     "actualGenerationMw": -160,
     "facilityCount": 4,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:10:00+10:00",
@@ -453,7 +621,10 @@
     "fuelType": "Natural Gas",
     "actualGenerationMw": 198,
     "facilityCount": 6,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:10:00+10:00",
@@ -461,7 +632,10 @@
     "fuelType": "Solar",
     "actualGenerationMw": 470,
     "facilityCount": 9,
-    "partiallyEnrichedFacilityCount": 1
+    "partiallyEnrichedFacilityCount": 1,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:10:00+10:00",
@@ -469,7 +643,10 @@
     "fuelType": "Wind",
     "actualGenerationMw": 552,
     "facilityCount": 14,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:10:00+10:00",
@@ -477,7 +654,10 @@
     "fuelType": "Battery",
     "actualGenerationMw": -140,
     "facilityCount": 5,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:10:00+10:00",
@@ -485,7 +665,10 @@
     "fuelType": "Brown coal",
     "actualGenerationMw": 3920,
     "facilityCount": 8,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:10:00+10:00",
@@ -493,7 +676,10 @@
     "fuelType": "Hydro",
     "actualGenerationMw": 148,
     "facilityCount": 4,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:10:00+10:00",
@@ -501,7 +687,10 @@
     "fuelType": "Solar",
     "actualGenerationMw": 640,
     "facilityCount": 12,
-    "partiallyEnrichedFacilityCount": 1
+    "partiallyEnrichedFacilityCount": 1,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:10:00+10:00",
@@ -509,7 +698,10 @@
     "fuelType": "Wind",
     "actualGenerationMw": 812,
     "facilityCount": 16,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:05:00+10:00",
@@ -517,7 +709,10 @@
     "fuelType": "Battery",
     "actualGenerationMw": -40,
     "facilityCount": 6,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:05:00+10:00",
@@ -525,7 +720,10 @@
     "fuelType": "Black coal",
     "actualGenerationMw": 5905,
     "facilityCount": 12,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:05:00+10:00",
@@ -533,7 +731,10 @@
     "fuelType": "Hydro",
     "actualGenerationMw": 268,
     "facilityCount": 5,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:05:00+10:00",
@@ -541,7 +742,10 @@
     "fuelType": "Natural Gas",
     "actualGenerationMw": 152,
     "facilityCount": 7,
-    "partiallyEnrichedFacilityCount": 1
+    "partiallyEnrichedFacilityCount": 1,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:05:00+10:00",
@@ -549,7 +753,10 @@
     "fuelType": "Solar",
     "actualGenerationMw": 890,
     "facilityCount": 21,
-    "partiallyEnrichedFacilityCount": 3
+    "partiallyEnrichedFacilityCount": 3,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:05:00+10:00",
@@ -557,7 +764,10 @@
     "fuelType": "UNKNOWN",
     "actualGenerationMw": 22,
     "facilityCount": 2,
-    "partiallyEnrichedFacilityCount": 2
+    "partiallyEnrichedFacilityCount": 2,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:05:00+10:00",
@@ -565,7 +775,10 @@
     "fuelType": "Wind",
     "actualGenerationMw": 402,
     "facilityCount": 11,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:05:00+10:00",
@@ -573,7 +786,10 @@
     "fuelType": "Battery",
     "actualGenerationMw": -85,
     "facilityCount": 4,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:05:00+10:00",
@@ -581,7 +797,10 @@
     "fuelType": "Natural Gas",
     "actualGenerationMw": 262,
     "facilityCount": 6,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:05:00+10:00",
@@ -589,7 +808,10 @@
     "fuelType": "Solar",
     "actualGenerationMw": 320,
     "facilityCount": 9,
-    "partiallyEnrichedFacilityCount": 1
+    "partiallyEnrichedFacilityCount": 1,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:05:00+10:00",
@@ -597,7 +819,10 @@
     "fuelType": "Wind",
     "actualGenerationMw": 585,
     "facilityCount": 14,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:05:00+10:00",
@@ -605,7 +830,10 @@
     "fuelType": "Battery",
     "actualGenerationMw": -55,
     "facilityCount": 5,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:05:00+10:00",
@@ -613,7 +841,10 @@
     "fuelType": "Brown coal",
     "actualGenerationMw": 3952,
     "facilityCount": 8,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:05:00+10:00",
@@ -621,7 +852,10 @@
     "fuelType": "Hydro",
     "actualGenerationMw": 218,
     "facilityCount": 4,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:05:00+10:00",
@@ -629,7 +863,10 @@
     "fuelType": "Solar",
     "actualGenerationMw": 445,
     "facilityCount": 12,
-    "partiallyEnrichedFacilityCount": 1
+    "partiallyEnrichedFacilityCount": 1,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:05:00+10:00",
@@ -637,7 +874,10 @@
     "fuelType": "Wind",
     "actualGenerationMw": 845,
     "facilityCount": 16,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:00:00+10:00",
@@ -645,7 +885,10 @@
     "fuelType": "Battery",
     "actualGenerationMw": 65,
     "facilityCount": 6,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:00:00+10:00",
@@ -653,7 +896,10 @@
     "fuelType": "Black coal",
     "actualGenerationMw": 5980,
     "facilityCount": 12,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:00:00+10:00",
@@ -661,7 +907,10 @@
     "fuelType": "Hydro",
     "actualGenerationMw": 310,
     "facilityCount": 5,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:00:00+10:00",
@@ -669,7 +918,10 @@
     "fuelType": "Natural Gas",
     "actualGenerationMw": 188,
     "facilityCount": 7,
-    "partiallyEnrichedFacilityCount": 1
+    "partiallyEnrichedFacilityCount": 1,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:00:00+10:00",
@@ -677,7 +929,10 @@
     "fuelType": "Solar",
     "actualGenerationMw": 640,
     "facilityCount": 21,
-    "partiallyEnrichedFacilityCount": 3
+    "partiallyEnrichedFacilityCount": 3,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:00:00+10:00",
@@ -685,7 +940,10 @@
     "fuelType": "UNKNOWN",
     "actualGenerationMw": 22,
     "facilityCount": 2,
-    "partiallyEnrichedFacilityCount": 2
+    "partiallyEnrichedFacilityCount": 2,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:00:00+10:00",
@@ -693,7 +951,10 @@
     "fuelType": "Wind",
     "actualGenerationMw": 420,
     "facilityCount": 11,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:00:00+10:00",
@@ -701,7 +962,10 @@
     "fuelType": "Battery",
     "actualGenerationMw": 40,
     "facilityCount": 4,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:00:00+10:00",
@@ -709,7 +973,10 @@
     "fuelType": "Natural Gas",
     "actualGenerationMw": 305,
     "facilityCount": 6,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:00:00+10:00",
@@ -717,7 +984,10 @@
     "fuelType": "Solar",
     "actualGenerationMw": 180,
     "facilityCount": 9,
-    "partiallyEnrichedFacilityCount": 1
+    "partiallyEnrichedFacilityCount": 1,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:00:00+10:00",
@@ -725,7 +995,10 @@
     "fuelType": "Wind",
     "actualGenerationMw": 610,
     "facilityCount": 14,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:00:00+10:00",
@@ -733,7 +1006,10 @@
     "fuelType": "Battery",
     "actualGenerationMw": 30,
     "facilityCount": 5,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:00:00+10:00",
@@ -741,7 +1017,10 @@
     "fuelType": "Brown coal",
     "actualGenerationMw": 3985,
     "facilityCount": 8,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:00:00+10:00",
@@ -749,7 +1028,10 @@
     "fuelType": "Hydro",
     "actualGenerationMw": 265,
     "facilityCount": 4,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:00:00+10:00",
@@ -757,7 +1039,10 @@
     "fuelType": "Solar",
     "actualGenerationMw": 295,
     "facilityCount": 12,
-    "partiallyEnrichedFacilityCount": 1
+    "partiallyEnrichedFacilityCount": 1,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   },
   {
     "intervalEnd": "2026-07-01T12:00:00+10:00",
@@ -765,6 +1050,9 @@
     "fuelType": "Wind",
     "actualGenerationMw": 880,
     "facilityCount": 16,
-    "partiallyEnrichedFacilityCount": 0
+    "partiallyEnrichedFacilityCount": 0,
+    "registrationCoverageSeconds": 93600,
+    "registrationCoverageBasis": "LISTING_OR_HTTP",
+    "registrationPublicationAt": "2026-06-30T02:00:00+00:00"
   }
 ]
