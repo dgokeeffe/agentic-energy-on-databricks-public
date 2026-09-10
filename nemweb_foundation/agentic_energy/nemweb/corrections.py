@@ -11,6 +11,7 @@ from datetime import datetime
 from typing import Any, Iterable, Mapping, Sequence
 
 from agentic_energy.nemweb.contracts import ContractError, parse_market_time
+from agentic_energy.nemweb.source_registry import get_subject_by_key
 
 
 def _required_text(row: Mapping[str, Any], name: str) -> str:
@@ -87,6 +88,189 @@ def latest_by_natural_key(
         if existing is None or order > existing[0]:
             latest[key] = (order, row)
     return [latest[key][1] for key in sorted(latest)]
+
+
+def _source_version_identity(row: Mapping[str, Any]) -> tuple[Any, ...]:
+    """Identify the exact landed archive a row came from.
+
+    The lander already keys immutable provenance on the archive checksum, so an
+    identical archive re-listed and landed again carries the same
+    ``source_archive_sha256`` and the same row number within that archive. That
+    pair is therefore a duplicate of one source version, not a new one, and must
+    not be reported as a correction. A genuine AEMO correction is republished as
+    a distinct archive with a distinct checksum.
+    """
+
+    return (
+        str(row.get("source_archive_sha256") or ""),
+        str(row.get("source_csv_member") or ""),
+        _integer(row, "source_row_number")
+        if row.get("source_row_number") not in (None, "")
+        else _integer(row, "ingestion_sequence"),
+    )
+
+
+def _comparable(value: Any) -> Any:
+    """Compare governed measures by value, not by incidental source typing.
+
+    A flag read as ``1``, ``"1"`` or ``True`` is the same published value, so a
+    re-typed but unchanged measure must not be reported as a price correction.
+    A missing measure stays distinct from any present one.
+    """
+
+    if value is None:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return str(value).strip()
+
+
+def _version_view(
+    row: Mapping[str, Any], value_fields: Sequence[str], sequence: int
+) -> dict[str, Any]:
+    """Describe one retained source version without dropping its lineage."""
+
+    return {
+        "correction_sequence": sequence,
+        "values": {field: row.get(field) for field in value_fields},
+        "report_version": row.get("report_version"),
+        "source_run_no": row.get("source_run_no", row.get("run_no")),
+        "source_archive": row.get("source_archive"),
+        "source_archive_sha256": row.get("source_archive_sha256"),
+        "source_url_path": row.get("source_url_path"),
+        "source_csv_member": row.get("source_csv_member"),
+        "source_publication_at": row.get("source_publication_at"),
+        "source_publication_basis": row.get("source_publication_basis"),
+        "landed_at": row.get("landed_at"),
+        "ingested_at": row.get("ingested_at"),
+        "ingestion_run_id": row.get("ingestion_run_id"),
+        "ingestion_sequence": row.get("ingestion_sequence"),
+        # The complete Bronze row is retained so no source-version metadata is
+        # lost by the observability projection itself.
+        "source_row": dict(row),
+    }
+
+
+def correction_history(
+    rows: Iterable[Mapping[str, Any]],
+    key_fields: Sequence[str],
+    *,
+    value_fields: Sequence[str],
+    source_revision: str | None = None,
+) -> list[dict[str, Any]]:
+    """Explain, per natural key, how a published interval reached its value.
+
+    This is observability over the *existing* latest-correction contract: the
+    governed current value is exactly the row :func:`latest_by_natural_key`
+    selects, ordered by :func:`correction_order`. No second definition of
+    "latest" is introduced here, and Bronze is neither mutated nor collapsed.
+
+    ``correction_status`` separates the three cases an operator must not
+    conflate:
+
+    ``NO_CORRECTION``
+        Only one source version exists for the key. Duplicate archives with
+        identical content collapse into it and are not corrections.
+    ``REPUBLISHED_UNCHANGED``
+        AEMO published a genuinely later source version whose governed measures
+        are identical. The lineage changed; the value did not.
+    ``VALUE_CORRECTED``
+        A later source version changed at least one governed measure.
+        ``changed_value_fields`` names them.
+    """
+
+    fields = tuple(value_fields)
+    grouped: dict[tuple[str, ...], list[tuple[tuple[Any, ...], dict[str, Any]]]] = {}
+    for source in rows:
+        row = dict(source)
+        key = tuple(_required_text(row, field) for field in key_fields)
+        grouped.setdefault(key, []).append((correction_order(row, source_revision), row))
+
+    history = []
+    for key in sorted(grouped):
+        ordered = sorted(grouped[key], key=lambda item: item[0])
+        # Collapse exact duplicates of one landed archive, keeping the first
+        # landing, which is the same rule the Bronze manifest index applies.
+        unique: list[dict[str, Any]] = []
+        seen: set[tuple[Any, ...]] = set()
+        for _, row in ordered:
+            identity = _source_version_identity(row)
+            if identity in seen:
+                continue
+            seen.add(identity)
+            unique.append(row)
+
+        versions = [
+            _version_view(row, fields, sequence)
+            for sequence, row in enumerate(unique, start=1)
+        ]
+        # The existing contract still chooses the current value; it is applied
+        # to the distinct source versions rather than to raw duplicates, so an
+        # identical re-landed archive cannot present itself as the correction.
+        # ``current`` is then read back out of that one selection instead of
+        # being recomputed, so this module cannot drift into a second
+        # definition of "latest" even where two versions tie on every
+        # ordering field.
+        governed = latest_by_natural_key(
+            unique, key_fields, source_revision=source_revision
+        )[0]
+        original = versions[0]
+        current = next(
+            version for version in versions if version["source_row"] == governed
+        )
+        changed = tuple(
+            field
+            for field in fields
+            if _comparable(original["values"][field]) != _comparable(current["values"][field])
+        )
+        if len(versions) == 1:
+            status = "NO_CORRECTION"
+        elif changed:
+            status = "VALUE_CORRECTED"
+        else:
+            status = "REPUBLISHED_UNCHANGED"
+        record = dict(zip(key_fields, (governed[field] for field in key_fields)))
+        record.update(
+            {
+                "correction_status": status,
+                "is_value_corrected": status == "VALUE_CORRECTED",
+                "changed_value_fields": changed,
+                "source_version_count": len(versions),
+                "correction_count": len(versions) - 1,
+                "original": original,
+                "current": current,
+                "source_versions": tuple(versions),
+            }
+        )
+        history.append(record)
+    return history
+
+
+DISPATCH_PRICE_VALUE_FIELDS: tuple[str, ...] = (
+    "rrp_aud_per_mwh",
+    "energy_excess_price_aud_per_mwh",
+    "regional_override_price_aud_per_mwh",
+    "administered_price_cap_flag",
+    "market_suspended_flag",
+)
+
+
+def dispatch_price_correction_history(
+    rows: Iterable[Mapping[str, Any]],
+) -> list[dict[str, Any]]:
+    """Correction observability for DISPATCHIS PRICE, the critical price family.
+
+    The natural key is taken from the governed source registry rather than
+    restated here, so interval end, region and intervention stay part of the
+    comparison and the two intervention runs are never conflated.
+    """
+
+    return correction_history(
+        rows,
+        get_subject_by_key("dispatch_price").natural_key,
+        value_fields=DISPATCH_PRICE_VALUE_FIELDS,
+    )
 
 
 def mark_effective_intervention(
