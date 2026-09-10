@@ -29,6 +29,7 @@ EXPLICIT_SOURCES = {
     "gold_region_dispatch.py", "gold_unit_dispatch.py", "gold_scada_generation.py",
     "gold_constraints.py", "gold_interconnectors.py", "gold_unit_solution.py",
     "gold_app_region_status.py", "gold_additional_aggregates.py",
+    "gold_price_spikes.py",
     "bronze_bids.py", "silver_bids.py", "gold_bids.py",
     "bronze_trading.py", "silver_trading.py", "gold_trading.py",
     "bronze_settlement.py", "silver_settlement.py", "gold_settlement.py",

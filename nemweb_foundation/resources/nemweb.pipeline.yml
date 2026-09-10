@@ -68,6 +68,10 @@ resources:
             path: ../agentic_energy/nemweb/pipeline/gold_app_region_status.py
         - file:
             path: ../agentic_energy/nemweb/pipeline/gold_additional_aggregates.py
+        # Reads the effective five-minute regional Gold table, so it is listed
+        # after gold_region_dispatch.py.
+        - file:
+            path: ../agentic_energy/nemweb/pipeline/gold_price_spikes.py
         # Slower analyst context. Market notices remain deliberately omitted
         # until their plain-text source has a bounded, tested parser.
         - file:

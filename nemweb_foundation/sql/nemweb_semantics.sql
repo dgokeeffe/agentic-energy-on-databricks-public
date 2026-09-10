@@ -54,6 +54,30 @@ FROM (
   FROM gold_nem_bid_stack
   GROUP BY ALL HAVING COUNT(*) > 1
 );
+-- The spike product is already reduced to the effective run, so its candidate key
+-- excludes intervention. A duplicate here would mean one physical interval was
+-- flagged twice and would inflate any spike count.
+SELECT assert_true(COUNT(*) = 0, 'gold_nem_dispatch_price_spike_5min candidate key is not unique')
+FROM (
+  SELECT interval_end, region_id
+  FROM gold_nem_dispatch_price_spike_5min
+  GROUP BY ALL HAVING COUNT(*) > 1
+);
+-- The strict boundary is a reviewed decision, so it is gated rather than trusted:
+-- a price exactly at the threshold must never be flagged as a spike.
+SELECT assert_true(
+  COUNT(*) = 0,
+  'gold_nem_dispatch_price_spike_5min violated the strict > threshold boundary'
+)
+FROM gold_nem_dispatch_price_spike_5min
+WHERE is_price_spike AND rrp_aud_per_mwh <= spike_threshold_aud_per_mwh;
+-- A missing dispatch price must be labelled, never flagged as a spike.
+SELECT assert_true(
+  COUNT(*) = 0,
+  'gold_nem_dispatch_price_spike_5min flagged a spike without a dispatch price'
+)
+FROM gold_nem_dispatch_price_spike_5min
+WHERE is_price_spike AND (rrp_aud_per_mwh IS NULL OR price_status <> 'PRESENT');
 
 -- Registration context must be present in aggregate while retaining individual
 -- aggregate/pseudo DUIDs whose governed fuel or region remains UNKNOWN.
@@ -160,3 +184,20 @@ COMMENT ON COLUMN gold_nem_bid_stack.maximum_availability_mw IS
   'Offered maximum availability in MW from daily bid context; not actual SCADA output and not T+1 UNIT_SOLUTION availability.';
 COMMENT ON COLUMN gold_nem_bid_stack.source_publication_at IS
   'Latest publication timestamp across joined day and period offers for source freshness.';
+
+COMMENT ON TABLE gold_nem_dispatch_price_spike_5min IS
+  'Governed regional dispatch-price spike flag at five-minute interval-ending NEM market grain (AEST, UTC+10, no daylight saving), one row per region and interval. is_price_spike is the documented rule rrp_aud_per_mwh > spike_threshold_aud_per_mwh with a strict boundary, so a price exactly at the threshold is not a spike. The threshold is a workshop-configured level carried in reviewed metadata, not an AEMO-published spike definition. Prices are dispatch AUD/MWh: this is dispatch, not settlement, and it is never a forecast. Negative dispatch prices are valid market outcomes and are never spikes. Derived from effective intervention runs only; the five-minute regional table retains both intervention runs and default analytics must never aggregate runs blindly. Non-spiking intervals are retained so no spikes stays distinguishable from no data. spike_freshness_status labels the answer and must not be used to hide a stale spike; source_publication_at and gold_published_at support freshness measurement.';
+COMMENT ON COLUMN gold_nem_dispatch_price_spike_5min.interval_end IS
+  'End of the five-minute dispatch interval in NEM market time (AEST, UTC+10, no DST), not the interval start.';
+COMMENT ON COLUMN gold_nem_dispatch_price_spike_5min.is_price_spike IS
+  'True when the effective dispatch price is strictly greater than spike_threshold_aud_per_mwh. False for a price at or below the threshold, for a valid negative price, and for a missing price.';
+COMMENT ON COLUMN gold_nem_dispatch_price_spike_5min.spike_threshold_aud_per_mwh IS
+  'Threshold in AUD/MWh this row was evaluated against, recorded per row so a published result stays explainable after the reviewed threshold changes.';
+COMMENT ON COLUMN gold_nem_dispatch_price_spike_5min.spike_rule_fingerprint IS
+  'Fingerprint of the operative rule metadata. A threshold or boundary change alters it without any pipeline code change.';
+COMMENT ON COLUMN gold_nem_dispatch_price_spike_5min.price_status IS
+  'PRESENT or UNKNOWN_PRICE. A missing dispatch price is labelled rather than being reported as a normal interval or a spike.';
+COMMENT ON COLUMN gold_nem_dispatch_price_spike_5min.spike_freshness_status IS
+  'CURRENT or STALE from source publication lag against the recorded staleness limit. A stale spike is labelled, never dropped, and must not be presented as current.';
+COMMENT ON COLUMN gold_nem_dispatch_price_spike_5min.administered_price_cap_flag IS
+  'AEMO administered price cap flag carried through as operator context; a capped interval is read differently from an uncapped one.';

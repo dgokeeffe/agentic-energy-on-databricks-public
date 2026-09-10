@@ -62,6 +62,13 @@ EXPECTED_EXPRESSIONS = {
         "minimum_price_band_aud_per_mwh": "MIN(LEAST(price_band_1_aud_per_mwh, price_band_2_aud_per_mwh, price_band_3_aud_per_mwh, price_band_4_aud_per_mwh, price_band_5_aud_per_mwh, price_band_6_aud_per_mwh, price_band_7_aud_per_mwh, price_band_8_aud_per_mwh, price_band_9_aud_per_mwh, price_band_10_aud_per_mwh))",
         "bid_period_row_count": "COUNT(1)",
     },
+    "nem_dispatch_price_spike_metrics": {
+        "price_spike_interval_count": "SUM(CASE WHEN is_price_spike THEN 1 ELSE 0 END)",
+        "distinct_region_with_spike_count": "COUNT(DISTINCT CASE WHEN is_price_spike THEN region_id END)",
+        "maximum_spike_price_aud_per_mwh": "MAX(CASE WHEN is_price_spike THEN rrp_aud_per_mwh END)",
+        "stale_price_spike_interval_count": "SUM(CASE WHEN is_price_spike AND spike_freshness_status = 'STALE' THEN 1 ELSE 0 END)",
+        "five_minute_interval_count": "COUNT(1)",
+    },
 }
 
 
@@ -93,6 +100,21 @@ SOURCE_ROWS = {
         {"total_cleared_mw": 100.0, "availability_mw": 120.0, "absolute_scada_dispatch_variance_mw": 4.0, "is_effective_run": True},
         {"total_cleared_mw": 50.0, "availability_mw": 60.0, "absolute_scada_dispatch_variance_mw": 6.0, "is_effective_run": True},
         {"total_cleared_mw": 900.0, "availability_mw": 900.0, "absolute_scada_dispatch_variance_mw": 90.0, "is_effective_run": False},
+    ],
+    # Boundary, negative price, missing price, staleness and a high-priced
+    # non-effective run are all represented, so the reconciled results below prove
+    # each is handled rather than merely commented.
+    "nem_dispatch_price_spike_metrics": [
+        {"region_id": "NSW1", "rrp_aud_per_mwh": 450.0, "is_price_spike": True, "spike_freshness_status": "CURRENT", "is_effective_run": True},
+        {"region_id": "NSW1", "rrp_aud_per_mwh": 900.0, "is_price_spike": True, "spike_freshness_status": "STALE", "is_effective_run": True},
+        {"region_id": "QLD1", "rrp_aud_per_mwh": 320.0, "is_price_spike": True, "spike_freshness_status": "CURRENT", "is_effective_run": True},
+        # Exactly at the 300.0 threshold: the strict boundary means not a spike.
+        {"region_id": "VIC1", "rrp_aud_per_mwh": 300.0, "is_price_spike": False, "spike_freshness_status": "CURRENT", "is_effective_run": True},
+        # A valid negative dispatch price is never a spike.
+        {"region_id": "SA1", "rrp_aud_per_mwh": -1000.0, "is_price_spike": False, "spike_freshness_status": "CURRENT", "is_effective_run": True},
+        # A missing price must not be counted as a spike.
+        {"region_id": "TAS1", "rrp_aud_per_mwh": None, "is_price_spike": False, "spike_freshness_status": "CURRENT", "is_effective_run": True},
+        {"region_id": "VIC1", "rrp_aud_per_mwh": 9999.0, "is_price_spike": True, "spike_freshness_status": "CURRENT", "is_effective_run": False},
     ],
     "nem_bid_availability_metrics": [
         {
@@ -152,6 +174,17 @@ EXPECTED_RESULTS = {
         "minimum_price_band_aud_per_mwh": -99.0,
         "bid_period_row_count": 2,
     },
+    "nem_dispatch_price_spike_metrics": {
+        # Three of the six effective rows spike: 450, 900 and 320. The 300.0
+        # boundary row, the negative price and the missing price do not.
+        "price_spike_interval_count": 3,
+        # NSW1 twice and QLD1 once, so two distinct regions. VIC1's 9999 price is
+        # on a non-effective run and must not appear.
+        "distinct_region_with_spike_count": 2,
+        "maximum_spike_price_aud_per_mwh": 900.0,
+        "stale_price_spike_interval_count": 1,
+        "five_minute_interval_count": 6,
+    },
 }
 
 
@@ -161,6 +194,7 @@ def direct_gold_aggregate(view: str, rows: list[dict]) -> dict[str, float]:
         "nem_binding_constraint_metrics",
         "nem_interconnector_flow_metrics",
         "nem_unit_availability_t1_metrics",
+        "nem_dispatch_price_spike_metrics",
     }:
         rows = [row for row in rows if row["is_effective_run"]]
 
@@ -206,6 +240,19 @@ def direct_gold_aggregate(view: str, rows: list[dict]) -> dict[str, float]:
             "estimated_dispatched_energy_mwh": sum(r["total_cleared_mw"] for r in rows) * 5 / 60,
             "mean_absolute_scada_target_variance_mw": mean(r["absolute_scada_dispatch_variance_mw"] for r in rows),
         }
+    if view == "nem_dispatch_price_spike_metrics":
+        spiking = [row for row in rows if row["is_price_spike"]]
+        return {
+            "price_spike_interval_count": len(spiking),
+            "distinct_region_with_spike_count": len({row["region_id"] for row in spiking}),
+            "maximum_spike_price_aud_per_mwh": max(
+                (row["rrp_aud_per_mwh"] for row in spiking), default=None
+            ),
+            "stale_price_spike_interval_count": sum(
+                row["spike_freshness_status"] == "STALE" for row in spiking
+            ),
+            "five_minute_interval_count": len(rows),
+        }
     if view == "nem_bid_availability_metrics":
         band_totals = [sum(r[f"band_availability_{i}_mw"] or 0 for i in range(1, 11)) for r in rows]
         lowest_prices = [min(r[f"price_band_{i}_aud_per_mwh"] for i in range(1, 11)) for r in rows]
@@ -250,6 +297,7 @@ def test_effective_run_filters_exclude_non_effective_rows_from_reconciliation() 
         "nem_binding_constraint_metrics",
         "nem_interconnector_flow_metrics",
         "nem_unit_availability_t1_metrics",
+        "nem_dispatch_price_spike_metrics",
     }
     # Each filtered fixture includes an adversarial high-value non-effective row;
     # the reconciled results above prove it contributes to none of the measures.

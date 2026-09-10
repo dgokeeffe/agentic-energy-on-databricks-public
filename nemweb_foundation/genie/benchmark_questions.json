@@ -54,6 +54,16 @@
       "expected_columns": ["region_id", "fuel_type", "average_dispatch_target_mw", "average_availability_mw", "mean_absolute_scada_target_variance_mw", "newest_t1_source_publication_at"],
       "result_expectation": {"minimum_row_count": 1},
       "explanation": "Availability and dispatch target are daily T+1 UNIT_SOLUTION fields, never Current five-minute availability."
+    },
+    {
+      "id": "regional-price-spikes",
+      "question": "Which NEM regions had dispatch-price spikes above the governed threshold in the last 24 hours, and is that result fresh enough to act on?",
+      "sql_file": "sql/genie_benchmarks/07_regional_price_spikes.sql",
+      "assets": ["nem_dispatch_price_spike_metrics"],
+      "expected_columns": ["region_id", "price_spike_interval_count", "five_minute_interval_count", "maximum_spike_price_aud_per_mwh", "stale_price_spike_interval_count", "spike_threshold_aud_per_mwh", "newest_source_publication_at", "newest_gold_publication_at"],
+      "result_expectation": {"minimum_row_count": 0},
+      "result_expectation_rationale": "A window with no spike is a valid and common answer, so a non-zero floor would be a false gate. five_minute_interval_count separates no spikes from no data.",
+      "explanation": "A spike is dispatch price strictly greater than the metadata threshold on the effective intervention run, so a price exactly at the threshold does not count. The threshold is workshop-configured, not an AEMO definition. Dispatch price, never settlement. Negative prices are valid and are never spikes. Freshness is reported so a stale spike is not presented as current."
     }
   ]
 }

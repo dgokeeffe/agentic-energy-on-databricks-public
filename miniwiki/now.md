@@ -48,6 +48,53 @@ initial pipeline, semantic, benchmark and dashboard SQL gates.
 - Keep market notices omitted until a bounded plain-text parser, fixture and
   correction contract are independently proven.
 
+## Session handoff — 2026-09-10: dispatch-price spike detector
+
+**Issue #3 implemented on `feat/governed-dispatch-price-spike-detector`, not
+committed.** The rule that
+[`features/price-spike-detector.md`](features/price-spike-detector.md) had blocked
+for definition review is now agreed and recorded there: absolute
+`rrp_aud_per_mwh > 300.0` AUD/MWh, **strict** boundary, threshold carried in
+`resources/metadata/spike_rule.json` rather than code. No relative
+trailing-median rule was approved; that stays a separate definition review.
+
+New governed surface: `gold_nem_dispatch_price_spike_5min`,
+`nem_dispatch_price_spike_metrics`, an alert-ready benchmark
+(`07_regional_price_spikes.sql`, now 7 benchmarks), and a `ds_spikes` dashboard
+panel under the KPI row.
+
+**The ordering is the substance, not the threshold.** Corrections resolve first,
+then the effective intervention run is selected, and only then is the threshold
+applied. In any other order a superseded value or a non-effective run creates a
+spike that never happened. Freshness labels rows and never filters them, and
+non-spiking intervals are retained, so "no spikes" stays distinguishable from
+"no data".
+
+**A green suite was not evidence.** Relaxing the Gold view's boundary from `>` to
+`>=` passed all 348 tests untouched: the offline tests proved the Python rule
+while the published answer comes from the Spark module, and nothing tied the two
+together. Four static contract tests now bind the Gold view to the reviewed rule.
+Each of four mutations — boundary, threshold, skipped correction resolution,
+dropped effective-run filter — was re-run and confirmed to fail. Same shape as the
+2026-09-08 facility-dimension lesson one layer out: tested code and deployed code
+had diverged on exactly the reviewed decision.
+
+**Evidence.** 353 passed with 37 subtests; static asset gate reports 7 benchmarks,
+6 Genie assets, 7 dashboard statements; safety 434 files, miniwiki 19 pages, links
+120 files, modern-API check 34 sources, `git diff --check` clean.
+
+**Not run.** No SQL executed and no dashboard rendered — the Gold view, metric
+view, benchmark and dashboard datasets are contract-tested only. The `--execute`
+gate and any deployment need workspace authorisation.
+
+**Still open.** The 300 AUD/MWh rationale is **unverified against current AEMO
+documentation** (no network access to AEMO sources in the implementing session)
+and must be confirmed before it is quoted to participants as market fact. The
+snapshot fixture contains no interval above the threshold, so an end-to-end
+non-zero spike count needs a thickened or live window. The spike metric was
+deliberately not added to the Genie space asset set. Independent review of the
+diff is required before a pull request.
+
 ## Session handoff — 2026-09-09: repository split resolved
 
 **Two repositories existed with no shared Git history, and the workshop exercises

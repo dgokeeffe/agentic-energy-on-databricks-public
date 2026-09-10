@@ -18,6 +18,7 @@ GOLD_DATASETS = {
         "gold_nem_dispatch_price_daily",
         "gold_nem_interconnector_flow_30min",
     },
+    "gold_price_spikes.py": {"gold_nem_dispatch_price_spike_5min"},
 }
 
 

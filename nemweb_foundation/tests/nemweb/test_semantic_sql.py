@@ -56,6 +56,7 @@ def test_semantic_sql_checks_every_candidate_key_before_comments() -> None:
         "gold_nem_unit_dispatch_availability_t1 candidate key is not unique",
         "silver_nem_facility_dimension candidate key is not unique",
         "gold_nem_bid_stack candidate key is not unique",
+        "gold_nem_dispatch_price_spike_5min candidate key is not unique",
     }
     for error in expected_errors:
         assert error in SEMANTICS
@@ -115,6 +116,7 @@ def test_comments_encode_all_required_market_semantics() -> None:
         "gold_nem_unit_dispatch_availability_t1",
         "silver_nem_facility_dimension",
         "gold_nem_bid_stack",
+        "gold_nem_dispatch_price_spike_5min",
     ):
         assert f"COMMENT ON TABLE {relation}" in SEMANTICS
 
@@ -129,6 +131,7 @@ def test_metric_yaml_uses_supported_v11_shape_and_curated_sources() -> None:
         "nem_interconnector_flow_metrics": "gold_nem_interconnector_flows_5min",
         "nem_unit_availability_t1_metrics": "gold_nem_unit_dispatch_availability_t1",
         "nem_bid_availability_metrics": "gold_nem_bid_stack",
+        "nem_dispatch_price_spike_metrics": "gold_nem_dispatch_price_spike_5min",
     }
     assert {name: definition["source"] for name, definition in metrics.items()} == expected
     for definition in metrics.values():
@@ -146,9 +149,37 @@ def test_intervention_metric_views_filter_effective_runs() -> None:
         "nem_binding_constraint_metrics",
         "nem_interconnector_flow_metrics",
         "nem_unit_availability_t1_metrics",
+        "nem_dispatch_price_spike_metrics",
     ):
         assert metrics[name]["filter"] == "is_effective_run = true"
         assert "effective" in metrics[name]["comment"].lower()
+
+
+def test_spike_semantics_are_gated_in_sql_not_only_documented() -> None:
+    # The strict boundary and the "missing price is not a spike" rule are reviewed
+    # decisions. Comments alone would not stop a regression, so the semantics job
+    # asserts them before any metadata is applied.
+    upper = SEMANTICS.upper()
+    assert "VIOLATED THE STRICT > THRESHOLD BOUNDARY" in upper
+    assert "IS_PRICE_SPIKE AND RRP_AUD_PER_MWH <= SPIKE_THRESHOLD_AUD_PER_MWH" in upper
+    assert "FLAGGED A SPIKE WITHOUT A DISPATCH PRICE" in upper
+    assert SEMANTICS.index("SELECT assert_true") < SEMANTICS.index(
+        "COMMENT ON TABLE gold_nem_dispatch_price_spike_5min"
+    )
+
+    spike = metric_definitions()["nem_dispatch_price_spike_metrics"]
+    lower = spike["comment"].lower()
+    for phrase in (
+        "strictly greater",
+        "not an aemo-published definition",
+        "dispatch, not settlement",
+        "negative prices are valid",
+    ):
+        assert phrase in lower, phrase
+    # A zero spike count must remain distinguishable from absent data, so the
+    # denominator is published alongside the spike count.
+    measures = {measure["name"] for measure in spike["measures"]}
+    assert {"price_spike_interval_count", "five_minute_interval_count"} <= measures
 
 
 def test_metric_yaml_distinguishes_source_cadence_units_sign_and_freshness() -> None:

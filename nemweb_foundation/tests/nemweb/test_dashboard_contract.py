@@ -33,6 +33,7 @@ def test_dashboard_datasets_are_single_portable_effective_queries() -> None:
     extracted = extractor.extract_dashboard_sql(ROOT / "dashboards/nemweb_overview.lvdash.json")
     assert {item["dataset"] for item in extracted} == {
         "ds_region",
+        "ds_spikes",
         "ds_generation",
         "ds_constraints",
         "ds_interconnectors",
@@ -44,7 +45,13 @@ def test_dashboard_datasets_are_single_portable_effective_queries() -> None:
         # Default catalog/schema are supplied by the dashboard resource.
         assert not re.search(r"\bFROM\s+[A-Za-z_][\w-]*\.[A-Za-z_]", item["sql"], re.I)
     by_name = {item["dataset"]: item["sql"].lower() for item in extracted}
-    for name in ("ds_region", "ds_constraints", "ds_interconnectors", "ds_t1_availability"):
+    for name in (
+        "ds_region",
+        "ds_spikes",
+        "ds_constraints",
+        "ds_interconnectors",
+        "ds_t1_availability",
+    ):
         assert "is_effective_run = true" in by_name[name]
     assert "unit/facility actual output" in by_name["ds_freshness"]
     assert by_name["ds_freshness"].count("union all") == 4
@@ -54,6 +61,7 @@ def test_dashboard_datasets_are_single_portable_effective_queries() -> None:
     # aggregate-only and needs no bound.
     for name in (
         "ds_region",
+        "ds_spikes",
         "ds_generation",
         "ds_constraints",
         "ds_interconnectors",
@@ -62,6 +70,20 @@ def test_dashboard_datasets_are_single_portable_effective_queries() -> None:
         assert "interval_end >= timestampadd(day," in by_name[name], (
             f"dashboard dataset {name} must bound interval_end"
         )
+    spikes = by_name["ds_spikes"]
+    # The panel must show non-spiking intervals too, so a quiet window is
+    # distinguishable from a broken pipeline. Filtering to is_price_spike would
+    # make an empty table ambiguous.
+    assert "where is_price_spike" not in spikes
+    assert "is_price_spike = true" not in spikes
+    # The threshold that fired and the freshness label must reach the panel, or an
+    # operator cannot tell what was applied or whether it is current.
+    for column in (
+        "spike_threshold_aud_per_mwh",
+        "spike_freshness_status",
+        "price_status",
+    ):
+        assert column in spikes, column
     t1 = by_name["ds_t1_availability"]
     aest_day = "date(from_utc_timestamp(interval_end, 'australia/brisbane'))"
     assert t1.count(aest_day) == 2, (
@@ -143,5 +165,10 @@ def test_dashboard_discloses_freshness_and_t1_source_limitations() -> None:
         "aemo source sign",
         "marginalvalue <> 0",
         "interval-ending aest",
+        # The spike rule is a reviewed decision and a configured level, so the
+        # dashboard must state it rather than presenting a bare count.
+        "strictly above the governed threshold",
+        "not an aemo-published spike definition",
+        "negative dispatch prices are valid and are never spikes",
     ):
         assert phrase in text, phrase

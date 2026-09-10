@@ -299,3 +299,54 @@ measures:
     expr: COUNT(1)
     comment: "Daily bid-period rows at DUID, type and direction grain."
 $$;
+
+CREATE OR REPLACE VIEW nem_dispatch_price_spike_metrics
+WITH METRICS
+LANGUAGE YAML
+AS $$
+version: 1.1
+source: gold_nem_dispatch_price_spike_5min
+filter: is_effective_run = true
+comment: "Effective-run regional dispatch-price spike metrics at interval-ending five-minute AEST (UTC+10, no DST) grain. A spike is the documented rule: dispatch price AUD/MWh strictly greater than the metadata threshold, so a price exactly at the threshold is not a spike. The threshold is a workshop-configured level, not an AEMO-published definition. This is dispatch, not settlement, and never a forecast. Negative prices are valid and are never spikes. Every interval is retained so no spikes stays distinguishable from no data, and freshness labels the answer rather than filtering it."
+dimensions:
+  - name: interval_end
+    expr: interval_end
+    comment: "End of the five-minute NEM dispatch interval in fixed AEST, never interval start."
+  - name: region_id
+    expr: region_id
+    comment: "AEMO NEM region; a spike is regional and prices are never averaged across regions."
+  - name: intervention
+    expr: intervention
+    comment: "Retained for audit; the global effective-run filter prevents intervention double counting."
+  - name: price_status
+    expr: price_status
+    comment: "PRESENT or UNKNOWN_PRICE; a missing dispatch price is labelled, never counted as a spike."
+  - name: spike_freshness_status
+    expr: spike_freshness_status
+    comment: "CURRENT or STALE against the recorded staleness limit; a stale spike is labelled, never hidden."
+  - name: spike_threshold_aud_per_mwh
+    expr: spike_threshold_aud_per_mwh
+    comment: "Threshold in AUD/MWh the row was evaluated against, so a past result stays explainable after a rule change."
+  - name: source_publication_at
+    expr: source_publication_at
+    comment: "AEMO publication time; compare separately with Gold publication time for freshness."
+  - name: gold_published_at
+    expr: gold_published_at
+    comment: "Lakeflow Gold publication time."
+measures:
+  - name: price_spike_interval_count
+    expr: SUM(CASE WHEN is_price_spike THEN 1 ELSE 0 END)
+    comment: "Effective five-minute regional intervals meeting the documented spike rule."
+  - name: distinct_region_with_spike_count
+    expr: COUNT(DISTINCT CASE WHEN is_price_spike THEN region_id END)
+    comment: "Distinct NEM regions with at least one spike in the selection."
+  - name: maximum_spike_price_aud_per_mwh
+    expr: MAX(CASE WHEN is_price_spike THEN rrp_aud_per_mwh END)
+    comment: "Highest dispatch price in AUD/MWh among spiking intervals; null when nothing spiked."
+  - name: stale_price_spike_interval_count
+    expr: SUM(CASE WHEN is_price_spike AND spike_freshness_status = 'STALE' THEN 1 ELSE 0 END)
+    comment: "Spiking intervals whose source publication is older than the recorded staleness limit and must not be presented as current."
+  - name: five_minute_interval_count
+    expr: COUNT(1)
+    comment: "Effective regional five-minute observations evaluated, spiking or not, so a zero spike count stays distinguishable from absent data."
+$$;
