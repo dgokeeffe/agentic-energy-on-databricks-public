@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "benchmarks": [
     {
       "id": "effective-intervention-uniqueness",
@@ -16,7 +16,7 @@
       "sql_file": "sql/genie_benchmarks/02_regional_price_demand.sql",
       "assets": ["nem_region_dispatch_metrics"],
       "expected_columns": ["region_id", "average_dispatch_price_aud_per_mwh", "maximum_dispatch_price_aud_per_mwh", "average_total_demand_mw", "newest_source_publication_at", "newest_gold_publication_at"],
-      "result_expectation": {"minimum_row_count": 1},
+      "result_expectation": {"minimum_row_count": 1, "distinct_key_columns": ["region_id"]},
       "explanation": "The metric view applies effective-run semantics globally and keeps dispatch price (AUD/MWh) distinct from demand (MW)."
     },
     {
@@ -25,7 +25,7 @@
       "sql_file": "sql/genie_benchmarks/03_generation_by_fuel.sql",
       "assets": ["nem_scada_generation_metrics"],
       "expected_columns": ["region_id", "fuel_type", "average_actual_generation_mw", "estimated_actual_energy_mwh", "partially_enriched_observation_count"],
-      "result_expectation": {"minimum_row_count": 1},
+      "result_expectation": {"minimum_row_count": 1, "distinct_key_columns": ["region_id", "fuel_type"]},
       "explanation": "Generation is signed SCADA actual MW/MWh; UNKNOWN fuel remains visible rather than being dropped."
     },
     {
@@ -34,7 +34,7 @@
       "sql_file": "sql/genie_benchmarks/04_binding_constraints.sql",
       "assets": ["nem_binding_constraint_metrics"],
       "expected_columns": ["constraint_id", "binding_constraint_interval_count", "average_marginal_value", "maximum_violation_degree"],
-      "result_expectation": {"minimum_row_count": 0},
+      "result_expectation": {"minimum_row_count": 0, "empty_result_is_valid": true, "distinct_key_columns": ["constraint_id"]},
       "explanation": "Binding uses the governed MARGINALVALUE <> 0 derivation. No rows is valid when no constraint binds in the selected period."
     },
     {
@@ -43,7 +43,7 @@
       "sql_file": "sql/genie_benchmarks/05_interconnector_source_sign.sql",
       "assets": ["nem_interconnector_flow_metrics"],
       "expected_columns": ["interconnector_id", "average_source_sign_flow_mw", "estimated_source_sign_flow_mwh", "average_losses_mw"],
-      "result_expectation": {"minimum_row_count": 1},
+      "result_expectation": {"minimum_row_count": 1, "distinct_key_columns": ["interconnector_id"]},
       "explanation": "Positive and negative values preserve AEMO source sign. Do not relabel flow as import or export without an interconnector definition."
     },
     {
@@ -52,8 +52,76 @@
       "sql_file": "sql/genie_benchmarks/06_t1_unit_availability.sql",
       "assets": ["nem_unit_availability_t1_metrics"],
       "expected_columns": ["region_id", "fuel_type", "average_dispatch_target_mw", "average_availability_mw", "mean_absolute_scada_target_variance_mw", "newest_t1_source_publication_at"],
-      "result_expectation": {"minimum_row_count": 1},
+      "result_expectation": {"minimum_row_count": 1, "distinct_key_columns": ["region_id", "fuel_type"]},
       "explanation": "Availability and dispatch target are daily T+1 UNIT_SOLUTION fields, never Current five-minute availability."
+    }
+  ],
+  "refusals": [
+    {
+      "id": "market-notice-cause",
+      "space_question_id": "209e1c8a663c56fb9bf33f427e4529fa",
+      "question": "Which market notice explains why that constraint bound, and what reason did AEMO give?",
+      "contract_source": "DATA-CONTRACT.md",
+      "contract_section": "## Deliberate omissions",
+      "contract_quote": "Market notices are deliberately omitted in this slice.",
+      "unsupported_because": "deliberate_omission",
+      "refusal_reason": "Market notices are deliberately omitted from this slice, so there is no notice text to cite. The governed assets can report that a constraint bound and what its marginal value was, but they carry no AEMO reason field. Answering would require the unstructured Market_Notice source, which has no bounded parser, deterministic fixture or correction test in this foundation.",
+      "near_miss_of": "binding-constraints"
+    },
+    {
+      "id": "bid-recommendation",
+      "space_question_id": "5248fb1838b258fb93bf07bdc4d92b0c",
+      "question": "What should this unit bid into tomorrow's evening peak to maximise its revenue?",
+      "contract_source": "DATA_LICENSES.md",
+      "contract_section": "## Disclaimer",
+      "contract_quote": "Verify operational, trading, investment or commercial decisions against official AEMO publications.",
+      "unsupported_because": "out_of_scope_decision_support",
+      "refusal_reason": "This asks for a forward-looking commercial recommendation. These assets are governed historical NEMWEB dispatch analytics, and operational, trading, investment or commercial decisions must be verified against official AEMO publications rather than taken from this space. Historical dispatch prices by region and interval can be reported; a bid recommendation cannot.",
+      "near_miss_of": "regional-price-demand"
+    },
+    {
+      "id": "five-minute-curtailment",
+      "space_question_id": "6b79f1019675518e890a4281ccb03172",
+      "question": "How much generation was curtailed at each unit over the last 24 hours, and what could each unit have produced?",
+      "contract_source": "DATA-CONTRACT.md",
+      "contract_section": "## Fixed data semantics",
+      "contract_quote": "Current reports do not publish five-minute unit availability.",
+      "unsupported_because": "no_published_field",
+      "refusal_reason": "AEMO Current reports publish no five-minute unit availability, so withheld output cannot be quantified from the Current five-minute path. Curtailment is a difference against an availability this source never published, and no governed asset defines a curtailment measure. SCADA-based output is actual_generation_mw only. Authoritative availability belongs solely to the daily T+1 unit-solution product, which is published a day later at daily cadence, so it cannot answer a question about the last 24 hours of Current dispatch.",
+      "near_miss_of": "t1-unit-availability"
+    },
+    {
+      "id": "constraint-marginal-value-by-region",
+      "space_question_id": "6d103ab9c0da5b20bdc40735f1aeaf35",
+      "question": "What was the total constraint marginal value in each NEM region over the last 24 hours?",
+      "contract_source": "DATA-CONTRACT.md",
+      "contract_section": "## Report-to-subject contract",
+      "contract_quote": "| Binding constraints | `DispatchIS_Reports`: `CONSTRAINT` | Five minute | `gold_nem_binding_constraints_5min` | interval end, constraint ID, intervention |",
+      "unsupported_because": "no_governed_dimension",
+      "refusal_reason": "The governed natural key for binding constraints is interval end, constraint ID and intervention. Separately, neither gold_nem_binding_constraints_5min nor nem_binding_constraint_metrics defines a region column, and no region-master source is declared, so there is no governed regional total to report. Marginal value is also documented as not an additive price or energy measure, so summing it would be wrong even if a region mapping existed. Binding counts and marginal values per constraint ID are supported.",
+      "near_miss_of": "binding-constraints"
+    },
+    {
+      "id": "interconnector-import-export-direction",
+      "space_question_id": "7ca32432acb35998b96c6ce5c7a2317d",
+      "question": "Which NEM regions were importing and which were exporting over the last 24 hours?",
+      "contract_source": "DATA-CONTRACT.md",
+      "contract_section": "## Report-to-subject contract",
+      "contract_quote": "| Interconnector flows | `DispatchIS_Reports`: `INTERCONNECTORRES` | Five minute | `gold_nem_interconnector_flows_5min` | interval end, interconnector ID, intervention |",
+      "unsupported_because": "no_governed_mapping",
+      "refusal_reason": "Interconnector flow is keyed by interval end, interconnector ID and intervention. Separately, neither the Gold table nor the metric view defines region endpoints, and the interconnector-master and region-master sources are deliberately not declared, so no governed interconnector-to-region mapping exists. Flow preserves the AEMO source sign, and import or export direction per region cannot be derived without that mapping. Reporting the signed flow per interconnector is supported; relabelling that sign as a regional import or export is not.",
+      "near_miss_of": "interconnector-source-sign"
+    },
+    {
+      "id": "snapshot-price-as-live-spot",
+      "space_question_id": "e4cfb06119f95d0992798ac744bf143d",
+      "question": "What is the spot price in NSW1 right now?",
+      "contract_source": "DATA-CONTRACT.md",
+      "contract_section": "## Fixed data semantics",
+      "contract_quote": "Both live under mode-scoped sibling roots in the governed landing Volume (`snapshot/` and `live/`); each sibling retains its own write-once mode marker.",
+      "unsupported_because": "snapshot_not_live",
+      "refusal_reason": "Landing is mode-scoped with a write-once marker per sibling root, so a deployment reading the snapshot root cannot observe the current market state; its newest interval is a captured historical one. The dispatch price for the most recent interval present can be reported, provided it is named as dispatch rather than settlement price, labelled as snapshot, and carries its interval-ending AEST timestamp and source publication time. It must never be presented as the live spot price.",
+      "near_miss_of": "regional-price-demand"
     }
   ]
 }

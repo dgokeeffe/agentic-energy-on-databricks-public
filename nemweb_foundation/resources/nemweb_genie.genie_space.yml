@@ -35,9 +35,39 @@ resources:
                 ]
               },
               {
+                "id": "209e1c8a663c56fb9bf33f427e4529fa",
+                "question": [
+                  "Which market notice explains why that constraint bound, and what reason did AEMO give?"
+                ]
+              },
+              {
                 "id": "3554da103b4957e5baf9ff50485ff5f5",
                 "question": [
                   "Which constraints were binding most often in the last 24 hours?"
+                ]
+              },
+              {
+                "id": "5248fb1838b258fb93bf07bdc4d92b0c",
+                "question": [
+                  "What should this unit bid into tomorrow's evening peak to maximise its revenue?"
+                ]
+              },
+              {
+                "id": "6b79f1019675518e890a4281ccb03172",
+                "question": [
+                  "How much generation was curtailed at each unit over the last 24 hours, and what could each unit have produced?"
+                ]
+              },
+              {
+                "id": "6d103ab9c0da5b20bdc40735f1aeaf35",
+                "question": [
+                  "What was the total constraint marginal value in each NEM region over the last 24 hours?"
+                ]
+              },
+              {
+                "id": "7ca32432acb35998b96c6ce5c7a2317d",
+                "question": [
+                  "Which NEM regions were importing and which were exporting over the last 24 hours?"
                 ]
               },
               {
@@ -50,6 +80,12 @@ resources:
                 "id": "ba51692511345c46acd50dd9392daa5c",
                 "question": [
                   "What were the average interconnector flows and losses using AEMO source-sign convention?"
+                ]
+              },
+              {
+                "id": "e4cfb06119f95d0992798ac744bf143d",
+                "question": [
+                  "What is the spot price in NSW1 right now?"
                 ]
               },
               {
@@ -160,7 +196,7 @@ resources:
               {
                 "id": "d91f9c36f09256378c6a0d7ccfd1674a",
                 "content": [
-                  "## Market and time semantics\nThis space covers the Australian National Electricity Market (NEM): NSW1, QLD1, VIC1, SA1 and TAS1. NEM market timestamps are interval-ending fixed AEST (UTC+10) with no daylight saving. Five-minute MW-to-MWh conversion is MW * 5 / 60. Prices are dispatch AUD/MWh unless explicitly labelled settlement. Negative prices and signed generation/flow values are valid.\n\n## Intervention and effective-run policy\nDefault analytics must use governed metric views, whose global filters select is_effective_run = true. The audit Gold regional table retains both intervention and non-intervention rows. Never aggregate across intervention rows without applying effective-run semantics. is_effective_run selects the highest intervention flag present for each natural key, otherwise intervention 0.\n\n## Unit output, availability and flow-sign limitations\nCurrent Dispatch SCADA provides five-minute actual_generation_mw only. It does not publish five-minute dispatch target or availability. Authoritative total-cleared target and availability come from daily T+1 UNIT_SOLUTION. Interconnector flow preserves AEMO source sign; do not label positive or negative as import/export without a governed interconnector definition. Keep UNKNOWN region/fuel rows visible and mention partial enrichment when material.\n\n## Query guidance\nMetric-view measures must be wrapped in MEASURE() and dimensions grouped with GROUP BY ALL. Prefer the deliberately curated metric views. Always state time range, units, dispatch-versus-T+1 context and source freshness. If a binding-constraint query returns no rows, report that none bound in the selected range rather than inventing an event."
+                  "## Market and time semantics\nThis space covers the Australian National Electricity Market (NEM): NSW1, QLD1, VIC1, SA1 and TAS1. NEM market timestamps are interval-ending fixed AEST (UTC+10) with no daylight saving. Five-minute MW-to-MWh conversion is MW * 5 / 60. Prices are dispatch AUD/MWh unless explicitly labelled settlement. Negative prices and signed generation/flow values are valid.\n\n## Intervention and effective-run policy\nDefault analytics must use governed metric views, whose global filters select is_effective_run = true. The audit Gold regional table retains both intervention and non-intervention rows. Never aggregate across intervention rows without applying effective-run semantics. is_effective_run selects the highest intervention flag present for each natural key, otherwise intervention 0.\n\n## Unit output, availability and flow-sign limitations\nCurrent Dispatch SCADA provides five-minute actual_generation_mw only. It does not publish five-minute dispatch target or availability. Authoritative total-cleared target and availability come from daily T+1 UNIT_SOLUTION. Interconnector flow preserves AEMO source sign; do not label positive or negative as import/export without a governed interconnector definition. Keep UNKNOWN region/fuel rows visible and mention partial enrichment when material.\n\n## Query guidance\nMetric-view measures must be wrapped in MEASURE() and dimensions grouped with GROUP BY ALL. Prefer the deliberately curated metric views. Always state time range, units, dispatch-versus-T+1 context and source freshness. If a binding-constraint query returns no rows, report that none bound in the selected range rather than inventing an event.\n\n## Refusal policy\nRefuse rather than infer when a question needs a field, dimension or mapping the governed contract does not publish. Name the specific reason in the refusal: the governed rule and what is missing, then what can be answered instead. \"I cannot answer that\" is not an adequate refusal.\nDeliberate omission: market notices are deliberately omitted from this slice, so there is no notice text and no AEMO reason field to cite. Report that a constraint bound and what its marginal value was instead.\nOut-of-scope decision support: these are governed historical NEMWEB dispatch analytics, and operational, trading, investment or commercial decisions must be verified against official AEMO publications rather than taken from this space. Give no forward-looking bid or revenue recommendation; report historical dispatch prices by region and interval instead.\nNo published field: AEMO Current reports publish no five-minute unit availability, so withheld output cannot be quantified at five-minute grain. SCADA-based output is actual_generation_mw only, no governed asset defines a curtailment measure, and authoritative availability belongs solely to the daily T+1 unit-solution product at daily cadence. Report T+1 dispatch target and availability instead, naming its T+1 cadence.\nNo governed dimension: the governed natural key for binding constraints is interval end, constraint ID and intervention, and separately no region column is defined and no region-master source is declared, so there is no governed regional total to report. Marginal value is documented as not an additive price or energy measure. Report binding counts and marginal values per constraint ID instead.\nNo governed mapping: interconnector flow is keyed by interval end, interconnector ID and intervention, and separately no region endpoints are defined and the interconnector-master and region-master sources are deliberately not declared, so per-region import or export direction cannot be derived. Report the signed flow per interconnector instead of relabelling that sign as a regional import or export.\nSnapshot not live: landing is mode-scoped with a write-once marker per sibling root, so a deployment reading the snapshot root cannot observe the current market state and its newest interval is a captured historical one. Never present a snapshot figure as live. Report the dispatch price for the most recent interval present, named as dispatch rather than settlement price, labelled as snapshot, and carrying its interval-ending AEST timestamp and source publication time."
                 ]
               }
             ],

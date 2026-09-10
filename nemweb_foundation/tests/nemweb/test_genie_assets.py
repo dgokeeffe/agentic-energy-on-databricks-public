@@ -9,6 +9,8 @@ import yaml
 ROOT = Path(__file__).parents[2]
 SPACE = json.loads((ROOT / "genie/nemweb_space.json").read_text())
 RESOURCE = yaml.safe_load((ROOT / "resources/nemweb_genie.genie_space.yml").read_text())
+BENCHMARK_DOC = json.loads((ROOT / "genie/benchmark_questions.json").read_text())
+REFUSALS = BENCHMARK_DOC["refusals"]
 
 
 def test_genie_resource_is_bundle_managed_and_parameterised() -> None:
@@ -89,7 +91,12 @@ def test_genie_instructions_define_market_and_source_limitations() -> None:
 def test_genie_samples_and_examples_are_deterministic_and_complete() -> None:
     samples = SPACE["config"]["sample_questions"]
     examples = SPACE["instructions"]["example_question_sqls"]
-    assert len(samples) == len(examples) == 6
+    # Samples and example SQL are deliberately no longer 1:1. The six answerable
+    # questions each have example SQL; the six must-refuse questions are surfaced as
+    # sample questions but carry no example SQL by design, because a must-refuse
+    # question must never reach the SQL executor.
+    assert len(samples) == 12
+    assert len(examples) == 6
     # The Genie API requires every id to be a lowercase 32-hex UUID without
     # hyphens (400 INVALID_PARAMETER_VALUE otherwise, observed 2026-09-02). They
     # are generated deterministically with uuid5 from a stable slug, so they are
@@ -98,7 +105,7 @@ def test_genie_samples_and_examples_are_deterministic_and_complete() -> None:
     all_ids += [item["id"] for item in SPACE["instructions"]["text_instructions"]]
     for value in all_ids:
         assert re.fullmatch(r"[0-9a-f]{32}", value), value
-    assert len({item["id"] for item in samples}) == 6
+    assert len({item["id"] for item in samples}) == 12
     assert len({item["id"] for item in examples}) == 6
     # The API additionally requires these lists to be sorted by id
     # ("example_question_sqls must be sorted by id", 400, observed 2026-09-02).
@@ -106,3 +113,41 @@ def test_genie_samples_and_examples_are_deterministic_and_complete() -> None:
     assert [item["id"] for item in examples] == sorted(item["id"] for item in examples)
     assert all(item["question"] and isinstance(item["question"][0], str) for item in samples)
     assert all("${var.catalog}.${var.schema}." in "".join(item["sql"]) for item in examples)
+
+
+def test_genie_refusal_policy_requires_naming_the_reason_and_covers_every_class() -> None:
+    # The refusal guidance lives in the single permitted text-instruction block, so a
+    # deployed space carries it; a separate block would be rejected by the API.
+    blocks = SPACE["instructions"]["text_instructions"]
+    assert len(blocks) == 1
+    merged = "\n".join(blocks[0]["content"])
+    lowered = merged.lower()
+    assert "## refusal policy" in lowered
+    # It must instruct naming the reason rather than merely declining.
+    assert "name the specific reason" in lowered
+    assert "i cannot answer that" in lowered and "not an adequate refusal" in lowered
+    assert "refuse rather than infer" in lowered
+    flattened = re.sub(r"[^a-z0-9]+", " ", lowered)
+    for item in REFUSALS:
+        # Each unsupported_because class is discoverable as prose, e.g. the class
+        # "no_published_field" appears as the heading "No published field:".
+        phrase = re.sub(r"[^a-z0-9]+", " ", item["unsupported_because"].lower())
+        assert phrase in flattened, item["unsupported_because"]
+
+
+def test_every_must_refuse_question_is_a_sample_question_with_no_example_sql() -> None:
+    samples = {item["id"]: "".join(item["question"]) for item in SPACE["config"]["sample_questions"]}
+    example_ids = {item["id"] for item in SPACE["instructions"]["example_question_sqls"]}
+    assert len(REFUSALS) == 6
+    for item in REFUSALS:
+        question_id = item["space_question_id"]
+        assert question_id in samples, item["id"]
+        assert samples[question_id] == item["question"], item["id"]
+        # A must-refuse question with example SQL would hand the executor a query.
+        assert question_id not in example_ids, item["id"]
+    # The API-required invariants still hold across the enlarged sample list.
+    sample_ids = [item["id"] for item in SPACE["config"]["sample_questions"]]
+    assert all(re.fullmatch(r"[0-9a-f]{32}", value) for value in sample_ids)
+    assert sample_ids == sorted(sample_ids)
+    assert len(set(sample_ids)) == len(sample_ids)
+    assert len(SPACE["instructions"]["text_instructions"]) == 1
