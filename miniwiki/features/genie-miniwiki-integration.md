@@ -10,8 +10,8 @@ coding sessions. It should make it easy to answer:
 - What is the next small thing to implement?
 - What should the next person or agent know?
 
-The repository-owned skill is
-[`.agents/skills/miniwiki/SKILL.md`](../../.agents/skills/miniwiki/SKILL.md).
+The repository uses ordinary Markdown pages and validation scripts for miniwiki
+continuity; no repository-owned skill is required.
 
 ## Technique
 

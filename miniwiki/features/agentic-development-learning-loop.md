@@ -29,28 +29,16 @@ a parallel lifecycle or a large new agent team.
 
 ## Gaps identified before this slice
 
-- [understand-requirement](../../.agents/skills/understand-requirement/SKILL.md) and
-  [plan-change](../../.agents/skills/plan-change/SKILL.md) specify necessary contracts
-  but do not explicitly vary preparation and proof with the kind of task.
-- [agentic-eval](../../.agents/skills/agentic-eval/SKILL.md) asks for inspected evidence,
-  but does not make an investigation distinguish an explanation ruled out from one
-  not examined.
-- [adversarial-review](../../.agents/skills/adversarial-review/SKILL.md) covers important
-  correctness and safety topics, but does not explicitly review code structure as a
-  separate question from passing tests.
-- The [pair record](../../workshop/track-record-template.md) records findings
-  and repairs, but not the distinction between normal refinement, correction of an
-  error, and abandoning an approach.
+- The former requirement, planning, evaluation, and review documents specified
+  useful contracts but added process and routing overhead to ordinary changes.
+- The pair record records findings and repairs, but does not need a separate
+  skill layer to distinguish refinement, correction, or abandoning an approach.
 - The tracks end with human disposition. They do not require a reusable lesson and a subsequent
   local check showing whether it helps. This leaves Observe and Improve less visible
   than the delivery stages.
-- The repository-owned [verification skill](../../.agents/skills/agentic-verification/SKILL.md)
-  still prescribes two reviewers for a small change, larger fixed ranges, and specific
-  model names. It assumes role availability not supplied as repo-local native agent
-  definitions. This differs from the current machine-level risk-based guidance and
-  undermines a fresh-clone workshop. Preserve the repository's current verification
-  floor in the first patch. Any change to reviewer counts or model policy is a separate
-  decision for David, not an incidental consequence of adding portable roles.
+- The former repository verification layer prescribed fixed reviewers and model
+  assumptions that were not available consistently across assistants. That layer
+  is now removed; use the track record and human judgement instead.
 - The former contradiction here — a current-focus page describing a seeded patch under
   a "historical" lane while the clock document said those lanes were not routed — was
   resolved on 2026-09-07 by making the tracks the routed path. See
@@ -139,14 +127,14 @@ with a location and consequence. Do not manufacture a defect to fill a checklist
 
 ### Package learning when the procedure has been exercised
 
-After the first pilot, consider `.agents/skills/capture-learning/SKILL.md`, used by
-maintainers and participants. This is a shared recipe for evaluating a lesson, not
-a requirement for every participant to create a skill. Its proposed procedure is:
+After the first pilot, use the track record instead of a separate skill. This is a
+shared recipe for evaluating a lesson, not a requirement for every participant to
+create a new workflow. Its proposed procedure is:
 
 1. Select an observed difficulty or useful refinement, not an invented failure.
 2. Decide whether it is reusable. Keep one-off context in the issue or session note.
-3. Put reusable behaviour into a regression test, a repeated procedure into a skill,
-   or a design convention into concise guidance.
+3. Put reusable behaviour into a regression test, a repeated procedure into concise
+   guidance, or a design convention into the relevant instructions.
 4. If the new file or change is outside the approved plan, amend the plan and obtain
    approval before editing it. Never weaken a check to demonstrate improvement.
 5. Rerun the original case and at least one variant or counterexample in an isolated

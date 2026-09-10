@@ -16,8 +16,8 @@ drop every wall-clock time and card number. Stages are self-paced.
 ## Why
 
 The repository previously carried two competing participant paths at once. A
-`QUICKSTART.md` described a shared GitHub-issue lifecycle with cross-track pairs
-routed through `.agents/skills/`. `lane_a_business/Instructions.md` and
+`QUICKSTART.md` described a shared GitHub-issue lifecycle with cross-track pairs.
+`lane_a_business/Instructions.md` and
 `lane_b_engineering/Instructions.md` described self-contained numbered-prompt
 tracks on a fixed clock. The deleted run-of-show asserted that the lane
 directories were "historical material and are not routed", while both lane
