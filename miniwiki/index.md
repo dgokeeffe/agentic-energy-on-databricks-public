@@ -66,6 +66,11 @@ installation. The repository-owned workflow is documented in
   — the facility dimension selected registration rows by wall-clock time, so the
   same Bronze data produced different Silver rows; why 290 tests missed it, why the
   pinned instant is derived from the data, and the bug found in the guard itself.
+- [`decisions/market-vs-source-timezone.md`](decisions/market-vs-source-timezone.md)
+  — why market time is fixed-AEST `Australia/Brisbane` while a feed's
+  `source_timezone` is per-feed metadata, why the snapshot fixture is deliberately
+  `Australia/Sydney` on the daylight-saving changeover date, and what breaks if the
+  two are unified.
 
 ## How to grow this wiki
 
