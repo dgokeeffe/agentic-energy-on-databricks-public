@@ -110,16 +110,23 @@ rejects `-288, 0`, which is that exact failure shape for this rule.
   thicken the fixture or state the limitation.
 - **Open risks:** the threshold value itself is unset and unreviewed; window
   performance at sustained five-minute cadence is unmeasured; no live cycle.
-- **Unverified and blocking a deployment claim: `F.median()` over a `ROWS BETWEEN`
-  frame has not been executed.** The Databricks `median` reference says it "can
-  also be invoked as a window function using the `OVER` clause", but percentile
-  functions are documented elsewhere as accepting only `RANGE` frames, and this
-  repository has no precedent — every other window use is `row_number()`. PySpark
-  is not installable in the authoring environment, so the plan was never analysed.
-  **The first authorised dev run must confirm the view analyses at all.** If it
-  raises on the `ROWS` frame, the fallback is `collect_list` over the same frame
-  with `percentile_approx` applied to the resulting 288-element array; the pure
-  function, the tests, and every governed surface stay unchanged, because only the
-  median mechanism moves.
+- **RESOLVED 2026-09-10: `F.median()` over a `ROWS` frame was a real defect, and
+  the view would not have analysed.** Executed on warehouse
+  `56c05cc4eb78c05d` by `scripts/verify_spike_sql_semantics.py`:
+
+  | Mechanism | Result |
+  |---|---|
+  | `median(x) OVER (... ROWS ...)` | **rejected** — `INVALID_WINDOW_SPEC_FOR_AGGREGATION_FUNC` |
+  | `percentile_approx(x, 0.5) OVER (... ROWS ...)` | accepted but **approximate** — returns `0.0` for `[0, 1]` where the exact median is `0.5` |
+  | `percentile(x, 0.5) OVER (... ROWS ...)` | **accepted and exact** — matched `statistics.median` on every probe |
+
+  The view now uses `percentile`. The trap worth recording: `percentile_approx`
+  *is* accepted, so it looks like the obvious fix, but it would have disagreed
+  with every offline test while the pipeline stayed green — a worse failure than
+  the outright rejection. Two mutants now guard against reverting to either.
+
+  The full rule was also verified end to end over 330 synthetic intervals: `NULL`
+  before interval 288, `false` at 288, `true` on the spike, `false` at 149.99 and
+  `true` at exactly 150.0, all matching the pure-Python rule.
 - **Next item:** a named reviewer sets `BUNDLE_VAR_spike_baseline_multiple`, then
   an authorised deployment exercises Gate 5 metric reconciliation.

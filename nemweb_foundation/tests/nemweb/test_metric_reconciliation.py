@@ -331,6 +331,27 @@ def test_the_spike_view_exposes_price_formation_basis_as_a_dimension() -> None:
     )
 
 
+def test_no_spike_measure_divides_by_the_total_interval_count() -> None:
+    """The understatement this guards against is silent, so it is asserted.
+
+    A spike rate over five_minute_interval_count counts undecidable intervals in
+    the denominator, which reports less risk exactly when the baseline is
+    incomplete. decided_interval_count is the only valid denominator, and no
+    measure may bake in the wrong one.
+    """
+
+    spike = metric_definitions()["nem_dispatch_price_spike_metrics"]
+    for measure in spike["measures"]:
+        expression = measure["expr"].replace(" ", "")
+        assert "/five_minute_interval_count" not in expression, measure["name"]
+        assert "/COUNT(1)" not in expression, measure["name"]
+        assert "/COUNT(*)" not in expression, measure["name"]
+    # Both counts must remain published, or a consumer cannot compute a rate at
+    # all and will reach for the wrong denominator themselves.
+    names = {measure["name"] for measure in spike["measures"]}
+    assert {"spike_interval_count", "decided_interval_count"} <= names
+
+
 def test_no_measure_expression_carries_an_unresolved_sql_parameter() -> None:
     """A metric view cannot take a named parameter; the threshold lives in Gold.
 

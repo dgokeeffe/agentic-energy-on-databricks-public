@@ -157,6 +157,28 @@ def test_the_spike_flag_is_withheld_rather_than_false_when_undecidable() -> None
     assert 'F.col("_baseline_median") > 0' in spike, "non-positive baseline withheld"
 
 
+def test_the_trailing_median_uses_exact_percentile_not_median_or_approx() -> None:
+    """The median mechanism is not interchangeable, and the wrong one fails silently.
+
+    Verified against a warehouse by scripts/verify_spike_sql_semantics.py:
+    median() over a ROWS frame raises INVALID_WINDOW_SPEC_FOR_AGGREGATION_FUNC, so
+    the view would not analyse at all. percentile_approx() *is* accepted, which
+    makes it the tempting fix, but it is approximate -- for [0, 1] it returns 0.0
+    where the exact median is 0.5. That would disagree with every offline test
+    while the pipeline stayed green, which is the worse failure of the two.
+    """
+
+    source = (PIPELINE / "gold_additional_aggregates.py").read_text()
+    assert 'F.expr("percentile(rrp_aud_per_mwh, 0.5)")' in source
+    # Comment lines legitimately name the rejected functions to explain why they
+    # are rejected, so only executable lines are searched.
+    code = "\n".join(
+        line for line in source.splitlines() if not line.lstrip().startswith("#")
+    )
+    assert "F.median(" not in code, "median() cannot take a window frame"
+    assert "percentile_approx" not in code, "approximate median diverges from the rule"
+
+
 def test_the_spike_view_separates_administered_prices_from_market_prices() -> None:
     """An administered or suspended price is an intervention artefact.
 

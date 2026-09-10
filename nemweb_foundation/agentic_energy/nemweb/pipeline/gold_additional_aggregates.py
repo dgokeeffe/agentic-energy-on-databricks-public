@@ -101,20 +101,21 @@ def gold_nem_dispatch_price_spike_5min():
         .alias("price_formation_basis"),
         "source_publication_at",
     )
-    # UNVERIFIED AT RUNTIME: F.median() over a ROWS frame has never been executed
-    # here. The Databricks median reference allows OVER, but percentile functions
-    # are documented elsewhere as RANGE-only and this pipeline has no precedent
-    # (every other window use is row_number()). If the first authorised run raises
-    # on the frame, replace only this median with collect_list over the same frame
-    # plus percentile_approx on the array; the rule and its tests do not change.
-    # See miniwiki/features/price-spike-detector.md.
+    # percentile(x, 0.5), NOT median() and NOT percentile_approx(). Verified on a
+    # warehouse by scripts/verify_spike_sql_semantics.py:
+    #   median() OVER a frame raises INVALID_WINDOW_SPEC_FOR_AGGREGATION_FUNC;
+    #   percentile_approx() is accepted but approximate -- for [0, 1] it returns
+    #   0.0 where the exact median is 0.5, so it would silently disagree with the
+    #   pure-Python rule every offline test asserts;
+    #   percentile() is exact and accepted over a ROWS frame.
+    # Do not "simplify" this back to median(); that check exists to stop it.
     #
     # count() over the same frame proves the window is full. Without it a partial
     # window still yields a median, and an early interval would be judged against
     # a handful of rows as though it had a full day of history.
     measured = source.select(
         "*",
-        F.median("rrp_aud_per_mwh").over(baseline).alias("_baseline_median"),
+        F.expr("percentile(rrp_aud_per_mwh, 0.5)").over(baseline).alias("_baseline_median"),
         F.count("rrp_aud_per_mwh").over(baseline).alias("_baseline_rows"),
     )
     complete_baseline = F.col("_baseline_rows") >= F.lit(SPIKE_BASELINE_INTERVALS)

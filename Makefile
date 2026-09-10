@@ -1,7 +1,7 @@
 PYTHON ?= python3
 PROFILE ?= DEFAULT
 
-.PHONY: setup miniwiki test foundation-test foundation-snapshot modern-apis build app-install app-typegen app-test app-dev-mock ticket-verify ml-test lakebase-test links safety bundle-validate bundle-validate-live-evidence facilitator-lakebase-preflight facilitator-lakebase-smoke validate-local validate-readonly
+.PHONY: setup miniwiki test foundation-test foundation-snapshot modern-apis mutation-spike build app-install app-typegen app-test app-dev-mock ticket-verify ml-test lakebase-test links safety bundle-validate bundle-validate-live-evidence facilitator-lakebase-preflight facilitator-lakebase-smoke validate-local validate-readonly
 
 setup:
 	bash scripts/setup-dev.sh
@@ -26,6 +26,13 @@ foundation-snapshot:
 
 modern-apis:
 	$(PYTHON) nemweb_foundation/scripts/check_modern_pipeline_apis.py
+
+# Injects ten known defects into the dispatch-price spike rule one at a time and
+# requires each to be caught by the specific test written for it. A green suite
+# does not prove a test would fail if the code were wrong; this does. Sources are
+# restored even on failure.
+mutation-spike:
+	$(PYTHON) nemweb_foundation/scripts/mutation_guard_spike_rule.py
 
 build:
 	rm -rf dist nemweb_foundation/dist nemweb_ml/dist
@@ -82,7 +89,7 @@ bundle-validate-live-evidence:
 	  done; \
 	  (cd nemweb_foundation && databricks bundle validate --strict -t live_evidence --profile $(PROFILE))
 
-validate-local: miniwiki links safety test foundation-snapshot modern-apis build app-test
+validate-local: miniwiki links safety test foundation-snapshot modern-apis mutation-spike build app-test
 
 facilitator-lakebase-preflight:
 	@test "$(PROFILE)" = "DEFAULT" || (echo 'PROFILE=DEFAULT is required' >&2; exit 2)

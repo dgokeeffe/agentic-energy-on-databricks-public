@@ -55,6 +55,31 @@ def test_a_non_positive_threshold_refuses(raw: str) -> None:
         spike_baseline_multiple(_spark({"nemweb.spike_baseline_multiple": raw}))
 
 
+def test_the_window_length_is_stated_identically_everywhere_it_appears() -> None:
+    """288 is published in five places and they must not drift apart.
+
+    The constant, the Gold view, the governed column comments, the metric view
+    comment and DATA-CONTRACT.md all state the baseline length. If one is edited
+    alone, analysts read a number the pipeline does not use.
+    """
+
+    from pathlib import Path
+
+    root = Path(__file__).parents[2]
+    surfaces = {
+        "gold view": root / "agentic_energy/nemweb/pipeline/gold_additional_aggregates.py",
+        "semantics": root / "sql/nemweb_semantics.sql",
+        "data contract": root / "DATA-CONTRACT.md",
+    }
+    for name, path in surfaces.items():
+        text = path.read_text()
+        assert str(SPIKE_BASELINE_INTERVALS) in text, f"{name} does not state 288"
+        # A stale window length is worse than none: it describes a rule that is
+        # not the one running.
+        for stale in (" 144 intervals", " 96 intervals", " 12 intervals"):
+            assert stale not in text, f"{name} states a stale window {stale!r}"
+
+
 def test_no_default_value_is_committed_anywhere_in_the_bundle() -> None:
     """A default in databricks.yml would silently re-enable the guessed number."""
 

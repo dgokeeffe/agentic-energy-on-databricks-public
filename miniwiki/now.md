@@ -95,15 +95,24 @@ configuration as `nemweb.spike_baseline_multiple`. **Both test layers were
 mutation-checked** — eight deliberate defects introduced one at a time, each
 caught by the test written for it.
 
-**One unverified mechanism, called out rather than smoothed over.** `F.median()`
-over a `ROWS BETWEEN` frame has **never been executed**. The Databricks `median`
-reference says it can be invoked with `OVER`, but percentile functions are
-documented elsewhere as accepting only `RANGE` frames, and this repository has no
-precedent — every existing window use is `row_number()`. PySpark could not be
-installed in the authoring environment, so the plan was not analysed. The first
-authorised dev run must confirm the view analyses; the documented fallback is
-`collect_list` plus `percentile_approx`, which changes only the median mechanism
-and leaves the rule, tests and governed surfaces intact.
+**The one unverified mechanism turned out to be a real defect, now fixed.**
+`F.median()` over a `ROWS` frame was executed against warehouse
+`56c05cc4eb78c05d` on 2026-09-10 and **Spark rejects it**
+(`INVALID_WINDOW_SPEC_FOR_AGGREGATION_FUNC`) — the Gold view would not have
+analysed. Reading the docs was not enough: the Databricks `median` reference says
+`OVER` is supported, and it is, but not with a frame.
+
+The near-miss is the part worth remembering. `percentile_approx` **is** accepted
+over a `ROWS` frame, so it looks like the fix — but it is approximate, returning
+`0.0` for `[0, 1]` where the exact median is `0.5`. Adopting it would have left
+the pipeline green while silently disagreeing with every offline test, which is
+worse than the outright rejection. The view now uses exact `percentile(x, 0.5)`,
+verified to match `statistics.median` on every probe, and two mutants guard
+against reverting to either wrong mechanism.
+
+`scripts/verify_spike_sql_semantics.py` is the reusable harness. It is read-only
+by construction — every case runs over `range()` literals, so it reads no governed
+table and needs only `CAN_USE` on a warehouse.
 
 **Not done, and not claimable.** Nothing is committed, deployed, or run in a
 workspace. `make bundle-validate` stops at its `.env` gate, so the
