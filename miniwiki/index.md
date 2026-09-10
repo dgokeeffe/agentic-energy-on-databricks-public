@@ -29,6 +29,10 @@ installation. The repository-owned workflow is documented in
   Genie → Review evidence and uncertainty → Save investigation → Follow up), the
   prepared Genie-analysis prototype, and the live two-agent collision in this
   checkout. **Read before editing `nemweb_app/`.**
+- [`features/registration-freshness-next-session.md`](features/registration-freshness-next-session.md)
+  — the sequenced continuation for issue #7 and pull request #28: the re-review
+  gate still open, the E1 issue not yet filed, and the traps that already cost
+  time in this work.
 - [`features/price-spike-detector.md`](features/price-spike-detector.md) — a
   downstream analytics idea that depends on the NEMWEB Gold contracts.
 - [`features/genie-miniwiki-integration.md`](features/genie-miniwiki-integration.md)
@@ -66,6 +70,11 @@ installation. The repository-owned workflow is documented in
   — the facility dimension selected registration rows by wall-clock time, so the
   same Bronze data produced different Silver rows; why 290 tests missed it, why the
   pinned instant is derived from the data, and the bug found in the guard itself.
+- [`decisions/registration-coverage-metric.md`](decisions/registration-coverage-metric.md)
+  — why issue #7's own freshness metric is identically zero and could never fire,
+  the market-time alternative that reports 2750 days stale on a fresh load, what
+  publication-time coverage measures instead, and the four of the author's own
+  guards that mutation testing caught doing nothing.
 
 ## How to grow this wiki
 
