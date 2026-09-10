@@ -97,6 +97,85 @@ def test_all_unknown_enrichment_fails_when_registration_context_is_expected() ->
         ]).validate(registration_context_expected=True)
 
 
+def test_absent_registration_context_is_distinguishable_from_legitimate_unknown() -> None:
+    """The case the Gold count-only gate could not see.
+
+    An absent context load yields every row UNKNOWN, which must stop the run. A
+    partial load yields *some* UNKNOWN rows, which is legitimate and must not.
+    Both have a positive row count, so the row count alone cannot tell them apart.
+    """
+
+    absent = registration_enrichment_quality(
+        [{"region_id": "UNKNOWN", "fuel_type": "UNKNOWN"} for _ in range(3)]
+    )
+    assert absent.total_rows == 3
+    assert absent.known_region_ratio == 0.0
+    assert absent.known_fuel_ratio == 0.0
+    with pytest.raises(ValueError, match="all regions are UNKNOWN"):
+        absent.validate(registration_context_expected=True)
+
+    partial = registration_enrichment_quality([
+        {"region_id": "NSW1", "fuel_type": "Wind"},
+        {"region_id": "UNKNOWN", "fuel_type": "UNKNOWN"},
+    ])
+    assert partial.total_rows == 2
+    assert partial.known_region_ratio == 0.5
+    # Unmatched DUIDs are preserved, not filtered, and the result still passes.
+    partial.validate(registration_context_expected=True)
+
+
+def test_gold_generation_fails_an_interval_with_no_enrichment_at_all() -> None:
+    """The Gold expectation must be interval-scoped, not per row.
+
+    region_id and fuel_type are grouping keys, so a legitimately UNKNOWN group is
+    a valid row. Only an interval with no known region *or* no known fuel is
+    evidence of a missing context load.
+
+    This asserts source text: the view is a @dp.materialized_view requiring
+    Databricks Spark, so it cannot execute in this environment.
+    """
+
+    source = (
+        Path(__file__).resolve().parents[2]
+        / "agentic_energy/nemweb/pipeline/gold_scada_generation.py"
+    ).read_text()
+
+    assert '"registration_context_present_per_interval"' in source
+    assert (
+        "interval_known_region_facility_count > 0 "
+        "AND interval_known_fuel_facility_count > 0" in source
+    )
+    # Interval-wide totals must come from a window, not the groupBy, or the
+    # expectation would only ever see one region/fuel bucket.
+    assert 'Window.partitionBy("interval_end")' in source
+    for column in (
+        "known_region_facility_count",
+        "known_fuel_facility_count",
+        "unmatched_facility_count",
+        "interval_known_region_facility_count",
+        "interval_known_fuel_facility_count",
+    ):
+        assert column in source, column
+    # Rows are never dropped to obtain a pass.
+    assert "expect_or_drop" in source
+    assert "dimension_match_status" not in source.split("expect_or_drop")[1].split(")")[0]
+    # The pre-existing count gate stays; the new one is additive.
+    assert '"valid_scada_enrichment_counts"' in source
+
+
+def test_gold_generation_carries_registration_effective_at_for_provenance() -> None:
+    """A consumer cannot report attribution staleness it cannot read."""
+
+    source = (
+        Path(__file__).resolve().parents[2]
+        / "agentic_energy/nemweb/pipeline/gold_scada_generation.py"
+    ).read_text()
+    # Selected from the dimension, then aggregated -- max, because the column is
+    # NULL for an unmatched DUID.
+    assert 'F.col("f.registration_effective_at")' in source
+    assert 'F.max("registration_effective_at").alias("registration_effective_at")' in source
+
+
 def test_pseudo_unit_keeps_region_and_unknown_fuel_instead_of_being_dropped() -> None:
     details, allocations, generators = _registration_rows()
     row = build_facility_dimension(
