@@ -46,6 +46,49 @@ def test_app_fuel_generation_read_is_fixed_and_separately_granted():
     assert "securable_type: SCHEMA" not in bundle
 
 
+def test_the_registration_staleness_threshold_is_the_same_in_both_languages():
+    """The pipeline and the screen must not disagree about what "stale" means.
+
+    ``STALE_REGISTRATION_AFTER_SECONDS`` is written twice — once in Python for the
+    governed contract, once in TypeScript for the screen — because the repository
+    has no cross-language constant sharing. Nothing else couples them, and an
+    independent review found the drift is silent: changing only the TypeScript side
+    from 45 to 40 days passes all 97 app tests and all 343 foundation tests,
+    because no test straddles the gap between the two values.
+
+    A pipeline that considers a load fresh while the screen calls it stale, or the
+    reverse, is the divergence this branch exists to prevent. Rather than trust a
+    comment to keep them aligned, read both literals and compare.
+    """
+    import re
+
+    def threshold(path: str, pattern: str) -> int:
+        text = (ROOT / path).read_text()
+        # MULTILINE, so ``^`` anchors each declaration to its own line rather than
+        # to the start of the file.
+        match = re.search(pattern, text, re.MULTILINE)
+        assert match, f"STALE_REGISTRATION_AFTER_SECONDS not found in {path}"
+        days, hours, minutes, seconds = (int(group) for group in match.groups())
+        return days * hours * minutes * seconds
+
+    python_seconds = threshold(
+        "nemweb_foundation/agentic_energy/nemweb/quality.py",
+        r"^STALE_REGISTRATION_AFTER_SECONDS = (\d+) \* (\d+) \* (\d+) \* (\d+)",
+    )
+    typescript_seconds = threshold(
+        "nemweb_app/client/src/domain/fuelCapture.ts",
+        r"^export const STALE_REGISTRATION_AFTER_SECONDS = (\d+) \* (\d+) \* (\d+) \* (\d+);",
+    )
+
+    assert python_seconds == typescript_seconds, (
+        f"registration staleness threshold has drifted: "
+        f"quality.py says {python_seconds}s, fuelCapture.ts says {typescript_seconds}s"
+    )
+    # A monthly archive is up to 31 days apart by definition, so a threshold at or
+    # below that alarms every ordinary month in both layers at once.
+    assert python_seconds > 31 * 24 * 60 * 60
+
+
 def test_app_states_the_availability_and_settlement_boundaries_on_screen():
     """A capture screen invites a curtailment reading, so the denial must be visible.
 
