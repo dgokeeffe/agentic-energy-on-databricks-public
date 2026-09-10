@@ -114,20 +114,50 @@ Filtering stale rows out would make a real spike look like an absence of spikes.
 Non-spiking intervals are retained for the same reason, so "no spikes" stays
 distinguishable from "no data".
 
+## Review findings addressed (2026-09-10, PR #27)
+
+An independent code review of PR #27 raised one correctness defect and two guard
+weaknesses. All are fixed on the same branch. The rule fingerprint is unchanged,
+so no published result is invalidated.
+
+- **A non-finite threshold failed open.** `json.loads` accepts the non-standard
+  `NaN`, `Infinity` and `-Infinity` literals and returns floats, which satisfied
+  the `isinstance` check in `load_spike_rule`. `NaN` made every comparison false
+  and silently disabled the detector — a real spike reported as no spike — while
+  `-Infinity` flagged every interval including a valid negative price. Neither
+  raised, neither was visible in the fingerprint, and the SQL boundary gate could
+  not catch the `NaN` case because no row violated it. The loader now requires
+  `math.isfinite`. This contradicted the module's own fail-closed contract, which
+  is why it is recorded here rather than treated as a tidy-up.
+- **The freshness label had no drift guard.** The Gold-view checks asserted only
+  that the strings `"STALE"` and `"CURRENT"` appeared somewhere in the module.
+  Flipping the comparison, or swapping the two literals, inverted every freshness
+  label while keeping both strings present — publishing a stale spike as
+  `CURRENT`, the exact failure the column exists to prevent. Both mutations passed
+  the full suite before the fix and fail after it.
+- **The no-inlined-threshold check was brittle.** `assert "300" not in source`
+  also fired on any comment, date, or row count containing those digits. It is now
+  an AST check for numeric constants, which is both precise and stronger: the
+  module carries no numeric literal at all.
+
+Also removed the unused `rule_document()` helper, and `metadata_version` is now
+validated rather than carried as an unread key.
+
 ## Human review
 
-- **Decision:** rule approved 2026-09-10; implementation **awaiting independent
-  review**.
-- **Reviewer:** pending — a person who did not draft the change must review the
-  diff, and should confirm the 300 AUD/MWh rationale against current AEMO
-  documentation before it is quoted to participants as market fact.
+- **Decision:** rule approved 2026-09-10; code review of PR #27 completed and its
+  findings addressed; **still awaiting human sign-off before merge**.
+- **Reviewer:** the 300 AUD/MWh rationale remains **unconfirmed against current
+  AEMO documentation** and must be checked by a person before it is quoted to
+  participants as market fact. The code review did not settle this.
 - **Evidence reviewed:** [`research/nemweb-contract.md`](../research/nemweb-contract.md)
   and the deterministic fixture contract.
 
 ## Session note
 
-- **Result:** the measure is implemented and proved offline. 353 tests pass and
-  the static asset gate reports 7 benchmarks and 7 dashboard statements.
+- **Result:** the measure is implemented and proved offline. `make foundation-test`
+  reports 363 passed with 37 subtests after the PR #27 review fixes (353 before),
+  and the static asset gate reports 7 benchmarks and 7 dashboard statements.
 - **Verified by mutation, not just by green tests.** Relaxing the Gold view's
   boundary from `>` to `>=` initially passed the whole suite — the offline tests
   covered the Python rule while the published answer came from the Spark module.
@@ -142,5 +172,7 @@ distinguishable from "no data".
   snapshot fixture contains no interval above 300 AUD/MWh, so a live or thickened
   window is needed to see a non-zero spike count end to end; the spike metric was
   deliberately not added to the Genie space asset set.
-- **Next item:** independent review of the diff, then a pull request linked to
-  [issue #3](https://github.com/dgokeeffe/agentic-energy-on-databricks-public/issues/3).
+- **Next item:** human sign-off on PR #27 (linked to
+  [issue #3](https://github.com/dgokeeffe/agentic-energy-on-databricks-public/issues/3)),
+  including the outstanding AEMO threshold confirmation. Code review is done; see
+  [Review findings addressed](#review-findings-addressed-2026-09-10-pr-27).

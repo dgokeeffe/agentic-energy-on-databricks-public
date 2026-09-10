@@ -13,10 +13,11 @@ rather than silently treated as either a spike or a normal interval.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from datetime import datetime, timezone
 import hashlib
 import json
+import math
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 
@@ -36,7 +37,11 @@ NATURAL_KEY = ("interval_end", "region_id", "intervention")
 
 SUPPORTED_RULES = frozenset({"absolute"})
 SUPPORTED_BOUNDARIES = frozenset({"strict"})
+# The only metadata layout this loader knows how to read. A future layout change
+# must bump this so an older reader refuses the file rather than misreading it.
+SUPPORTED_METADATA_VERSION = 1
 _REQUIRED_FIELDS = (
+    "metadata_version",
     "rule",
     "threshold_aud_per_mwh",
     "boundary",
@@ -78,6 +83,13 @@ def load_spike_rule(path: Path | None = None) -> SpikeRule:
     if missing:
         raise ContractError(f"spike rule metadata is missing fields: {sorted(missing)}")
 
+    metadata_version = document["metadata_version"]
+    if metadata_version != SUPPORTED_METADATA_VERSION:
+        raise ContractError(
+            f"unsupported spike rule metadata_version {metadata_version!r}; this "
+            f"reader understands version {SUPPORTED_METADATA_VERSION}"
+        )
+
     rule = document["rule"]
     if rule not in SUPPORTED_RULES:
         raise ContractError(
@@ -92,8 +104,17 @@ def load_spike_rule(path: Path | None = None) -> SpikeRule:
         )
 
     threshold = document["threshold_aud_per_mwh"]
-    if isinstance(threshold, bool) or not isinstance(threshold, (int, float)):
-        raise ContractError("threshold_aud_per_mwh must be a number in AUD/MWh")
+    # json.loads accepts the non-standard NaN, Infinity and -Infinity literals and
+    # returns floats, so an isinstance check alone lets them through. Each one
+    # fails open rather than closed: NaN makes every comparison false and silently
+    # disables the detector, and -Infinity flags every interval including a valid
+    # negative price. Neither is visible in the fingerprint, so reject them here.
+    if (
+        isinstance(threshold, bool)
+        or not isinstance(threshold, (int, float))
+        or not math.isfinite(threshold)
+    ):
+        raise ContractError("threshold_aud_per_mwh must be a finite number in AUD/MWh")
 
     stale_after_seconds = document["stale_after_seconds"]
     if (
@@ -227,9 +248,3 @@ def spike_rows(
     effective = [row for row in labelled if row["is_effective_run"]]
     classified = [classify_interval(row, as_of=as_of, rule=rule) for row in effective]
     return sorted(classified, key=lambda row: (row["interval_end"], row["region_id"]))
-
-
-def rule_document(rule: SpikeRule) -> dict[str, Any]:
-    """The rule and its fingerprint, for an evidence record."""
-
-    return {**asdict(rule), "fingerprint": rule_fingerprint(rule)}

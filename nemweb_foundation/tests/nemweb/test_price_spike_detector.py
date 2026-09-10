@@ -8,6 +8,7 @@ semantics are proved without a warehouse.
 
 from __future__ import annotations
 
+import ast
 import json
 from pathlib import Path
 
@@ -16,6 +17,7 @@ import pytest
 from agentic_energy.nemweb.contracts import ContractError
 from agentic_energy.nemweb.spike import (
     DEFAULT_SPIKE_RULE,
+    SUPPORTED_METADATA_VERSION,
     SpikeRule,
     classify_interval,
     load_spike_rule,
@@ -218,6 +220,7 @@ def test_the_shipped_rule_metadata_is_the_reviewed_default() -> None:
     assert document["rule"] == "absolute"
     assert document["threshold_aud_per_mwh"] == 300.0
     assert document["boundary"] == "strict"
+    assert document["metadata_version"] == SUPPORTED_METADATA_VERSION
     assert load_spike_rule() == RULE
 
 
@@ -229,9 +232,16 @@ def test_the_shipped_rule_metadata_is_the_reviewed_default() -> None:
         ({"threshold_aud_per_mwh": None}, "threshold"),
         ({"threshold_aud_per_mwh": "300"}, "threshold"),
         ({"threshold_aud_per_mwh": True}, "threshold"),
+        # json.loads accepts these non-standard literals and returns floats, so an
+        # isinstance check alone admits them. See the fail-open test below.
+        ({"threshold_aud_per_mwh": float("nan")}, "finite"),
+        ({"threshold_aud_per_mwh": float("inf")}, "finite"),
+        ({"threshold_aud_per_mwh": float("-inf")}, "finite"),
         ({"stale_after_seconds": 0}, "stale_after_seconds"),
         ({"stale_after_seconds": -60}, "stale_after_seconds"),
         ({"rationale": ""}, "rationale"),
+        # An unrecognised layout must be refused, not read on a best-effort basis.
+        ({"metadata_version": 2}, "metadata_version"),
     ],
 )
 def test_malformed_rule_metadata_is_rejected_before_any_side_effect(
@@ -250,6 +260,55 @@ def test_a_missing_required_field_is_rejected(tmp_path) -> None:
     path.write_text(json.dumps({"rule": "absolute"}), encoding="utf-8")
     with pytest.raises(ContractError, match="threshold_aud_per_mwh"):
         load_spike_rule(path)
+
+
+@pytest.mark.parametrize("literal", ["NaN", "Infinity", "-Infinity"])
+def test_a_non_finite_threshold_literal_in_the_json_is_rejected(tmp_path, literal) -> None:
+    """These reach the loader as bare JSON text, not as a Python float.
+
+    ``json.loads`` accepts NaN, Infinity and -Infinity even though they are not
+    valid JSON, and returns ordinary floats that satisfy an isinstance check. The
+    file therefore has to be rejected by content, not only by type.
+    """
+
+    document = json.loads(DEFAULT_SPIKE_RULE.read_text(encoding="utf-8"))
+    document["threshold_aud_per_mwh"] = 300.0
+    raw = json.dumps(document).replace("300.0", literal)
+    path = tmp_path / "spike_rule.json"
+    path.write_text(raw, encoding="utf-8")
+    assert literal in path.read_text(encoding="utf-8")
+    with pytest.raises(ContractError, match="finite"):
+        load_spike_rule(path)
+
+
+def test_a_non_finite_threshold_would_fail_open_which_is_why_it_is_rejected() -> None:
+    """Prove the rejection above guards a real defect, not a theoretical one.
+
+    A non-finite threshold does not raise and does not produce an obviously wrong
+    row. It quietly inverts the detector, and the fingerprint still looks orderly,
+    so nothing downstream reveals it. NaN makes every comparison false and reports
+    a real spike as no spike; -Infinity flags every interval including a valid
+    negative price. Both are worse than an error.
+    """
+
+    def rule_with(threshold: float) -> SpikeRule:
+        return SpikeRule(
+            rule=RULE.rule,
+            threshold_aud_per_mwh=threshold,
+            boundary=RULE.boundary,
+            stale_after_seconds=RULE.stale_after_seconds,
+            rationale=RULE.rationale,
+            comment=RULE.comment,
+        )
+
+    # A genuine 99999 AUD/MWh spike disappears.
+    silenced = only([row(rrp_aud_per_mwh=99999.0)], rule=rule_with(float("nan")))
+    assert silenced["is_price_spike"] is False
+    assert silenced["price_status"] == "PRESENT", "no error and no label: the gap is invisible"
+
+    # A valid negative dispatch price becomes a spike.
+    inverted = only([row(rrp_aud_per_mwh=-1000.0)], rule=rule_with(float("-inf")))
+    assert inverted["is_price_spike"] is True
 
 
 def test_threshold_change_alters_the_fingerprint_without_a_code_change() -> None:
@@ -288,12 +347,40 @@ GOLD_SPIKE_SOURCE = (
 ).read_text()
 
 
+def _numeric_literals(source: str) -> list[float]:
+    """Numeric constants in the module's code, ignoring comments and docstrings.
+
+    Checked on the parse tree rather than the raw text. A substring ban on "300"
+    also fires on a date, a row count, or a comment that happens to contain those
+    digits, which makes the guard fail for reasons unrelated to the threshold.
+    """
+
+    return [
+        node.value
+        for node in ast.walk(ast.parse(source))
+        if isinstance(node, ast.Constant)
+        and isinstance(node.value, (int, float))
+        and not isinstance(node.value, bool)
+    ]
+
+
 def test_gold_view_reads_the_threshold_from_reviewed_metadata_not_a_literal() -> None:
     assert "load_spike_rule()" in GOLD_SPIKE_SOURCE
     assert "_RULE.threshold_aud_per_mwh" in GOLD_SPIKE_SOURCE
     assert "rule_fingerprint" in GOLD_SPIKE_SOURCE
     # A hard-coded threshold would let the published flag drift from the metadata.
-    assert "300" not in GOLD_SPIKE_SOURCE
+    # The module carries no numeric constant at all, so any number appearing here
+    # is a governed value that escaped the metadata.
+    assert _numeric_literals(GOLD_SPIKE_SOURCE) == []
+
+
+def test_the_numeric_literal_guard_would_catch_an_inlined_threshold() -> None:
+    """A guard never shown to fail is indistinguishable from one that cannot fail."""
+
+    assert _numeric_literals('F.col("rrp_aud_per_mwh") > F.lit(300.0)') == [300.0]
+    # A comment or docstring mentioning the number is not a defect, and the
+    # previous substring form of this check rejected it.
+    assert _numeric_literals('# reviewed against the 300 AUD/MWh level\nx = _RULE.t') == []
 
 
 def test_gold_view_applies_the_strict_boundary() -> None:
@@ -314,6 +401,25 @@ def test_gold_view_defaults_to_the_effective_run_and_labels_freshness() -> None:
     # Non-spiking intervals are retained so no spikes stays distinguishable from
     # no data, which a .where(is_price_spike) filter would destroy.
     assert 'where(F.col("is_price_spike"))' not in GOLD_SPIKE_SOURCE
+
+
+def test_gold_view_labels_staleness_in_the_direction_the_rule_intends() -> None:
+    """Assert the comparison and both labels together, as the boundary check does.
+
+    Presence of the strings "STALE" and "CURRENT" says nothing about which one a
+    lagging row receives. Flipping the comparison, or swapping the two literals,
+    inverts every freshness label while keeping both strings in the file: a stale
+    spike would then be published as CURRENT, which is the exact failure this
+    column exists to prevent.
+    """
+
+    assert (
+        'lag_seconds > F.lit(_RULE.stale_after_seconds), F.lit("STALE")'
+        in GOLD_SPIKE_SOURCE
+    ), "lag beyond the recorded limit is STALE; < or swapped labels invert the answer"
+    assert '.otherwise(F.lit("CURRENT")).alias("spike_freshness_status")' in GOLD_SPIKE_SOURCE
+    # The limit is metadata like the threshold, never inlined.
+    assert "_RULE.stale_after_seconds" in GOLD_SPIKE_SOURCE
 
 
 def test_gold_view_labels_a_missing_price_instead_of_flagging_it() -> None:
