@@ -102,12 +102,17 @@ and asserts set equality.
 - **Re-review.** `e08a5ff` post-dates the review that requested it. Per
   `adversarial-review`, accepted repairs return through the gates, so a fresh
   reviewer on the full diff is the next gate before the draft is lifted.
-- **E1 has no issue yet.** `io.py:281` stamps `F.lit("listing_or_http")`
-  unconditionally, discarding the `retrieval_fallback` that `lander.py:432`
-  computes. Every Bronze table using `section_stream` is affected. Consequence
-  here: the basis leg of the degradation guard is **inert**, and a timing heuristic
-  is what actually fires. It is recorded only in the PR body, so **it dies if #28
-  is closed.**
+- **E1 has no issue yet, and is worse than the PR body says.** `io.py:281` stamps
+  `F.lit("listing_or_http")` unconditionally. Two verified corrections: it affects
+  **8 Bronze tables**, not just the 3 registration ones (the `subject_key` branch
+  also serves the dispatch subjects, while 6 legacy call sites inherit the correct
+  basis — so the column means two different things across Bronze); and
+  `land_nemweb_delta.py:49` coalesces `source_publication_at` **before**
+  `lander.py:432` tests it, making the `retrieval_fallback` arm **unreachable on
+  the deployed path**, so repairing `io.py:281` alone would leave the job still
+  lying. Detail in
+  [`decisions/registration-coverage-metric.md`](decisions/registration-coverage-metric.md).
+  Recorded only there and in the PR body, so **file the issue before #28 closes.**
 - **E2 blocks workshop use.** All six snapshot manifest artifacts have
   `source_publication_at: null`, so the default path renders "not assessable" —
   correct, but an invisible demo. Anyone assigning #7 as an exercise gets a feature

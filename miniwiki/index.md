@@ -43,6 +43,11 @@ installation. The repository-owned workflow is documented in
 
 - [`research/nemweb-contract.md`](research/nemweb-contract.md) — source grain,
   freshness, uncertainty, and evidence prompts.
+- [`research/draft-issue-source-publication-basis.md`](research/draft-issue-source-publication-basis.md)
+  — a verified, not-yet-filed issue body: Bronze overwrites the field that says
+  whether a publication timestamp came from AEMO or from our own download clock,
+  across 8 tables, with a second fabrication upstream that makes the honest branch
+  unreachable.
 - [`research/agents-md-practices.md`](research/agents-md-practices.md) — current
   guidance and the decision behind the minimal global agent instructions.
 - [`decisions/workshop-flow.md`](decisions/workshop-flow.md) — why the workshop

@@ -66,7 +66,15 @@ the gate **incomplete**, not passed.
 `retrieval_fallback` that `lander.py:432` computes. It currently exists **only as
 a note in the PR body**, so closing #28 loses it.
 
-Verify each link before filing, rather than copying the claim:
+**A verified draft body is already written**, at
+[`../research/draft-issue-source-publication-basis.md`](../research/draft-issue-source-publication-basis.md).
+Read it before re-investigating — it corrects two things the PR body gets wrong:
+the blast radius is **8 Bronze tables**, not the 3 registration ones, and
+`land_nemweb_delta.py:49` coalesces the field **before** `lander.py:432` tests it,
+making the `retrieval_fallback` arm unreachable on the deployed path. Repairing
+`io.py:281` alone would leave the job still lying.
+
+Spot-check rather than re-derive:
 
 ```bash
 grep -n "source_publication_basis" nemweb_foundation/agentic_energy/nemweb/pipeline/io.py
@@ -75,10 +83,11 @@ grep -rn "section_stream" nemweb_foundation/agentic_energy/nemweb/pipeline/   # 
 grep -rn "source_publication_basis" nemweb_foundation/tests/                 # will a fix break a test?
 ```
 
-Blast radius matters: if `section_stream` feeds every Bronze table, this is not a
-registration-only defect. Say so in the issue, and state plainly whether existing
-Bronze rows need a backfill or the fix is forward-only — or that it could not be
-determined.
+Two things the draft flags that need a person, not an agent: the deployed row
+counts, which decide whether a backfill is needed (snapshot-mode rows are
+known-wrong rather than merely unverified, so forward-only is not obviously
+enough); and which of the three migration options to take. The draft lays them
+out without choosing.
 
 **Filing an issue is outward-facing. Ask before running `gh issue create`.**
 
@@ -95,8 +104,8 @@ and a maintainer merges.
 
 All six artifacts in
 `nemweb_foundation/agentic_energy/resources/nemweb_snapshot/v1/manifest.json`
-have `source_publication_at: null`, so the default snapshot path renders "not
-assessable". That is correct behaviour and an invisible demo: anyone assigning
+**omit the `source_publication_at` key entirely** — not merely set it null — so
+the default snapshot path renders "not assessable". That is correct behaviour and an invisible demo: anyone assigning
 #7 as a workshop exercise sees a feature that never shows its interesting state.
 
 Re-cutting the snapshot changes fixture provenance and is **not** an agent

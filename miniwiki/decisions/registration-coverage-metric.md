@@ -145,12 +145,41 @@ image of green-tests-wrong-code.
 
 ## Open, and needing a human
 
-- **E1, filed separately:** `io.py:281` stamps `F.lit("listing_or_http")`
-  unconditionally, discarding the `retrieval_fallback` that `lander.py:432`
-  computes. Every Bronze table using `section_stream` is affected. Consequence
-  here: the **basis leg of the degradation guard is inert**, and a timing heuristic
-  (publication implausibly close to `landed_at`) is what actually fires. Until it is
-  fixed, treat `source_publication_basis` as unreliable.
+- **E1, still to be filed, and worse than first described.** A draft body is
+  prepared. Two corrections to the original note, both verified:
+
+  - **The blast radius is 8 Bronze tables, not the 3 registration ones.**
+    `io.py:281` sits in `section_stream`'s `subject_key` branch, which also serves
+    `dispatch_price`, `dispatch_region_sum`, `dispatch_constraint`,
+    `dispatch_interconnector_res` and `dispatch_unit_scada` — 8 of the 9
+    `CRITICAL_TABLES`. The 6 legacy-branch call sites (bids, trading, settlement,
+    unit_solution_t1) inherit the **correct** basis from the manifest. So
+    `source_publication_basis` currently means two different things across Bronze,
+    which is worse than being uniformly wrong. An earlier version of this page said
+    "every Bronze table using `section_stream`"; that is not exact.
+  - **There is a second, independent fabrication upstream, and repairing
+    `io.py:281` alone would leave the deployed job still lying.**
+    `scripts/land_nemweb_delta.py:49` does
+    `item.get("source_publication_at") or item["retrieved_at"]` **before**
+    `lander.py:432` tests the same field, so `archive.source_publication_at` is
+    never falsy on the deployed path and the `retrieval_fallback` arm is
+    **unreachable**. Confirmed by contrast: `land_snapshot` passes the value
+    uncoalesced (`lander.py:532`) and does yield `retrieval_fallback` for all six
+    fixture archives. The deployed entrypoint is
+    `resources/nemweb_lander.job.yml` → `scripts/land_nemweb_delta.py`.
+  - The Delta landing path also has **no basis column at all** to project from —
+    `delta_lander.py:177` (DDL), `:25-33` (`LandingProvenance`), `:123-127` all
+    lack it. So the fix is not a one-line change at `io.py:281`.
+
+  Consequence here: the **basis leg of the degradation guard is inert**, and the
+  timing heuristic (publication implausibly close to `landed_at`) is what actually
+  fires. Until this is fixed, treat `source_publication_basis` as unreliable.
+
+  Also note the snapshot manifest **omits the `source_publication_at` key
+  entirely** rather than setting it null, so under snapshot mode the fallback path
+  is 100% of rows. Existing Bronze rows are therefore known-wrong rather than
+  merely unverified, and forward-only is not obviously sufficient — a facilitator
+  needs to check deployed row counts before choosing a migration.
 - **E2, needs a facilitator decision:** all six snapshot manifest artifacts have
   `source_publication_at: null`, so the default path renders "not assessable".
   Correct behaviour, invisible demo. **Anyone assigning #7 as a workshop exercise
