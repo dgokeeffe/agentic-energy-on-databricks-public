@@ -53,8 +53,9 @@ def test_the_serving_table_can_gain_the_attribution_columns_on_an_existing_deplo
     EXISTS`` is a no-op against a table that already exists, so new pipeline columns
     would fail the serving job on the first refresh after deploy. There is no
     ``autoMerge`` anywhere in this repository, and adding one would let any future
-    pipeline column reach the serving surface unreviewed, so the columns are named
-    in an idempotent ``ALTER TABLE``.
+    pipeline column reach the serving surface unreviewed, so the reconciliation is
+    ``MERGE WITH SCHEMA EVOLUTION``: per-statement, evolving the target to match
+    this one reviewed source and nothing else.
 
     Asserted rather than left to the comment, because the failure only appears
     against a previously-deployed table — never in a clean-schema test run.
@@ -122,8 +123,8 @@ def test_the_registration_staleness_threshold_is_the_same_in_both_languages():
     governed contract, once in TypeScript for the screen — because the repository
     has no cross-language constant sharing. Nothing else couples them, and an
     independent review found the drift is silent: changing only the TypeScript side
-    from 45 to 40 days passes all 97 app tests and all 343 foundation tests,
-    because no test straddles the gap between the two values.
+    from 45 to 40 days passes all 101 app tests and all 345 collected foundation and
+    root tests, because no test straddles the gap between the two values.
 
     A pipeline that considers a load fresh while the screen calls it stale, or the
     reverse, is the divergence this branch exists to prevent. Rather than trust a
@@ -131,10 +132,18 @@ def test_the_registration_staleness_threshold_is_the_same_in_both_languages():
 
     An earlier version matched four literal factors with a regex, and an independent
     review showed that broke on refactors carrying no semantic change at all —
-    ``45 * 86400``, ``(45) * (24) * (60) * (60)``, a line continuation, or a
-    ``_DAY`` constant. A guard that fails on a no-op teaches maintainers to delete
-    it. Both sides are now evaluated as arithmetic, so the test couples the value
-    rather than its spelling.
+    ``45 * 86400``, ``(45) * (24) * (60) * (60)``, ``3888000``, or a trailing
+    comment. A guard that fails on a no-op teaches maintainers to delete it. Both
+    sides are now evaluated as arithmetic, so the test couples the value rather
+    than its spelling.
+
+    Two spellings are deliberately still refused, because accepting them would mean
+    either executing the file or reimplementing a parser: a named constant such as
+    ``45 * _DAY``, whose value this test cannot see, and a declaration split across
+    lines. Both fail with an explicit instruction to keep the declaration a
+    single-line literal expression, which is the actionable message — unlike the
+    bare ``SyntaxError`` traceback an earlier version produced for the multi-line
+    case.
     """
     import ast
     import re
@@ -159,7 +168,20 @@ def test_the_registration_staleness_threshold_is_the_same_in_both_languages():
                 f"update this guard deliberately."
             )
 
-        return value(ast.parse(expression.strip(), mode="eval").body)
+        # A declaration continued onto another line is captured mid-expression by the
+        # single-line regex below, so ``ast.parse`` would raise SyntaxError and bury
+        # the cause in a traceback. Convert it into the same actionable message as
+        # every other unevaluable spelling.
+        try:
+            tree = ast.parse(expression.strip(), mode="eval")
+        except SyntaxError:
+            raise AssertionError(
+                f"{path} declares the threshold across more than one line, or as an "
+                f"expression that does not parse on its own ({expression!r}). Keep it "
+                f"a single-line literal integer expression, or update this guard "
+                f"deliberately."
+            ) from None
+        return value(tree.body)
 
     def threshold(path: str, pattern: str) -> int:
         text = (ROOT / path).read_text()
@@ -178,7 +200,14 @@ def test_the_registration_staleness_threshold_is_the_same_in_both_languages():
     )
     typescript_seconds = threshold(
         "nemweb_app/client/src/domain/fuelCapture.ts",
-        r"^export const STALE_REGISTRATION_AFTER_SECONDS\s*=\s*(.+?);\s*$",
+        # The trailing ``(?://.*)?`` accepts an end-of-line comment, so the two
+        # languages are treated alike. The Python pattern needs no equivalent: it
+        # captures any ``# …`` into the expression and ``ast.parse`` then ignores it
+        # as a comment, whereas ``// …`` is a syntax error to ``ast`` and, before
+        # this, was not matched at all — so adding ``// 45 days`` reported the
+        # constant as missing or renamed. That is the no-op failure this guard was
+        # rewritten to stop producing.
+        r"^export const STALE_REGISTRATION_AFTER_SECONDS\s*=\s*(.+?);\s*(?://.*)?$",
     )
 
     assert python_seconds == typescript_seconds, (
