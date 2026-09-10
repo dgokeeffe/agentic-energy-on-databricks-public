@@ -9,7 +9,6 @@ from pathlib import Path
 
 import pytest
 
-
 yaml = pytest.importorskip("yaml")
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -54,29 +53,12 @@ def test_runtime_service_principal_is_optional_for_dev(bundle):
     assert bundle["variables"]["runtime_service_principal"].get("default") == ""
 
 
-def test_deploy_script_requires_the_sp_only_for_workshop():
+def test_deploy_script_uses_profile_and_workshop_var_not_env_file():
     script = (REPO_ROOT / "scripts" / "deploy.sh").read_text()
-    guard = "BUNDLE_VAR_runtime_service_principal:?"
-    assert guard in script
-    before = script.split(guard)[0]
-    assert 'if [ "$TARGET" = "workshop" ]; then' in before
-
-
-def test_live_evidence_deploy_cannot_be_shadowed_by_development_environment_values():
-    script = (REPO_ROOT / "scripts" / "deploy.sh").read_text()
-    for name in (
-        "BUNDLE_VAR_resource_prefix",
-        "BUNDLE_VAR_schema",
-        "BUNDLE_VAR_landing_schema",
-        "BUNDLE_VAR_landing_volume",
-        "BUNDLE_VAR_app_serving_schema",
-        "BUNDLE_VAR_nemweb_mode",
-        "BUNDLE_VAR_allow_live_nemweb",
-    ):
-        assert f"unset {name}" in script or name in script.split("unset ", 1)[1]
-    assert script.index("live_evidence ${suffix} must differ") < script.index(
-        "unset BUNDLE_VAR_resource_prefix"
-    )
+    assert "RUNTIME_SERVICE_PRINCIPAL" in script
+    assert "BUNDLE_VAR_" not in script
+    assert 'if [ "$TARGET" = "workshop" ]; then' in script
+    assert "--profile \"$PROFILE\"" in script
 
 
 def test_writing_jobs_are_single_run_and_queued(jobs):

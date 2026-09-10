@@ -6,6 +6,7 @@ dist/
 build/
 
 # Subagent scratch state from coding-agent runs.
+.pi/
 .pi-subagents/
 __pycache__/
 *.py[cod]
@@ -20,7 +21,6 @@ uv.lock
 .pi-subagents/
 .env
 .env.*
-!.env.example
 *.pem
 *.key
 *.p12

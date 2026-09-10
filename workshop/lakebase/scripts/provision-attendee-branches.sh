@@ -92,7 +92,7 @@ done
 echo
 echo "Done. Give each attendee only their own slug:"
 for slug in "$@"; do
-  echo "  BUNDLE_VAR_attendee_slug=$slug"
+  echo "  --var attendee_slug=$slug"
 done
 echo
 echo "Attendees deploy their app BEFORE running anything locally, so the app's"

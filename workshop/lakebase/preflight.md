@@ -16,7 +16,7 @@ Use only the explicit `DEFAULT` profile. Record resource names, states, and comm
    service principal:
 
    ```bash
-   databricks permissions update database-projects "$BUNDLE_VAR_lakebase_project_id" \
+   databricks permissions update database-projects "<lakebase-project-id>" \
      --json '{"access_control_list": [{"group_name": "<approved-participant-group>", "permission_level": "CAN_MANAGE"}]}' \
      --profile DEFAULT
    ```

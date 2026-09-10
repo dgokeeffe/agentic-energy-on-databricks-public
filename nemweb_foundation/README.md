@@ -24,9 +24,8 @@ with `uv run --extra test python -m pytest` from the root.
 
 ## Bundle validation
 
-The `dev` target creates the SQL warehouse and UC schemas and names them from
-the authenticated CLI identity. Override with `BUNDLE_VAR_*` only when those
-defaults are wrong, then run:
+Choose a target. `dev` and `live_evidence` create the SQL warehouse and UC
+schemas and name them from the authenticated CLI identity. No `.env`. Then run:
 
 ```bash
 databricks bundle validate --strict -t dev --profile DEFAULT

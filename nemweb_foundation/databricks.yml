@@ -7,6 +7,11 @@ bundle:
 include:
   - resources/*.yml
 
+# Development mode prefixes job/pipeline names. Keep UC schema names stable so
+# Volume paths and pipeline catalogs stay legal identifiers.
+experimental:
+  skip_name_prefix_for_schema: true
+
 artifacts:
   default:
     type: whl
@@ -15,16 +20,23 @@ artifacts:
 
 variables:
   resource_prefix:
-    description: Run-specific prefix beginning with agentic-energy-workshop-
+    description: >-
+      Run-specific resource-name prefix. Defaults to an identity-qualified
+      workshop prefix so a developer can validate and deploy without extra vars.
+    default: agentic-energy-workshop-${workspace.current_user.short_name}
   catalog:
-    description: Unity Catalog catalog for this target
+    description: >-
+      Unity Catalog catalog. Defaults to the deploying user's personal catalog.
+    default: ${workspace.current_user.short_name}
   schema:
-    description: Unity Catalog schema for this target
+    description: Pipeline schema name; created by the bundle schema resource
+    default: agentic_energy_workshop
   landing_schema:
     description: Schema containing the managed landing Volume; defaults to the pipeline schema
     default: ${var.schema}
   app_serving_schema:
     description: Isolated schema containing the regular Delta synced-table source
+    default: ${var.schema}_serving
   volume_reader_principal:
     description: >-
       Unity Catalog principal granted READ_VOLUME on the NEMWEB landing Volume.
@@ -53,13 +65,17 @@ variables:
 
   landing_volume:
     description: Managed Unity Catalog Volume name for immutable NEMWEB archives and manifests
+    default: nemweb_landing
   warehouse_id:
-    description: SQL warehouse used by NEMWEB evidence, semantic and analyst tasks
+    description: >-
+      SQL warehouse used by evidence, semantic and analyst tasks. Defaults to
+      the warehouse this bundle creates so a developer does not supply an ID.
+    default: ${resources.sql_warehouses.analytics.id}
   lakebase_cdf_history_table:
     description: >-
       Fully qualified Unity Catalog name of the immutable Lakebase-generated
-      lb_investigations_history table. Supply through BUNDLE_VAR_; no resource
-      identifier or host is stored in Git.
+      lb_investigations_history table. Defaults to the pipeline schema; no
+      resource identifier or host is stored in Git.
     default: ${var.catalog}.${var.schema}.lb_investigations_history
   nemweb_mode:
     description: NEMWEB source mode; set to live only for an explicitly approved live run
@@ -95,32 +111,36 @@ variables:
   runtime_service_principal:
     description: >-
       Service principal that owns ETL job execution and Volume writes in the
-      shared workshop target. Unused by dev, which runs as the deploying
-      identity, so it is optional there.
+      shared workshop target. Unused by dev and live_evidence. Pass
+      --var runtime_service_principal=... only when deploying workshop.
     default: ""
   participant_group:
-    description: Group allowed to view and run the workshop job
+    description: >-
+      Group allowed to view and run the workshop job. Unused on the default
+      dev target, which grants the Volume to the deploying identity instead.
+    default: users
   facilitator_group:
-    description: Group allowed to manage the workshop job
+    description: Group allowed to manage the workshop job. Unused on the default dev target.
+    default: admins
   live_evidence_resource_prefix:
-    description: Isolated live-evidence resource prefix; required for target live_evidence
+    description: Isolated live-evidence resource prefix
+    default: agentic-energy-workshop-live-${workspace.current_user.short_name}
   live_evidence_schema:
-    description: Pre-existing isolated pipeline and Delta landing schema
+    description: Isolated pipeline and Delta landing schema
+    default: agentic_energy_workshop_live
   live_evidence_landing_schema:
-    description: Pre-existing isolated managed-Volume schema
+    description: Isolated managed-Volume schema
+    default: ${var.live_evidence_schema}
   live_evidence_landing_volume:
     description: Isolated managed Volume name
+    default: nemweb_landing_live
   live_evidence_app_serving_schema:
-    description: Pre-existing isolated app-serving schema
+    description: Isolated app-serving schema
+    default: ${var.live_evidence_schema}_serving
 
-# Values are intentionally supplied through BUNDLE_VAR_* environment
-# variables or --var. No workspace, catalog, schema, or principal is committed.
-# DATABRICKS_HOST is intentionally supplied by the authenticated CLI/CI
-# environment because bundle interpolation is not supported for auth fields.
-# Development resource names are namespaced by the deploying identity, but UC
-# table/Volume paths are supplied variables and are therefore intentionally NOT
-# claimed to be isolated. Operators must use identity-qualified dev schema and
-# Volume names; ../docs/nemweb-operations.md makes this a pre-deployment gate.
+# Choose a target. Defaults cover catalog, schemas, warehouse and live-evidence
+# isolation. The workshop target still needs runtime_service_principal via --var.
+# DATABRICKS_HOST comes from the authenticated CLI profile.
 targets:
   dev:
     default: true
