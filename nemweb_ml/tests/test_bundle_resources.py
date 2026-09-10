@@ -9,7 +9,9 @@ ROOT = Path(__file__).resolve().parents[1]
 def test_jobs_are_serverless_manual_shells_and_parameterised():
     resources = {}
     for path in (ROOT / "resources").glob("*.yml"):
-        resources.update(yaml.safe_load(path.read_text())["resources"]["jobs"])
+        jobs = (yaml.safe_load(path.read_text()) or {}).get("resources", {}).get("jobs")
+        if jobs:
+            resources.update(jobs)
     assert set(resources) == {"nemweb_training", "nemweb_batch_scoring"}
     for job in resources.values():
         assert "schedule" not in job and "trigger" not in job and "continuous" not in job
@@ -29,6 +31,10 @@ def test_registry_and_alias_safety_contracts():
     assert "serving_endpoint" not in resources
     variables = yaml.safe_load((ROOT / "databricks.yml").read_text())["variables"]
     assert {"mlflow_experiment_name", "uc_model_name", "training_table", "feature_table", "prediction_table"} <= variables.keys()
+    assert variables["catalog"]["default"] == "${workspace.current_user.short_name}"
+    assert variables["schema"]["default"] == "agentic_energy_workshop"
+    assert variables["mlflow_experiment_name"]["default"] == "${resources.experiments.nemweb.name}"
+    assert variables["uc_model_name"]["default"] == "${resources.registered_models.price_model.full_name}"
 
 
 def test_fixture_is_explicitly_not_a_useful_performance_claim():

@@ -36,6 +36,11 @@ def test_required_nemweb_bundle_variables_are_parameterised():
         "network_retry_count",
     }
     assert expected <= variables.keys()
+    assert variables["catalog"]["default"] == "${workspace.current_user.short_name}"
+    assert variables["schema"]["default"] == "agentic_energy_workshop"
+    assert variables["app_serving_schema"]["default"] == "${var.schema}_serving"
+    assert variables["landing_volume"]["default"] == "nemweb_landing"
+    assert variables["warehouse_id"]["default"] == "${resources.sql_warehouses.analytics.id}"
     assert variables["landing_schema"]["default"] == "${var.schema}"
     assert variables["landing_path"]["default"] == "/Volumes/${var.catalog}/${var.landing_schema}/${var.landing_volume}"
     assert variables["nemweb_mode"]["default"] == "snapshot"
@@ -51,9 +56,24 @@ def test_required_nemweb_bundle_variables_are_parameterised():
     assert target["mode"] == "development"
     for key in ("resource_prefix", "schema", "landing_schema", "landing_volume", "app_serving_schema"):
         assert target["variables"][key] == "${var.live_evidence_" + key + "}"
-        assert "default" not in variables["live_evidence_" + key]
+        assert "default" in variables["live_evidence_" + key]
     assert target["variables"]["nemweb_mode"] == "live"
     assert target["variables"]["allow_live_nemweb"] == "true"
+
+
+def test_bundle_owns_warehouse_and_schemas():
+    warehouse = _yaml("resources/nemweb_sql_warehouse.sql_warehouse.yml")["resources"][
+        "sql_warehouses"
+    ]["analytics"]
+    assert warehouse["enable_serverless_compute"] is True
+    assert warehouse["warehouse_type"] == "PRO"
+    assert warehouse["name"] == "${var.resource_prefix}-sql"
+    pipeline = _yaml("resources/nemweb_pipeline.schema.yml")["resources"]["schemas"]["pipeline"]
+    serving = _yaml("resources/nemweb_app_serving.schema.yml")["resources"]["schemas"]["app_serving"]
+    assert pipeline["name"] == "${var.schema}"
+    assert serving["name"] == "${var.app_serving_schema}"
+    bundle = _yaml("databricks.yml")
+    assert bundle["experimental"]["skip_name_prefix_for_schema"] is True
 
 
 def test_managed_landing_volume_is_governed_and_parameterised():

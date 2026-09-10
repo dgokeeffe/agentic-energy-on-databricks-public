@@ -15,7 +15,9 @@ variables:
   attendee_slug:
     description: >-
       Short per-attendee identifier, e.g. dok. Lowercase letters, numbers, and
-      hyphens only, starting with a letter, 26 characters or fewer.
+      hyphens only, starting with a letter, 26 characters or fewer. Pass
+      --var attendee_slug=...; ${workspace.current_user.short_name} often
+      contains a dot, which is illegal in an App name and a Lakebase branch ID.
 
   # App names permit only lowercase alphanumerics and hyphens and are limited to
   # 2-30 characters total (Apps create API). The former literal prefix
@@ -32,7 +34,10 @@ variables:
     default: ${var.app_name_prefix}-${var.attendee_slug}
 
   sql_warehouse_id:
-    description: SQL Warehouse ID supplied outside Git
+    description: >-
+      SQL warehouse the app may use. Defaults to the warehouse this bundle
+      creates so an attendee does not copy an ID from the foundation deploy.
+    default: ${resources.sql_warehouses.analytics.id}
   region_status_table:
     description: Fully qualified reviewed region-status serving table
     default: agentic_energy_workshop.agentic_energy_workshop_d4_serving.gold_nem_app_region_status
@@ -44,7 +49,10 @@ variables:
   # a shared seeded parent, so schema names (app_write, app_read) stay identical
   # for everyone and the application code needs no per-attendee change.
   lakebase_project_id:
-    description: Lakebase Autoscaling project ID supplied outside Git, without the projects/ prefix
+    description: >-
+      Lakebase Autoscaling project ID without the projects/ prefix. Still a
+      facilitator-owned workspace resource; pass --var lakebase_project_id=...
+      when deploying the app. There is no .env.
 
   postgres_branch_id:
     description: >-
@@ -76,6 +84,16 @@ variables:
     default: projects/${var.lakebase_project_id}/branches/${var.postgres_branch_id}/databases/${var.postgres_database_id}
 
 resources:
+  sql_warehouses:
+    analytics:
+      name: ${var.app_name}-sql
+      warehouse_type: PRO
+      enable_serverless_compute: true
+      enable_photon: true
+      cluster_size: 2X-Small
+      min_num_clusters: 1
+      max_num_clusters: 1
+      auto_stop_mins: 10
   apps:
     app:
       name: ${var.app_name}

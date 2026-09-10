@@ -1,0 +1,7 @@
+resources:
+  registered_models:
+    price_model:
+      catalog_name: ${var.catalog}
+      schema_name: ${var.schema}
+      name: nemweb_price_model
+      comment: Challenger-only NEMWEB price model created by the nemweb-ml bundle

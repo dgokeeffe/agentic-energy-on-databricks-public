@@ -46,18 +46,15 @@ ml-test:
 lakebase-test:
 	uv run --extra test $(PYTHON) -m pytest workshop/lakebase/tests -q
 
-# Dev defaults come from the authenticated CLI identity and workspace lookup.
-# Source .env when present so workshop or live-evidence overrides still apply.
+# Targets carry their own defaults. No .env.
 bundle-validate:
 	@test -n "$(PROFILE)" || (echo 'PROFILE=<name> is required' >&2; exit 2)
-	set -a; test -f .env && . ./.env; set +a; \
-	  (cd nemweb_foundation && databricks bundle validate --strict -t dev --profile $(PROFILE)) && \
-	  (cd nemweb_ml && databricks bundle validate --strict -t dev --profile $(PROFILE))
+	(cd nemweb_foundation && databricks bundle validate --strict -t dev --profile $(PROFILE))
+	(cd nemweb_ml && databricks bundle validate --strict -t dev --profile $(PROFILE))
 
 bundle-validate-live-evidence:
 	@test -n "$(PROFILE)" || (echo 'PROFILE=<name> is required' >&2; exit 2)
-	set -a; test -f .env && . ./.env; set +a; \
-	  (cd nemweb_foundation && databricks bundle validate --strict -t live_evidence --profile $(PROFILE))
+	(cd nemweb_foundation && databricks bundle validate --strict -t live_evidence --profile $(PROFILE))
 
 # Fast, workspace-free checks for normal development. The full local gate below
 # remains available before a handoff or workshop rehearsal.
