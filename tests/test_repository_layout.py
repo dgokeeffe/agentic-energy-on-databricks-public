@@ -60,32 +60,56 @@ def test_the_serving_table_can_gain_the_attribution_columns_on_an_existing_deplo
     against a previously-deployed table — never in a clean-schema test run.
     """
     serving = (ROOT / "nemweb_foundation/sql/app_serving/gold_nem_scada_generation_5min.sql").read_text()
-    assert "ADD COLUMNS IF NOT EXISTS" in serving, "schema evolution must be idempotent"
 
-    # Assert on executable SQL only. The comment above the ALTER names autoMerge in
-    # order to explain why it is NOT used, and a bare substring check on the whole
-    # file failed on that sentence — the same over-broad assertion that would have
-    # been satisfied by deleting the explanation.
-    statements = [
+    # Assert on executable SQL only, never the whole file. The prose above the MERGE
+    # names both autoMerge and the rejected ALTER in order to explain why neither is
+    # used, and a bare substring check would fail on that explanation — the same
+    # over-broad assertion that would also have been satisfied by deleting it.
+    statements = " ".join(
         line.split("--")[0] for line in serving.splitlines() if not line.strip().startswith("--")
-    ]
-    assert "automerge" not in " ".join(statements).lower(), (
-        "schema evolution must stay explicitly named, not delegated to autoMerge"
     )
 
-    alter = serving.split("ADD COLUMNS IF NOT EXISTS")[1].split(";")[0]
+    # MERGE WITH SCHEMA EVOLUTION is per-statement: it evolves the target to match
+    # this one reviewed source. Verified against the SQL engine — the previous
+    # `ALTER TABLE ... ADD COLUMNS IF NOT EXISTS` returned PARSE_SYNTAX_ERROR at
+    # 'EXISTS' (SQLSTATE 42601), because ADD COLUMNS has no IF NOT EXISTS clause.
+    # Plain ADD COLUMNS parses but is not idempotent, and this job runs on every
+    # refresh, so neither form is usable here.
+    assert "MERGE WITH SCHEMA EVOLUTION" in statements, (
+        "the serving MERGE must evolve the target schema, or new pipeline columns "
+        "fail the publication against an already-deployed table"
+    )
+    assert "ADD COLUMNS IF NOT EXISTS" not in statements, (
+        "ADD COLUMNS IF NOT EXISTS is not valid Databricks SQL (PARSE_SYNTAX_ERROR)"
+    )
+    assert "automerge" not in statements.lower(), (
+        "schema evolution must stay per-statement, not a table-wide autoMerge property"
+    )
+
+    # The pipeline, the serving surface and the app read must name the same columns.
+    # An asymmetry here is invisible locally: the app silently ignores a column it
+    # does not select, so it could accumulate server-side while the client is blind
+    # to it.
+    gold = (ROOT / "nemweb_foundation/agentic_energy/nemweb/pipeline/gold_scada_generation.py").read_text()
     read = (ROOT / "nemweb_app/config/queries/latest_fuel_generation.sql").read_text()
-    for column in (
+    published = {
         "registration_effective_at",
         "registration_publication_at",
         "registration_coverage_seconds",
         "registration_coverage_basis",
-    ):
-        assert column in alter, f"{column} is published by the pipeline but not added to the serving table"
+    }
+    for column in published:
+        assert column in gold, f"{column} is expected in the Gold product but is not published there"
 
-    # Every column the app reads must exist in the serving table it reads from.
-    for column in ("registration_publication_at", "registration_coverage_seconds", "registration_coverage_basis"):
-        assert column in read, f"{column} was added to serving but is not selected by the app"
+    # registration_effective_at is deliberately NOT read by the app: it is fixed-AEST
+    # market time and the screen reports UTC coverage instead. Every other published
+    # column must reach the app, and the app must read nothing that is not published.
+    expected_in_app = published - {"registration_effective_at"}
+    in_app = {column for column in published if column in read}
+    assert in_app == expected_in_app, (
+        f"serving and app read have drifted: published-and-unread "
+        f"{sorted(expected_in_app - in_app)}, unexpected {sorted(in_app - expected_in_app)}"
+    )
 
     # The reviewed read must stay pinned to one object.
     assert "FROM IDENTIFIER(:fuel_generation_table)" in read
@@ -103,26 +127,58 @@ def test_the_registration_staleness_threshold_is_the_same_in_both_languages():
 
     A pipeline that considers a load fresh while the screen calls it stale, or the
     reverse, is the divergence this branch exists to prevent. Rather than trust a
-    comment to keep them aligned, read both literals and compare.
+    comment to keep them aligned, read both declarations and compare.
+
+    An earlier version matched four literal factors with a regex, and an independent
+    review showed that broke on refactors carrying no semantic change at all —
+    ``45 * 86400``, ``(45) * (24) * (60) * (60)``, a line continuation, or a
+    ``_DAY`` constant. A guard that fails on a no-op teaches maintainers to delete
+    it. Both sides are now evaluated as arithmetic, so the test couples the value
+    rather than its spelling.
     """
+    import ast
     import re
+
+    def evaluate(expression: str, path: str) -> int:
+        """Evaluate a literal arithmetic expression, refusing anything else.
+
+        ``ast.literal_eval`` rejects ``45 * 24``, so walk the tree instead. Only
+        integer literals, multiplication and addition are permitted — enough for any
+        honest spelling of a duration, and not enough to execute anything.
+        """
+
+        def value(node: ast.AST) -> int:
+            if isinstance(node, ast.Constant) and isinstance(node.value, int):
+                return node.value
+            if isinstance(node, ast.BinOp) and isinstance(node.op, (ast.Mult, ast.Add)):
+                left, right = value(node.left), value(node.right)
+                return left * right if isinstance(node.op, ast.Mult) else left + right
+            raise AssertionError(
+                f"{path} declares the threshold as an expression this test cannot "
+                f"evaluate ({expression!r}). Keep it literal integer arithmetic, or "
+                f"update this guard deliberately."
+            )
+
+        return value(ast.parse(expression.strip(), mode="eval").body)
 
     def threshold(path: str, pattern: str) -> int:
         text = (ROOT / path).read_text()
         # MULTILINE, so ``^`` anchors each declaration to its own line rather than
         # to the start of the file.
         match = re.search(pattern, text, re.MULTILINE)
-        assert match, f"STALE_REGISTRATION_AFTER_SECONDS not found in {path}"
-        days, hours, minutes, seconds = (int(group) for group in match.groups())
-        return days * hours * minutes * seconds
+        assert match, (
+            f"STALE_REGISTRATION_AFTER_SECONDS not found in {path}. If it was "
+            f"renamed or moved, update both sides and this guard together."
+        )
+        return evaluate(match.group(1), path)
 
     python_seconds = threshold(
         "nemweb_foundation/agentic_energy/nemweb/quality.py",
-        r"^STALE_REGISTRATION_AFTER_SECONDS = (\d+) \* (\d+) \* (\d+) \* (\d+)",
+        r"^STALE_REGISTRATION_AFTER_SECONDS\s*=\s*(.+?)\s*$",
     )
     typescript_seconds = threshold(
         "nemweb_app/client/src/domain/fuelCapture.ts",
-        r"^export const STALE_REGISTRATION_AFTER_SECONDS = (\d+) \* (\d+) \* (\d+) \* (\d+);",
+        r"^export const STALE_REGISTRATION_AFTER_SECONDS\s*=\s*(.+?);\s*$",
     )
 
     assert python_seconds == typescript_seconds, (

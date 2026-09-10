@@ -38,23 +38,25 @@ SELECT *, CAST(:source_mode AS STRING) AS source_mode
 FROM IDENTIFIER(:catalog || '.' || :schema || '.gold_nem_scada_generation_5min')
 WHERE FALSE;
 
--- Evolve a serving table that was created before the attribution columns existed.
+-- Schema evolution is handled on the MERGE itself, at the bottom of this file.
 --
--- CREATE TABLE IF NOT EXISTS above is a no-op against a deployed table, so it adds
--- nothing; and the MERGE below uses UPDATE SET * / INSERT *, which requires the
--- two schemas to agree. There is no autoMerge setting anywhere in this repository,
--- and enabling one here would let any future pipeline column arrive in the serving
--- surface unreviewed. So the columns are named explicitly instead.
+-- CREATE TABLE IF NOT EXISTS above is a no-op against an already-deployed table, so
+-- it cannot add the attribution columns; and the MERGE uses UPDATE SET * / INSERT *,
+-- which requires both schemas to agree. Something has to reconcile them.
 --
--- IF NOT EXISTS makes this idempotent, which matters because the publication job
--- runs on every refresh, not only at deploy time.
-ALTER TABLE IDENTIFIER(:catalog || '.' || :app_serving_schema || '.gold_nem_scada_generation_5min')
-ADD COLUMNS IF NOT EXISTS (
-  registration_effective_at TIMESTAMP COMMENT 'Fixed-AEST market instant the registration dimension was evaluated at: the maximum SCADA interval present in Bronze. Never difference this against a UTC publication timestamp.',
-  registration_publication_at TIMESTAMP COMMENT 'UTC publication instant of the weakest of the three monthly registration loads.',
-  registration_coverage_seconds BIGINT COMMENT 'Signed UTC publication-time distance from the dispatch data being priced to the registration context attributing it. NULL means not assessable, never zero.',
-  registration_coverage_basis STRING COMMENT 'LISTING_OR_HTTP when the publication instants are vouchable; DEGRADED_RETRIEVAL_FALLBACK when one was derived from our own retrieval and the coverage figure therefore proves nothing; UNKNOWN when absent.'
-);
+-- An earlier version of this file used ALTER TABLE ... ADD COLUMNS IF NOT EXISTS.
+-- That is NOT valid Databricks SQL: the engine returns PARSE_SYNTAX_ERROR at
+-- 'EXISTS' (SQLSTATE 42601), because ADD COLUMNS has no IF NOT EXISTS clause. It
+-- would have failed this task on the next refresh, and no local test can catch it
+-- because none of them reach a SQL engine. Plain ADD COLUMNS is valid but is not
+-- idempotent — it errors once the column exists — and this job runs on every
+-- refresh rather than only at deploy, so a bare ALTER is also wrong here.
+--
+-- MERGE WITH SCHEMA EVOLUTION is per-statement and reviewed: it evolves the target
+-- to match this one source and nothing else. That is deliberately narrower than the
+-- spark.databricks.delta.schema.autoMerge.enabled table property, which would let
+-- any future pipeline column reach the serving surface unreviewed and is used
+-- nowhere in this repository.
 
 SELECT assert_true(
   COUNT(*) > 0,
@@ -79,7 +81,8 @@ SELECT assert_true(
   'app serving publication refused to remove more than half of existing generation rows'
 );
 
-MERGE INTO IDENTIFIER(:catalog || '.' || :app_serving_schema || '.gold_nem_scada_generation_5min') AS target
+MERGE WITH SCHEMA EVOLUTION
+INTO IDENTIFIER(:catalog || '.' || :app_serving_schema || '.gold_nem_scada_generation_5min') AS target
 USING (
   SELECT *, CAST(:source_mode AS STRING) AS source_mode
   FROM IDENTIFIER(:catalog || '.' || :schema || '.gold_nem_scada_generation_5min')

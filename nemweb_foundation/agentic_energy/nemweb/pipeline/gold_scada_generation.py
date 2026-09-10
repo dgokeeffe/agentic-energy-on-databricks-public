@@ -34,6 +34,7 @@ def gold_nem_scada_generation_5min():
         # carried through so a consumer can tell a stale registration load from a
         # legitimately unmatched DUID.
         F.col("f.registration_effective_at"),
+        F.col("f.registration_publication_at"),
         F.col("f.registration_coverage_seconds"),
         F.col("f.registration_coverage_basis"),
     )
@@ -49,6 +50,10 @@ def gold_nem_scada_generation_5min():
         # facility_count would fragment, and the app-serving MERGE — keyed on only
         # the three real columns — would collide.
         F.max("registration_effective_at").alias("registration_effective_at"),
+        # min, matching the coverage rule: the oldest registration publication is
+        # the one that governs, so an operator reading this sees the weakest leg
+        # rather than the most flattering one.
+        F.min("registration_publication_at").alias("registration_publication_at"),
         F.max("registration_coverage_seconds").alias("registration_coverage_seconds"),
         # min, not max: DEGRADED_RETRIEVAL_FALLBACK sorts before LISTING_OR_HTTP, so
         # degraded provenance dominates instead of being masked by a healthy row.
