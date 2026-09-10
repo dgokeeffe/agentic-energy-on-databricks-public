@@ -1,20 +1,14 @@
 # Agentic Energy miniwiki
 
-This is the workshop's shared Markdown logbook. It carries intent, design
-thinking, research, guardrails, session evidence, and the next safe action across
-people and agent sessions. Pages are committed with the code so a fresh clone is
-useful without a service, account, local database, or machine-level skill
-installation. The repository-owned workflow is documented in
-[`.agents/skills/miniwiki/SKILL.md`](../.agents/skills/miniwiki/SKILL.md).
+This is an optional Markdown logbook for intent, design thinking, research, and
+session notes. Pages are committed with the code so a fresh clone remains useful
+without a service, account, or local database. Use ordinary Markdown when it is
+helpful; nothing in this directory is required for development.
 
 ## Start with
 
-- Workshop participants start in [`../QUICKSTART.md`](../QUICKSTART.md),
-  then fill [`../workshop/track-record-template.md`](../workshop/track-record-template.md).
 - [`now.md`](now.md) — current focus, open questions, and the next action.
-- [`session-template.md`](session-template.md) — copy this when a session needs
-  a durable handoff.
-- [`guardrails.md`](guardrails.md) — non-negotiable safety and workshop limits.
+- [`session-template.md`](session-template.md) — optional handoff template.
 
 ## Feature horizon
 
