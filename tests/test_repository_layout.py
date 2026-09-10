@@ -46,6 +46,51 @@ def test_app_fuel_generation_read_is_fixed_and_separately_granted():
     assert "securable_type: SCHEMA" not in bundle
 
 
+def test_the_serving_table_can_gain_the_attribution_columns_on_an_existing_deploy():
+    """A MERGE with UPDATE SET * needs both schemas to agree.
+
+    The publication uses ``UPDATE SET *`` / ``INSERT *``, and ``CREATE TABLE IF NOT
+    EXISTS`` is a no-op against a table that already exists, so new pipeline columns
+    would fail the serving job on the first refresh after deploy. There is no
+    ``autoMerge`` anywhere in this repository, and adding one would let any future
+    pipeline column reach the serving surface unreviewed, so the columns are named
+    in an idempotent ``ALTER TABLE``.
+
+    Asserted rather than left to the comment, because the failure only appears
+    against a previously-deployed table — never in a clean-schema test run.
+    """
+    serving = (ROOT / "nemweb_foundation/sql/app_serving/gold_nem_scada_generation_5min.sql").read_text()
+    assert "ADD COLUMNS IF NOT EXISTS" in serving, "schema evolution must be idempotent"
+
+    # Assert on executable SQL only. The comment above the ALTER names autoMerge in
+    # order to explain why it is NOT used, and a bare substring check on the whole
+    # file failed on that sentence — the same over-broad assertion that would have
+    # been satisfied by deleting the explanation.
+    statements = [
+        line.split("--")[0] for line in serving.splitlines() if not line.strip().startswith("--")
+    ]
+    assert "automerge" not in " ".join(statements).lower(), (
+        "schema evolution must stay explicitly named, not delegated to autoMerge"
+    )
+
+    alter = serving.split("ADD COLUMNS IF NOT EXISTS")[1].split(";")[0]
+    read = (ROOT / "nemweb_app/config/queries/latest_fuel_generation.sql").read_text()
+    for column in (
+        "registration_effective_at",
+        "registration_publication_at",
+        "registration_coverage_seconds",
+        "registration_coverage_basis",
+    ):
+        assert column in alter, f"{column} is published by the pipeline but not added to the serving table"
+
+    # Every column the app reads must exist in the serving table it reads from.
+    for column in ("registration_publication_at", "registration_coverage_seconds", "registration_coverage_basis"):
+        assert column in read, f"{column} was added to serving but is not selected by the app"
+
+    # The reviewed read must stay pinned to one object.
+    assert "FROM IDENTIFIER(:fuel_generation_table)" in read
+
+
 def test_the_registration_staleness_threshold_is_the_same_in_both_languages():
     """The pipeline and the screen must not disagree about what "stale" means.
 

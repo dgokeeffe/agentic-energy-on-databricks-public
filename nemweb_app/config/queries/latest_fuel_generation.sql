@@ -10,6 +10,15 @@
 -- This is actual SCADA output only: AEMO Current publishes no five-minute
 -- availability, so nothing here supports a curtailment or availability claim.
 --
+-- interval_end is interval-ending fixed AEST. registration_coverage_seconds is a
+-- UTC publication-time delta. The two clocks must never be differenced.
+--
+-- registration_coverage_seconds is signed and nullable: negative means the
+-- registration load was published after the dispatch data it describes, and NULL
+-- means the distance is not assessable rather than zero. Read it together with
+-- registration_coverage_basis, because a small coverage under
+-- DEGRADED_RETRIEVAL_FALLBACK establishes nothing about the registration's age.
+--
 -- The LIMIT bounds the window to roughly two hours across five NEM regions at
 -- five-minute grain with several fuels per region.
 SELECT
@@ -18,7 +27,10 @@ SELECT
   fuel_type,
   actual_generation_mw,
   facility_count,
-  partially_enriched_facility_count
+  partially_enriched_facility_count,
+  registration_publication_at,
+  registration_coverage_seconds,
+  registration_coverage_basis
 FROM IDENTIFIER(:fuel_generation_table)
 ORDER BY interval_end DESC, region_id, fuel_type
 LIMIT 1000
