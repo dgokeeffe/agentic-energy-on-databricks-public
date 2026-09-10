@@ -74,6 +74,9 @@ Required evidence:
 - **Evidence reviewed:** [`research/nemweb-contract.md`](../research/nemweb-contract.md)
   and the deterministic fixture contract.
 
+Full evidence, with the exact commands and the `main` baseline, is in
+[`price-spike-test-results.md`](price-spike-test-results.md).
+
 ## Implementation
 
 The rule lives in two places, deliberately:
