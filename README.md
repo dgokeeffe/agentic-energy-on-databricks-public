@@ -78,10 +78,8 @@ make app-dev-mock
 ## Databricks validation
 
 Workspace commands require an explicitly named CLI profile. Choose a bundle
-target; there is no `.env`. `dev` and `live_evidence` create the SQL warehouse,
-UC schemas, MLflow experiment and registered model from the authenticated
-identity. The app still needs `--var attendee_slug=...` and
-`--var lakebase_project_id=...`.
+target; every variable has a default and there is no `.env`. Override with
+`--var` only when a default is wrong.
 
 ```bash
 make bundle-validate PROFILE=<your-profile>

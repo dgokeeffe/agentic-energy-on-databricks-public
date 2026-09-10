@@ -2,22 +2,14 @@ bundle:
   name: agentic-energy-workshop-app
 
 variables:
-  # Per-attendee isolation key. Required, no default: the workshop shares one
-  # workspace, so every isolated resource name derives from this one value.
-  #
-  # ${workspace.current_user.short_name} is deliberately NOT used. For
-  # first.last@example.com it resolves to "first.last", and a dot is invalid in
-  # both a Databricks App name and a Lakebase branch ID.
-  #
-  # Must satisfy the intersection of both naming rules: start with a lowercase
-  # letter, then lowercase letters, numbers, or hyphens only. Keep it to 26
-  # characters or fewer so app_name stays within the 30-character App limit.
+  # short_name often contains a dot (first.last), which is illegal in App names
+  # and Lakebase branch IDs. Default to the bundle target so validate works
+  # without --var; override per attendee when more than one person shares a workspace.
   attendee_slug:
     description: >-
-      Short per-attendee identifier, e.g. dok. Lowercase letters, numbers, and
-      hyphens only, starting with a letter, 26 characters or fewer. Pass
-      --var attendee_slug=...; ${workspace.current_user.short_name} often
-      contains a dot, which is illegal in an App name and a Lakebase branch ID.
+      Short per-attendee identifier. Lowercase letters, numbers, and hyphens
+      only, starting with a letter, 26 characters or fewer.
+    default: ${bundle.target}
 
   # App names permit only lowercase alphanumerics and hyphens and are limited to
   # 2-30 characters total (Apps create API). The former literal prefix
@@ -38,21 +30,27 @@ variables:
       SQL warehouse the app may use. Defaults to the warehouse this bundle
       creates so an attendee does not copy an ID from the foundation deploy.
     default: ${resources.sql_warehouses.analytics.id}
+  serving_catalog:
+    description: Catalog holding the reviewed app serving tables
+    default: ${workspace.current_user.short_name}
+  serving_schema:
+    description: Schema holding the reviewed app serving tables
+    default: agentic_energy_workshop_serving
   region_status_table:
     description: Fully qualified reviewed region-status serving table
-    default: agentic_energy_workshop.agentic_energy_workshop_d4_serving.gold_nem_app_region_status
+    default: ${var.serving_catalog}.${var.serving_schema}.gold_nem_app_region_status
   fuel_generation_table:
     description: Fully qualified reviewed fuel-generation serving table
-    default: agentic_energy_workshop.agentic_energy_workshop_d4_serving.gold_nem_scada_generation_5min
+    default: ${var.serving_catalog}.${var.serving_schema}.gold_nem_scada_generation_5min
 
   # Lakebase isolation. Each attendee works on their own copy-on-write branch of
   # a shared seeded parent, so schema names (app_write, app_read) stay identical
   # for everyone and the application code needs no per-attendee change.
   lakebase_project_id:
     description: >-
-      Lakebase Autoscaling project ID without the projects/ prefix. Still a
-      facilitator-owned workspace resource; pass --var lakebase_project_id=...
-      when deploying the app. There is no .env.
+      Lakebase Autoscaling project ID without the projects/ prefix. Defaults
+      to the project this bundle creates.
+    default: ${resources.postgres_projects.lakebase.project_id}
 
   postgres_branch_id:
     description: >-
@@ -84,6 +82,16 @@ variables:
     default: projects/${var.lakebase_project_id}/branches/${var.postgres_branch_id}/databases/${var.postgres_database_id}
 
 resources:
+  postgres_projects:
+    lakebase:
+      project_id: aew-${var.attendee_slug}
+      display_name: NEM operations ${var.attendee_slug}
+      pg_version: 17
+  postgres_branches:
+    attendee:
+      parent: ${resources.postgres_projects.lakebase.id}
+      branch_id: ${var.postgres_branch_id}
+      no_expiry: true
   sql_warehouses:
     analytics:
       name: ${var.app_name}-sql

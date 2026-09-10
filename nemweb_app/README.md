@@ -15,9 +15,10 @@ run-specific regular Delta tables named in the reviewed
 Those two SQL files are the only warehouse read paths, and there is no custom
 warehouse proxy endpoint.
 
-The app bundle creates its SQL warehouse. Pass `--var attendee_slug=...` and
-`--var lakebase_project_id=...` at deploy time. Do not add hosts, tokens, or
-workspace URLs to Git. Investigation identity comes from the platform-provided
+The app bundle creates its SQL warehouse and Lakebase project. Defaults cover
+`attendee_slug` and `lakebase_project_id`; override with `--var` only when more
+than one attendee shares a workspace. Do not add hosts, tokens, or workspace
+URLs to Git. Investigation identity comes from the platform-provided
 `x-forwarded-user` request context and is never accepted from request JSON.
 Every Postgres value is a bind parameter. Integration mode is supported only behind the Databricks Apps proxy: the server rejects trusted identity when `DATABRICKS_APP_NAME` is absent, and direct local integration access is not an authentication boundary.
 

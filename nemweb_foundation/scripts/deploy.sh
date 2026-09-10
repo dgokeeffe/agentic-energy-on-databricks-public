@@ -8,11 +8,9 @@ PROFILE="${PROFILE:-${2:-}}"
 case "$TARGET" in dev|workshop|live_evidence) ;; *) echo "usage: $0 {dev|workshop|live_evidence}" >&2; exit 2;; esac
 : "${PROFILE:?Set PROFILE=<cli-profile>}"
 
-# Choose a target. No .env. The workshop service principal is a --var because
-# it is a workspace identity the bundle cannot invent.
+# Every variable has a default. Optional overrides stay --var, not .env.
 extra=()
-if [ "$TARGET" = "workshop" ]; then
-  : "${RUNTIME_SERVICE_PRINCIPAL:?Set RUNTIME_SERVICE_PRINCIPAL=<application-id>}"
+if [ -n "${RUNTIME_SERVICE_PRINCIPAL:-}" ]; then
   extra+=(--var "runtime_service_principal=${RUNTIME_SERVICE_PRINCIPAL}")
 fi
 

@@ -41,23 +41,20 @@ def test_dev_target_has_no_run_as(bundle):
     )
 
 
-def test_workshop_target_pins_the_runtime_service_principal(bundle):
+def test_workshop_target_does_not_pin_run_as_by_default(bundle):
     workshop = bundle["targets"]["workshop"]
     assert workshop["mode"] == "production"
-    assert workshop["run_as"] == {
-        "service_principal_name": "${var.runtime_service_principal}"
-    }
+    assert "run_as" not in workshop
 
 
 def test_runtime_service_principal_is_optional_for_dev(bundle):
     assert bundle["variables"]["runtime_service_principal"].get("default") == ""
 
 
-def test_deploy_script_uses_profile_and_workshop_var_not_env_file():
+def test_deploy_script_uses_profile_and_optional_overrides():
     script = (REPO_ROOT / "scripts" / "deploy.sh").read_text()
     assert "RUNTIME_SERVICE_PRINCIPAL" in script
     assert "BUNDLE_VAR_" not in script
-    assert 'if [ "$TARGET" = "workshop" ]; then' in script
     assert "--profile \"$PROFILE\"" in script
 
 
