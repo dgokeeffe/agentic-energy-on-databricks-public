@@ -87,11 +87,9 @@ issue number.
 
 Both would have sent a participant or agent down a dead end on a fresh clone:
 
-- `.agents/skills/issue-navigator/SKILL.md` instructed an agent to *"List open
-  GitHub issues carrying `workshop-ready`"*, which returned nothing. It now names
-  the exact `gh` command, says to stop and tell the facilitator on an empty list
-  rather than improvise a ticket, states that the route is optional, and warns that
-  numbers are not portable between the repositories.
+- The old issue-routing instructions told an agent to *"List open GitHub issues
+  carrying `workshop-ready`"*, which returned nothing. The participant route
+  remains independent of issues and does not require a ticket.
 - `nemweb_app/README.md` cited #12, #13, #14 and #18 as entry points. None resolved.
 
 ## The participant path never depended on issues

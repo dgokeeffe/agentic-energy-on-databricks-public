@@ -14,8 +14,8 @@ conversion.
 
 ## Approved files
 
-- the single pipeline implementation file changed by `lane_b_engineering/skills/02-seeded-defect-red-green/assets/track-b-defect.patch`
-- `lane_b_engineering/skills/02-seeded-defect-red-green/assets/processing_timestamps_utc_contract.py`
+- the single pipeline implementation file changed by `lane_b_engineering/assets/track-b-defect.patch`
+- `lane_b_engineering/assets/processing_timestamps_utc_contract.py`
 
 Anything else requires a new approval before editing.
 
@@ -25,12 +25,12 @@ Tests verify repeatable behaviour: given a known implementation contract, the
 pipeline produces UTC processing timestamps while preserving AEST market time.
 
 ```bash
-uv run --extra test python -m pytest lane_b_engineering/skills/02-seeded-defect-red-green/assets/processing_timestamps_utc_contract.py -q
+uv run --extra test python -m pytest lane_b_engineering/assets/processing_timestamps_utc_contract.py -q
 ```
 
 Required red-to-green evidence:
 
-- [ ] test fails after `lane_b_engineering/skills/02-seeded-defect-red-green/assets/track-b-defect.patch` is applied
+- [ ] test fails after `lane_b_engineering/assets/track-b-defect.patch` is applied
 - [ ] changed implementation makes the same test pass
 - [ ] test was not deleted, skipped, or weakened
 - [ ] focused regression tests pass
