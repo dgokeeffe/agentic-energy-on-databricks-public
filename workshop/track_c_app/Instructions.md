@@ -24,6 +24,7 @@ Read it before stage 2.
 ## Data ownership, which you must not violate
 
 | Object | Writer | Reader |
+|---|---|---|
 | `gold_nem_app_region_status` (Delta serving source) | Lakehouse publication job | Synced-table pipeline |
 | `app_read.nem_region_status_synced` | Managed sync | Your app, **read-only** |
 | `app_write.investigations` | Your app | Lakebase CDF |
@@ -159,6 +160,7 @@ Pick one change. Keep it small enough to prove.
 Starting points:
 
 | Concern | Files |
+|---|---|
 | Investigation writes | `nemweb_app/server/db/investigations.ts`, `../lakebase/migrations/001_app_write_investigations.sql` |
 | Synced read contract | `../lakebase/contracts/region-status.schema.json`, `../lakebase/tests/test_synced_table_contract.py` |
 | CDF current state | `../lakebase/cdf.py`, `../lakebase/tests/test_cdf_reducer.py` |

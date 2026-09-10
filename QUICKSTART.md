@@ -20,6 +20,7 @@ facilitator rather than working around it.
 ## Choose your track
 
 | Track | Choose this if you want to… | Start here |
+|---|---|---|
 | **A — Governed answer** | Turn an operator question into an explainable answer that cites its source and freshness, and that refuses an unsafe question. Metric views, Genie, dashboards. | [`lane_a_business/Instructions.md`](lane_a_business/Instructions.md) |
 | **B — Production fix** | Repair a seeded data defect with a failing test, then prove that both deterministic tests and an agentic evaluation can reject weak work. | [`lane_b_engineering/Instructions.md`](lane_b_engineering/Instructions.md) |
 | **C — App and Lakebase** | Build on the operations app and its writable Postgres state, with your own isolated Lakebase branch and your own deployed app. | [`workshop/track_c_app/Instructions.md`](workshop/track_c_app/Instructions.md) |

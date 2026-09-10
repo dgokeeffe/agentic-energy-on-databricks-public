@@ -39,6 +39,7 @@ the wall time did not.
 ## What replaced what
 
 | Withdrawn | Replacement |
+|---|---|
 | Cross-track pair with two owners | One attendee (or a self-chosen pair) completing one track |
 | Shared `workshop-pair-record.md` | A record per track, held inside the track directory |
 | `workshop-run-of-show.md` as sole clock | Stage order inside each track; no times |

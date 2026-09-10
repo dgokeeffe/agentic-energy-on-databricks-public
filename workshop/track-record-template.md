@@ -7,6 +7,7 @@ Do not record credentials, tokens, private workspace URLs, tenant identifiers, o
 anyone's personal data.
 
 | Field | Record |
+|---|---|
 | Track (A, B, or C) | |
 | Your name | |
 | Attendee slug (Track C only) | |
@@ -17,6 +18,7 @@ anyone's personal data.
 Repeat this block for each numbered stage you complete.
 
 | Field | Record |
+|---|---|
 | Stage number and name | |
 | What you set out to prove | |
 | Exact commands run | |
@@ -34,6 +36,7 @@ Complete these once, at the end. They separate what you proved from what you
 assumed, and they are the part most often skipped.
 
 | Field | Record |
+|---|---|
 | Task kind, preparation choice, and verification rationale | |
 | Explanations ruled out with cited evidence, versus paths not investigated | |
 | Refinement, defect correction, restart, or block, with a short reason when relevant | |
@@ -58,6 +61,7 @@ change beyond the plan is a later approved task.
 ## Close
 
 | Field | Record |
+|---|---|
 | What the track produced | |
 | What would need to be true to trust it in production | |
 | Remaining uncertainty | |

@@ -61,7 +61,7 @@ by recording what you learned, what remains uncertain, and whether you want to
 continue, revise the question, or ask for help.
 
 | Stage | Prompt | Output |
-|---|---|---|---|
+|---|---|---|
 | 1. Research and brief | [`01-research-and-brief.md`](prompts/01-research-and-brief.md) | cited contract, approved brief, Gold-window evidence |
 | 2. Metric view | [`02-check-metric-view.md`](prompts/02-check-metric-view.md) | checked measures, dimensions, and filter |
 | 3. Genie Agent | [`03-scope-genie-agent.md`](prompts/03-scope-genie-agent.md) | agent purpose, assets, instructions, and limits |

@@ -72,7 +72,7 @@ Use a fresh AI-assistant conversation for every numbered prompt. Finish the
 current stage and record its human decision before starting the next.
 
 | Stage | Prompt | Output |
-|---|---|---|---|
+|---|---|---|
 | 1. Read evidence and approve plan | [`01-read-evidence-and-plan.md`](prompts/01-read-evidence-and-plan.md) | defect statement, cited contracts, approved plan |
 | 2. Seed, reproduce, and repair | [`02-seeded-defect-red-green.md`](prompts/02-seeded-defect-red-green.md) | clean/red/green results, diff, regression, decision |
 | 3. Evaluate and review | [`03-agentic-eval-and-review.md`](prompts/03-agentic-eval-and-review.md) | eval evidence and independent verdict |

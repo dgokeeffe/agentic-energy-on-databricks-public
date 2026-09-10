@@ -1,6 +1,94 @@
+import re
+import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+
+# A fenced block opener or closer, indented by at most three spaces.
+MARKDOWN_FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})")
+# One delimiter cell of a GitHub-Flavored Markdown table, with optional alignment.
+SEPARATOR_CELL = re.compile(r"^:?-+:?$")
+
+
+def _table_cells(line: str) -> list[str]:
+    """Split a pipe table row into its cells, ignoring the outer pipes."""
+    # An escaped pipe is content, not a cell boundary.
+    parts = line.strip().replace(r"\|", "\x00").split("|")
+    if parts and not parts[0].strip():
+        parts = parts[1:]
+    if parts and not parts[-1].strip():
+        parts = parts[:-1]
+    return parts
+
+
+def _is_table_row(line: str) -> bool:
+    stripped = line.strip()
+    return stripped.startswith("|") and stripped.count("|") >= 2
+
+
+def _is_separator_row(line: str) -> bool:
+    if not _is_table_row(line):
+        return False
+    cells = _table_cells(line)
+    return bool(cells) and all(SEPARATOR_CELL.match(cell.strip()) for cell in cells)
+
+
+def test_every_tracked_markdown_table_has_a_matching_separator_row():
+    """A pipe table without a well-formed delimiter row renders as literal text.
+
+    GitHub-Flavored Markdown requires a delimiter row immediately after the
+    header, with the same number of columns. When it is missing or miscounted the
+    whole block is published as raw pipes, so participant-facing routing tables
+    and the copied track record silently stop being tables. That failure is
+    invisible in a diff, so it is asserted here.
+    """
+    tracked = subprocess.check_output(
+        ["git", "ls-files", "*.md"], cwd=ROOT, text=True
+    ).splitlines()
+    failures: list[str] = []
+    for relative in tracked:
+        path = ROOT / relative
+        # A tracked path can be absent when a deletion is staged but not committed.
+        if not path.is_file():
+            continue
+        lines = path.read_text(encoding="utf-8").splitlines()
+        fence: str | None = None
+        previous_was_row = False
+        for index, line in enumerate(lines):
+            opener = MARKDOWN_FENCE.match(line)
+            if opener:
+                marker = opener.group(1)[0] * 3
+                # Example markdown inside a code fence is illustration, not a table.
+                fence = None if fence == marker else fence or marker
+                previous_was_row = False
+                continue
+            if fence is not None:
+                continue
+            if not _is_table_row(line):
+                previous_was_row = False
+                continue
+            # A row that follows another row is a body row, not a new header.
+            if previous_was_row:
+                continue
+            previous_was_row = True
+            if _is_separator_row(line):
+                # A stray delimiter row with no header above it is not a table.
+                continue
+            header = len(_table_cells(line))
+            following = lines[index + 1] if index + 1 < len(lines) else ""
+            location = f"{relative}:{index + 1}"
+            if not _is_separator_row(following):
+                failures.append(
+                    f"{location}: table header with {header} columns has no separator row"
+                )
+                continue
+            separator = len(_table_cells(following))
+            if separator != header:
+                failures.append(
+                    f"{location}: header has {header} columns but the separator "
+                    f"on line {index + 2} has {separator}"
+                )
+    assert not failures, "malformed Markdown tables:\n" + "\n".join(failures)
 
 
 def test_required_foundation_app_ml_and_lakebase_structures_exist():

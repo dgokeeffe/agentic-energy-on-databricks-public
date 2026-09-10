@@ -34,6 +34,7 @@ Verified against
 on 2026-09-07:
 
 | Resource | Limit |
+|---|---|
 | Maximum number of concurrently active computes | 20 |
 | Maximum number of branches per project | 500 |
 | Maximum number of Postgres databases per branch | 500 |
@@ -57,6 +58,7 @@ ask Databricks Support to raise the limit.
 Practical planning rule:
 
 | Concurrent attendees | Action |
+|---|---|
 | Up to 19 | One project. No further action. |
 | 20 or more | Request a limit increase **before** the workshop, or shard attendees across a second project. |
 
@@ -90,6 +92,7 @@ sets it once and every isolated resource derives from it.
 For the synthetic example `attendee_slug=example`:
 
 | Resource | Name |
+|---|---|
 | Lakebase branch | `projects/<project>/branches/dev-example` |
 | Branch compute endpoint | `.../branches/dev-example/endpoints/primary` |
 | Databricks App | `aew-example` |

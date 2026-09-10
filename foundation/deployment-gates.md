@@ -64,6 +64,7 @@ Jobs, pipelines, and the landing Volume are created successfully in that same
 run. Complete the cold start in this order, then redeploy:
 
 | Step | Why |
+|---|---|
 | 1. Run the **context** job (`-context`) | Lands monthly MMSDM registration and materialises `bronze_nem_dudetail`. |
 | 2. Run the **critical** job (`-refresh`) | Lands Current reports and publishes the five-minute medallion. |
 | 3. Run the **semantics** job (`-semantics`) | Creates the metric views. |
