@@ -29,6 +29,74 @@ export interface FuelGenerationRow {
   facilityCount: number;
   /** Facilities missing region or fuel enrichment, retained rather than dropped. */
   partiallyEnrichedFacilityCount: number;
+  /**
+   * Signed UTC publication-time distance from the SCADA being priced to the
+   * weakest of the three monthly registration loads. Null when either instant is
+   * absent, which is not the same as zero.
+   */
+  registrationCoverageSeconds?: number | null;
+  /** LISTING_OR_HTTP | DEGRADED_RETRIEVAL_FALLBACK | UNKNOWN. */
+  registrationCoverageBasis?: string | null;
+  registrationPublicationAt?: string | null;
+}
+
+/**
+ * Coverage beyond this is stale. Mirrors STALE_REGISTRATION_AFTER_SECONDS in
+ * `nemweb_foundation/agentic_energy/nemweb/quality.py`, where the derivation
+ * lives: a monthly archive is up to 31 days apart by definition, AEMO publishes
+ * partway through the following month, and the lander reaches back a further 35
+ * days. Under ~35 days this alarms every normal month.
+ *
+ * Deliberately not the app's SOURCE_STALE_AFTER_MS (15 minutes). That is
+ * calibrated for five-minute SCADA and is four orders of magnitude out for a
+ * monthly registration source.
+ */
+export const STALE_REGISTRATION_AFTER_SECONDS = 45 * 24 * 60 * 60;
+
+/**
+ * Whether the attribution behind a value-capture figure can be vouched for.
+ *
+ * `assessable: false` is a third state, not a synonym for fresh. A near-zero
+ * coverage under a degraded basis is evidence of nothing: the publication instant
+ * was fabricated from our own retrieval time, so the registration content may be
+ * arbitrarily old. Reporting that as fresh is the silent-plausible-value failure
+ * this whole path exists to prevent.
+ */
+export interface RegistrationAttribution {
+  assessable: boolean;
+  stale: boolean;
+  coverageSeconds: number | null;
+  basis: string | null;
+  publicationAt: string | null;
+}
+
+export function registrationAttribution(rows: FuelGenerationRow[]): RegistrationAttribution {
+  // The weakest row governs, matching the pipeline's F.min on the basis: one
+  // healthy interval must not vouch for a degraded refresh.
+  const withCoverage = rows.filter(
+    (row) => row.registrationCoverageSeconds !== null && row.registrationCoverageSeconds !== undefined
+  );
+  const basis = rows.find((row) => row.registrationCoverageBasis === 'DEGRADED_RETRIEVAL_FALLBACK')
+    ? 'DEGRADED_RETRIEVAL_FALLBACK'
+    : (rows.find((row) => row.registrationCoverageBasis)?.registrationCoverageBasis ?? null);
+
+  if (withCoverage.length === 0 || basis === null || basis === 'UNKNOWN') {
+    return { assessable: false, stale: false, coverageSeconds: null, basis, publicationAt: null };
+  }
+
+  const coverageSeconds = Math.max(
+    ...withCoverage.map((row) => row.registrationCoverageSeconds as number)
+  );
+  const assessable = basis === 'LISTING_OR_HTTP';
+  return {
+    assessable,
+    // Never stale when unassessable: that would claim a measurement the
+    // provenance cannot support.
+    stale: assessable && coverageSeconds > STALE_REGISTRATION_AFTER_SECONDS,
+    coverageSeconds,
+    basis,
+    publicationAt: withCoverage.find((row) => row.registrationPublicationAt)?.registrationPublicationAt ?? null,
+  };
 }
 
 /** One governed observation of regional price for an interval. */

@@ -19,6 +19,21 @@ const requiredNumber = z.preprocess(
 );
 const timestamp = z.iso.datetime({ offset: true });
 
+/**
+ * Coverage columns are nullable, unlike every other field here.
+ *
+ * The pipeline publishes NULL rather than 0 when either publication instant is
+ * absent, because zero would read as perfect coverage on a schema holding
+ * nothing. Defaulting a missing value to 0 in this parser would undo that and
+ * report the strongest possible freshness from the weakest possible evidence.
+ * They are also optional, so a deployment whose serving table predates the new
+ * columns degrades to "not assessable" rather than failing the whole read.
+ */
+const nullableNumber = z.preprocess(
+  (value) => (typeof value === 'string' && value.trim() !== '' ? Number(value) : value),
+  z.number().finite().nullable()
+);
+
 const fuelGenerationRowSchema = z.object({
   interval_end: timestamp,
   region_id: z.string().min(1),
@@ -26,6 +41,9 @@ const fuelGenerationRowSchema = z.object({
   actual_generation_mw: requiredNumber,
   facility_count: requiredNumber,
   partially_enriched_facility_count: requiredNumber,
+  registration_coverage_seconds: nullableNumber.optional(),
+  registration_coverage_basis: z.string().min(1).nullable().optional(),
+  registration_publication_at: timestamp.nullable().optional(),
 });
 
 export function normaliseFuelGenerationRows(rows: unknown[]): FuelGenerationRow[] {
@@ -38,6 +56,9 @@ export function normaliseFuelGenerationRows(rows: unknown[]): FuelGenerationRow[
       actualGenerationMw: row.actual_generation_mw,
       facilityCount: row.facility_count,
       partiallyEnrichedFacilityCount: row.partially_enriched_facility_count,
+      registrationCoverageSeconds: row.registration_coverage_seconds ?? null,
+      registrationCoverageBasis: row.registration_coverage_basis ?? null,
+      registrationPublicationAt: row.registration_publication_at ?? null,
     };
   });
 }

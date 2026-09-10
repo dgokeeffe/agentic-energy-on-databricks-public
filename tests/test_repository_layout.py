@@ -46,6 +46,179 @@ def test_app_fuel_generation_read_is_fixed_and_separately_granted():
     assert "securable_type: SCHEMA" not in bundle
 
 
+def test_the_serving_table_can_gain_the_attribution_columns_on_an_existing_deploy():
+    """A MERGE with UPDATE SET * needs both schemas to agree.
+
+    The publication uses ``UPDATE SET *`` / ``INSERT *``, and ``CREATE TABLE IF NOT
+    EXISTS`` is a no-op against a table that already exists, so new pipeline columns
+    would fail the serving job on the first refresh after deploy. There is no
+    ``autoMerge`` anywhere in this repository, and adding one would let any future
+    pipeline column reach the serving surface unreviewed, so the reconciliation is
+    ``MERGE WITH SCHEMA EVOLUTION``: per-statement, evolving the target to match
+    this one reviewed source and nothing else.
+
+    Asserted rather than left to the comment, because the failure only appears
+    against a previously-deployed table — never in a clean-schema test run.
+    """
+    serving = (ROOT / "nemweb_foundation/sql/app_serving/gold_nem_scada_generation_5min.sql").read_text()
+
+    # Assert on executable SQL only, never the whole file. The prose above the MERGE
+    # names both autoMerge and the rejected ALTER in order to explain why neither is
+    # used, and a bare substring check would fail on that explanation — the same
+    # over-broad assertion that would also have been satisfied by deleting it.
+    statements = " ".join(
+        line.split("--")[0] for line in serving.splitlines() if not line.strip().startswith("--")
+    )
+
+    # MERGE WITH SCHEMA EVOLUTION is per-statement: it evolves the target to match
+    # this one reviewed source. Verified against the SQL engine — the previous
+    # `ALTER TABLE ... ADD COLUMNS IF NOT EXISTS` returned PARSE_SYNTAX_ERROR at
+    # 'EXISTS' (SQLSTATE 42601), because ADD COLUMNS has no IF NOT EXISTS clause.
+    # Plain ADD COLUMNS parses but is not idempotent, and this job runs on every
+    # refresh, so neither form is usable here.
+    assert "MERGE WITH SCHEMA EVOLUTION" in statements, (
+        "the serving MERGE must evolve the target schema, or new pipeline columns "
+        "fail the publication against an already-deployed table"
+    )
+    assert "ADD COLUMNS IF NOT EXISTS" not in statements, (
+        "ADD COLUMNS IF NOT EXISTS is not valid Databricks SQL (PARSE_SYNTAX_ERROR)"
+    )
+    assert "automerge" not in statements.lower(), (
+        "schema evolution must stay per-statement, not a table-wide autoMerge property"
+    )
+
+    # The pipeline, the serving surface and the app read must name the same columns.
+    # An asymmetry here is invisible locally: the app silently ignores a column it
+    # does not select, so it could accumulate server-side while the client is blind
+    # to it.
+    gold = (ROOT / "nemweb_foundation/agentic_energy/nemweb/pipeline/gold_scada_generation.py").read_text()
+    read = (ROOT / "nemweb_app/config/queries/latest_fuel_generation.sql").read_text()
+    published = {
+        "registration_effective_at",
+        "registration_publication_at",
+        "registration_coverage_seconds",
+        "registration_coverage_basis",
+    }
+    for column in published:
+        assert column in gold, f"{column} is expected in the Gold product but is not published there"
+
+    # registration_effective_at is deliberately NOT read by the app: it is fixed-AEST
+    # market time and the screen reports UTC coverage instead. Every other published
+    # column must reach the app, and the app must read nothing that is not published.
+    expected_in_app = published - {"registration_effective_at"}
+    in_app = {column for column in published if column in read}
+    assert in_app == expected_in_app, (
+        f"serving and app read have drifted: published-and-unread "
+        f"{sorted(expected_in_app - in_app)}, unexpected {sorted(in_app - expected_in_app)}"
+    )
+
+    # The reviewed read must stay pinned to one object.
+    assert "FROM IDENTIFIER(:fuel_generation_table)" in read
+
+
+def test_the_registration_staleness_threshold_is_the_same_in_both_languages():
+    """The pipeline and the screen must not disagree about what "stale" means.
+
+    ``STALE_REGISTRATION_AFTER_SECONDS`` is written twice — once in Python for the
+    governed contract, once in TypeScript for the screen — because the repository
+    has no cross-language constant sharing. Nothing else couples them, and an
+    independent review found the drift is silent: changing only the TypeScript side
+    from 45 to 40 days passes all 101 app tests and all 345 collected foundation and
+    root tests, because no test straddles the gap between the two values.
+
+    A pipeline that considers a load fresh while the screen calls it stale, or the
+    reverse, is the divergence this branch exists to prevent. Rather than trust a
+    comment to keep them aligned, read both declarations and compare.
+
+    An earlier version matched four literal factors with a regex, and an independent
+    review showed that broke on refactors carrying no semantic change at all —
+    ``45 * 86400``, ``(45) * (24) * (60) * (60)``, ``3888000``, or a trailing
+    comment. A guard that fails on a no-op teaches maintainers to delete it. Both
+    sides are now evaluated as arithmetic, so the test couples the value rather
+    than its spelling.
+
+    Two spellings are deliberately still refused, because accepting them would mean
+    either executing the file or reimplementing a parser: a named constant such as
+    ``45 * _DAY``, whose value this test cannot see, and a declaration split across
+    lines. Both fail with an explicit instruction to keep the declaration a
+    single-line literal expression, which is the actionable message — unlike the
+    bare ``SyntaxError`` traceback an earlier version produced for the multi-line
+    case.
+    """
+    import ast
+    import re
+
+    def evaluate(expression: str, path: str) -> int:
+        """Evaluate a literal arithmetic expression, refusing anything else.
+
+        ``ast.literal_eval`` rejects ``45 * 24``, so walk the tree instead. Only
+        integer literals, multiplication and addition are permitted — enough for any
+        honest spelling of a duration, and not enough to execute anything.
+        """
+
+        def value(node: ast.AST) -> int:
+            if isinstance(node, ast.Constant) and isinstance(node.value, int):
+                return node.value
+            if isinstance(node, ast.BinOp) and isinstance(node.op, (ast.Mult, ast.Add)):
+                left, right = value(node.left), value(node.right)
+                return left * right if isinstance(node.op, ast.Mult) else left + right
+            raise AssertionError(
+                f"{path} declares the threshold as an expression this test cannot "
+                f"evaluate ({expression!r}). Keep it literal integer arithmetic, or "
+                f"update this guard deliberately."
+            )
+
+        # A declaration continued onto another line is captured mid-expression by the
+        # single-line regex below, so ``ast.parse`` would raise SyntaxError and bury
+        # the cause in a traceback. Convert it into the same actionable message as
+        # every other unevaluable spelling.
+        try:
+            tree = ast.parse(expression.strip(), mode="eval")
+        except SyntaxError:
+            raise AssertionError(
+                f"{path} declares the threshold across more than one line, or as an "
+                f"expression that does not parse on its own ({expression!r}). Keep it "
+                f"a single-line literal integer expression, or update this guard "
+                f"deliberately."
+            ) from None
+        return value(tree.body)
+
+    def threshold(path: str, pattern: str) -> int:
+        text = (ROOT / path).read_text()
+        # MULTILINE, so ``^`` anchors each declaration to its own line rather than
+        # to the start of the file.
+        match = re.search(pattern, text, re.MULTILINE)
+        assert match, (
+            f"STALE_REGISTRATION_AFTER_SECONDS not found in {path}. If it was "
+            f"renamed or moved, update both sides and this guard together."
+        )
+        return evaluate(match.group(1), path)
+
+    python_seconds = threshold(
+        "nemweb_foundation/agentic_energy/nemweb/quality.py",
+        r"^STALE_REGISTRATION_AFTER_SECONDS\s*=\s*(.+?)\s*$",
+    )
+    typescript_seconds = threshold(
+        "nemweb_app/client/src/domain/fuelCapture.ts",
+        # The trailing ``(?://.*)?`` accepts an end-of-line comment, so the two
+        # languages are treated alike. The Python pattern needs no equivalent: it
+        # captures any ``# …`` into the expression and ``ast.parse`` then ignores it
+        # as a comment, whereas ``// …`` is a syntax error to ``ast`` and, before
+        # this, was not matched at all — so adding ``// 45 days`` reported the
+        # constant as missing or renamed. That is the no-op failure this guard was
+        # rewritten to stop producing.
+        r"^export const STALE_REGISTRATION_AFTER_SECONDS\s*=\s*(.+?);\s*(?://.*)?$",
+    )
+
+    assert python_seconds == typescript_seconds, (
+        f"registration staleness threshold has drifted: "
+        f"quality.py says {python_seconds}s, fuelCapture.ts says {typescript_seconds}s"
+    )
+    # A monthly archive is up to 31 days apart by definition, so a threshold at or
+    # below that alarms every ordinary month in both layers at once.
+    assert python_seconds > 31 * 24 * 60 * 60
+
+
 def test_app_states_the_availability_and_settlement_boundaries_on_screen():
     """A capture screen invites a curtailment reading, so the denial must be visible.
 

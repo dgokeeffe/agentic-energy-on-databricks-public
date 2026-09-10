@@ -265,3 +265,91 @@ describe('RegionalOperationsShell', () => {
     expect(html).toContain('Investigate the observation with Genie');
   });
 });
+
+describe('registration attribution provenance', () => {
+  const priced = (overrides: Partial<FuelGenerationRow> = {}) => [
+    fuel({ intervalEnd: '2026-07-01T12:05:00+10:00', ...overrides }),
+    fuel({ intervalEnd: '2026-07-01T12:10:00+10:00', ...overrides }),
+  ];
+
+  const healthy = {
+    registrationCoverageSeconds: 26 * 3600,
+    registrationCoverageBasis: 'LISTING_OR_HTTP',
+    registrationPublicationAt: '2026-06-30T02:00:00+00:00',
+  };
+
+  it('shows a stale state when registration lags the priced intervals', () => {
+    // The acceptance criterion from the issue: a dimension well behind the priced
+    // intervals must be reported, not rendered silently.
+    const markup = render(
+      ready(twoIntervals, {
+        fuelRows: priced({ ...healthy, registrationCoverageSeconds: 70 * 86400 }),
+      })
+    );
+    expect(markup).toContain('Registration attribution is');
+    expect(markup).toContain('stale');
+    expect(markup).toContain('70.0d');
+  });
+
+  it('shows the current state without claiming availability or curtailment', () => {
+    const markup = render(ready(twoIntervals, { fuelRows: priced(healthy) }));
+    expect(markup).toContain('Registration attribution is current');
+
+    // Scoped to the provenance note itself. A whole-page assertion was wrong:
+    // other sections legitimately mention curtailment in order to deny it, and
+    // deleting those disclaimers to satisfy this test would be a real regression.
+    const note = /data-testid="attribution-provenance"[^>]*>(.*?)<\/p>/s.exec(markup);
+    expect(note).not.toBeNull();
+    expect(note![1]).not.toMatch(/curtail|availability/i);
+  });
+
+  it('shows "not assessable" rather than fresh under a degraded basis', () => {
+    const markup = render(
+      ready(twoIntervals, {
+        fuelRows: priced({
+          ...healthy,
+          registrationCoverageSeconds: 30,
+          registrationCoverageBasis: 'DEGRADED_RETRIEVAL_FALLBACK',
+        }),
+      })
+    );
+    expect(markup).toContain('not assessable');
+    expect(markup).not.toContain('Registration attribution is current');
+  });
+
+  it('renders a non-zero partially-enriched facility count on screen', () => {
+    // This count was aggregated in Gold, selected in the reviewed SQL, parsed, and
+    // carried per fuel — then never rendered. An operator could not distinguish a
+    // legitimately UNKNOWN fuel from a missing registration load.
+    const markup = render(
+      ready(twoIntervals, {
+        fuelRows: priced({ ...healthy, facilityCount: 4, partiallyEnrichedFacilityCount: 2 }),
+      })
+    );
+    expect(markup).toContain('2 of 4 facilities missing registration detail');
+  });
+
+  it('omits the enrichment note when every facility is fully enriched', () => {
+    const markup = render(
+      ready(twoIntervals, { fuelRows: priced({ ...healthy, partiallyEnrichedFacilityCount: 0 }) })
+    );
+    expect(markup).not.toContain('missing registration detail');
+  });
+
+  it('keeps a charging battery negative alongside the new attribution note', () => {
+    // Guards the signed-generation contract against the render change: the note
+    // must not be produced by a code path that also normalises the sign.
+    const markup = render(
+      ready(twoIntervals, {
+        fuelRows: priced({
+          ...healthy,
+          fuelType: 'Battery storage',
+          actualGenerationMw: -300,
+          partiallyEnrichedFacilityCount: 1,
+        }),
+      })
+    );
+    expect(markup).toContain('Battery charging');
+    expect(markup).toContain('−');
+  });
+});

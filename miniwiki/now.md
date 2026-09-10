@@ -48,6 +48,87 @@ initial pipeline, semantic, benchmark and dashboard SQL gates.
 - Keep market notices omitted until a bounded plain-text parser, fixture and
   correction contract are independently proven.
 
+## Session handoff — 2026-09-10: registration attribution freshness (issue #7)
+
+**Read [`decisions/registration-coverage-metric.md`](decisions/registration-coverage-metric.md)
+before touching this work.** It holds the reasoning a fresh session would
+otherwise re-derive, including two rejected metrics and why.
+
+**Where the work is.** Branch `feat/registration-attribution-freshness`, seven
+commits `d202a02..e08a5ff`, pushed to the fork
+`saket-gogte14/agentic-energy-on-databricks-public`. Open as **draft** PR #28
+against `dgokeeffe:main`. `origin` is unchanged and read-only to this account
+(`push: false`, verified via the API), so a fork is the only contribution route
+and a maintainer merges.
+
+**What it does.** An analyst can see when the region and fuel attribution behind a
+value-capture figure is stale, incomplete, or not assessable. Coverage is the
+signed UTC publication-time distance from the SCADA being priced to the weakest of
+the three monthly registration loads, carried Silver → Gold → serving → app and
+rendered on the value-capture card. The partially-enriched facility count now
+renders for the first time; it previously died in the domain layer at
+`fuelCapture.ts:298`.
+
+**The finding that reshaped the issue.** Issue #7's literal ask — the lag between
+`registration_effective_at` and the priced intervals — is **identically zero by
+construction**, because both sides are `MAX(interval_end)` of the same Bronze
+table. It would have shipped an indicator that could never fire. The substitution
+was approved by the requester; the operator outcome in the issue is unchanged and
+met.
+
+**Evidence.** Root and foundation 345 passed with 37 subtests (320 at `05dad2c`);
+app 101 unit tests and 3 Playwright tests; typecheck, eslint and appkit lint
+clean; links 120 files, safety 432 files, miniwiki 20 pages;
+`git diff --check` clean. Label **prepared/snapshot** — no live NEMWEB claim.
+
+**A blocking defect was found late, by an independent reviewer, and repaired.**
+`ALTER TABLE … ADD COLUMNS IF NOT EXISTS` is not valid Databricks SQL. Proven with
+a read-only probe against a deliberately nonexistent table, which separates a
+parse failure from a missing-table failure: with the clause,
+`[PARSE_SYNTAX_ERROR] at or near 'EXISTS'`; without it,
+`[TABLE_OR_VIEW_NOT_FOUND]`. It would have failed the serving job on the next
+refresh, and **no local test could catch it because none reach a SQL engine.** Now
+`MERGE WITH SCHEMA EVOLUTION`, which is per-statement and reviewed rather than a
+table-wide `autoMerge`.
+
+Chasing that reviewer's symmetry point then exposed a **real pipeline defect**:
+Silver published `registration_publication_at`, Gold dropped it, and the app
+selected it — so the app read a column the serving table would never have had. The
+coherence test had compared only two of the three layers. It now spans all three
+and asserts set equality.
+
+**Still open, needing a person:**
+
+- **Re-review.** `e08a5ff` post-dates the review that requested it. Per
+  `adversarial-review`, accepted repairs return through the gates, so a fresh
+  reviewer on the full diff is the next gate before the draft is lifted.
+- **E1 has no issue yet, and is worse than the PR body says.** `io.py:281` stamps
+  `F.lit("listing_or_http")` unconditionally. Two verified corrections: it affects
+  **8 Bronze tables**, not just the 3 registration ones (the `subject_key` branch
+  also serves the dispatch subjects, while 6 legacy call sites inherit the correct
+  basis — so the column means two different things across Bronze); and
+  `land_nemweb_delta.py:49` coalesces `source_publication_at` **before**
+  `lander.py:432` tests it, making the `retrieval_fallback` arm **unreachable on
+  the deployed path**, so repairing `io.py:281` alone would leave the job still
+  lying. Detail in
+  [`decisions/registration-coverage-metric.md`](decisions/registration-coverage-metric.md).
+  Recorded only there and in the PR body, so **file the issue before #28 closes.**
+- **E2 blocks workshop use.** All six snapshot manifest artifacts have
+  `source_publication_at: null`, so the default path renders "not assessable" —
+  correct, but an invisible demo. Anyone assigning #7 as an exercise gets a feature
+  that never shows its interesting state. Re-cutting the snapshot is a
+  fixture-provenance decision for a facilitator.
+- **Nothing is runtime-verified in the pipeline.** `pyspark` is not a test
+  dependency, so the `F.min` aggregates, the pre-filter placement and the schema
+  evolution are statically proven only. Needs an authorised run with
+  `--profile DEFAULT`, schedules PAUSED, `allow_live_nemweb` false.
+- **Lakebase branch `dev-saket`** was provisioned from `production` (LSN
+  `0/1E17F68`) and still exists, holding a compute against the documented
+  20-per-project limit. Remove it when the work is done.
+
+**Next question.** Does the re-review pass on `e08a5ff`, and should E1 be filed
+before #28 leaves draft?
+
 ## Session handoff — 2026-09-09: repository split resolved
 
 **Two repositories existed with no shared Git history, and the workshop exercises

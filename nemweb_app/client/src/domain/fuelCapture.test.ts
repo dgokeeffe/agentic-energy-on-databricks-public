@@ -9,6 +9,8 @@ import {
   fuelToken,
   observationToken,
   regionCapture,
+  registrationAttribution,
+  STALE_REGISTRATION_AFTER_SECONDS,
   weakestCapture,
   type FuelGenerationRow,
   type RegionPriceRow,
@@ -451,5 +453,96 @@ describe('capturedRegions', () => {
       'NSW1',
       'VIC1',
     ]);
+  });
+});
+
+describe('registrationAttribution', () => {
+  const healthy = (overrides: Partial<FuelGenerationRow> = {}) =>
+    generation({
+      registrationCoverageSeconds: 26 * 3600,
+      registrationCoverageBasis: 'LISTING_OR_HTTP',
+      registrationPublicationAt: '2026-06-30T02:00:00+00:00',
+      ...overrides,
+    });
+
+  it('reports an ordinary monthly load as assessable and not stale', () => {
+    const attribution = registrationAttribution([healthy()]);
+    expect(attribution.assessable).toBe(true);
+    expect(attribution.stale).toBe(false);
+    expect(attribution.coverageSeconds).toBe(26 * 3600);
+  });
+
+  it('reports a registration load months behind the dispatch data as stale', () => {
+    // 70 days: one wholly missed monthly publication, past the 45-day threshold.
+    const attribution = registrationAttribution([healthy({ registrationCoverageSeconds: 70 * 86400 })]);
+    expect(attribution.assessable).toBe(true);
+    expect(attribution.stale).toBe(true);
+  });
+
+  it('does not alarm inside the normal monthly cadence', () => {
+    // 31 days is the definitional gap between two monthly archives. Alarming here
+    // would train an operator to ignore the badge.
+    expect(registrationAttribution([healthy({ registrationCoverageSeconds: 31 * 86400 })]).stale).toBe(false);
+    expect(STALE_REGISTRATION_AFTER_SECONDS).toBeGreaterThan(31 * 86400);
+  });
+
+  it('refuses to call a degraded basis fresh, however small the coverage', () => {
+    // The failure this exists to prevent: the publication instant was fabricated
+    // from our own retrieval time, so near-zero coverage proves nothing.
+    const attribution = registrationAttribution([
+      healthy({ registrationCoverageSeconds: 30, registrationCoverageBasis: 'DEGRADED_RETRIEVAL_FALLBACK' }),
+    ]);
+    expect(attribution.assessable).toBe(false);
+    expect(attribution.stale).toBe(false);
+  });
+
+  it('does not claim staleness it cannot measure, even at a large coverage', () => {
+    // The case that matters, and the one an earlier version of this suite missed.
+    // Testing a degraded basis only at a small coverage cannot detect a missing
+    // `assessable &&` guard on `stale`, because the threshold is not crossed
+    // either way. Here coverage is 200 days AND the basis is degraded: the number
+    // is meaningless, so the honest report is "not assessable", not "stale".
+    const attribution = registrationAttribution([
+      healthy({
+        registrationCoverageSeconds: 200 * 86400,
+        registrationCoverageBasis: 'DEGRADED_RETRIEVAL_FALLBACK',
+      }),
+    ]);
+    expect(attribution.assessable).toBe(false);
+    expect(attribution.stale).toBe(false);
+  });
+
+  it('lets one degraded row govern a batch of healthy ones', () => {
+    // Mirrors the pipeline's F.min on the basis: the weakest row wins, so a
+    // healthy interval cannot vouch for a degraded refresh.
+    const attribution = registrationAttribution([
+      healthy(),
+      healthy({ registrationCoverageBasis: 'DEGRADED_RETRIEVAL_FALLBACK' }),
+    ]);
+    expect(attribution.assessable).toBe(false);
+    expect(attribution.basis).toBe('DEGRADED_RETRIEVAL_FALLBACK');
+  });
+
+  it('treats absent coverage as not assessable rather than as zero', () => {
+    // A serving table predating the coverage columns must degrade, not report
+    // perfect freshness from no evidence at all.
+    const attribution = registrationAttribution([generation()]);
+    expect(attribution.assessable).toBe(false);
+    expect(attribution.coverageSeconds).toBeNull();
+    expect(attribution.stale).toBe(false);
+  });
+
+  it('treats an explicit UNKNOWN basis as not assessable', () => {
+    const attribution = registrationAttribution([
+      healthy({ registrationCoverageSeconds: null, registrationCoverageBasis: 'UNKNOWN' }),
+    ]);
+    expect(attribution.assessable).toBe(false);
+  });
+
+  it('preserves a negative coverage rather than clamping it', () => {
+    // Registration published after the SCADA is ordinary for a monthly source.
+    const attribution = registrationAttribution([healthy({ registrationCoverageSeconds: -2100 })]);
+    expect(attribution.coverageSeconds).toBe(-2100);
+    expect(attribution.stale).toBe(false);
   });
 });

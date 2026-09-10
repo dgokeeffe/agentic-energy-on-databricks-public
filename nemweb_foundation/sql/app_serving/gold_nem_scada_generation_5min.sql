@@ -9,6 +9,19 @@
 -- sum, so a charging battery is negative and must never be treated as generation.
 -- This is actual SCADA output only: AEMO Current publishes no five-minute
 -- availability, so nothing here supports an availability or curtailment claim.
+--
+-- Two clocks, never to be differenced. interval_end and registration_effective_at
+-- are interval-ending fixed AEST (UTC+10, no daylight saving). Every publication,
+-- landing and processing timestamp — including registration_publication_at and the
+-- registration_coverage_seconds delta computed from it — is UTC. Subtracting one
+-- domain from the other yields a result ten hours wrong.
+--
+-- registration_coverage_seconds is signed and may be NULL. Negative means the
+-- registration load was published after the dispatch data it describes, which is
+-- ordinary for a monthly source. NULL means the distance could not be established
+-- and must be read as "not assessable", never as zero; a consumer defaulting it to
+-- zero would report the strongest possible freshness from the weakest possible
+-- evidence. registration_coverage_basis carries which of those applies.
 CREATE TABLE IF NOT EXISTS IDENTIFIER(:catalog || '.' || :app_serving_schema || '.gold_nem_scada_generation_5min')
 TBLPROPERTIES (
   'delta.enableChangeDataFeed' = 'true',
@@ -17,12 +30,33 @@ TBLPROPERTIES (
   'grain' = 'five_minutes',
   'source.timezone' = 'AEST',
   'availability' = 'not_published_in_current',
+  'registration.coverage' = 'utc_publication_delta',
   'data.classification' = 'mode_explicit'
 )
 AS
 SELECT *, CAST(:source_mode AS STRING) AS source_mode
 FROM IDENTIFIER(:catalog || '.' || :schema || '.gold_nem_scada_generation_5min')
 WHERE FALSE;
+
+-- Schema evolution is handled on the MERGE itself, at the bottom of this file.
+--
+-- CREATE TABLE IF NOT EXISTS above is a no-op against an already-deployed table, so
+-- it cannot add the attribution columns; and the MERGE uses UPDATE SET * / INSERT *,
+-- which requires both schemas to agree. Something has to reconcile them.
+--
+-- An earlier version of this file used ALTER TABLE ... ADD COLUMNS IF NOT EXISTS.
+-- That is NOT valid Databricks SQL: the engine returns PARSE_SYNTAX_ERROR at
+-- 'EXISTS' (SQLSTATE 42601), because ADD COLUMNS has no IF NOT EXISTS clause. It
+-- would have failed this task on the next refresh, and no local test can catch it
+-- because none of them reach a SQL engine. Plain ADD COLUMNS is valid but is not
+-- idempotent — it errors once the column exists — and this job runs on every
+-- refresh rather than only at deploy, so a bare ALTER is also wrong here.
+--
+-- MERGE WITH SCHEMA EVOLUTION is per-statement and reviewed: it evolves the target
+-- to match this one source and nothing else. That is deliberately narrower than the
+-- spark.databricks.delta.schema.autoMerge.enabled table property, which would let
+-- any future pipeline column reach the serving surface unreviewed and is used
+-- nowhere in this repository.
 
 SELECT assert_true(
   COUNT(*) > 0,
@@ -47,7 +81,8 @@ SELECT assert_true(
   'app serving publication refused to remove more than half of existing generation rows'
 );
 
-MERGE INTO IDENTIFIER(:catalog || '.' || :app_serving_schema || '.gold_nem_scada_generation_5min') AS target
+MERGE WITH SCHEMA EVOLUTION
+INTO IDENTIFIER(:catalog || '.' || :app_serving_schema || '.gold_nem_scada_generation_5min') AS target
 USING (
   SELECT *, CAST(:source_mode AS STRING) AS source_mode
   FROM IDENTIFIER(:catalog || '.' || :schema || '.gold_nem_scada_generation_5min')
