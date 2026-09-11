@@ -47,9 +47,14 @@ Lakebase readiness from a pipeline pass.
 
 Wait for the exact refresh job run to report SUCCESS. Never run bundle commands
 concurrently against the same target state, including `bundle summary` during a
-deploy. Get resource identifiers only after deployment finishes:
+deploy. The lab runtime principal owns its Gold tables; grant the explicitly selected
+facilitator read access after the first successful refresh. The helper adds SELECT
+on exactly four Gold products; it does not grant learner groups or app access.
+Get resource identifiers only after deployment finishes:
 
 ```sh
+python3 scripts/grant-workshop-read.py --profile <profile> --target lab \
+  --catalog <catalog> --deployment-id <new-id>
 databricks bundle summary --target lab --profile <profile> -o json
 python3 scripts/workshop-query.py --profile <profile> --warehouse-id <warehouse-id> \
   --catalog <catalog> --schema <isolated-schema> \
