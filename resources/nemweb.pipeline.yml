@@ -43,6 +43,8 @@ resources:
           path: ../src/agentic_energy/gold/gold_interconnectors.py
       - file:
           path: ../src/agentic_energy/gold/gold_app_region_status.py
+      - file:
+          path: ../src/agentic_energy/gold/gold_initial_supply.py
       configuration:
         spark.sql.session.timeZone: Australia/Brisbane
         nemweb.source_mode: ${var.nemweb_mode}

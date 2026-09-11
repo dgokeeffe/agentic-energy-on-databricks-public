@@ -33,3 +33,7 @@ app-deploy: validate
 provision: require-profile
 	@test -n "$(CATALOG)" -a -n "$(DEPLOYMENT_ID)" || (echo 'Set CATALOG and DEPLOYMENT_ID.' >&2; exit 1)
 	python3 scripts/provision-lakebase.py --profile "$(PROFILE)" --catalog "$(CATALOG)" --deployment-id "$(DEPLOYMENT_ID)" --target $(TARGET)
+
+.PHONY: lab-test
+lab-test:
+	uv run --frozen pytest workshop/initial-supply/test_behaviour.py

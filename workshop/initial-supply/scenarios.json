@@ -1,0 +1,8 @@
+[
+  {"name":"signed battery charging reduces observed supply", "given":[["2026-07-01 00:05:00","NSW1","G1",100,"REGION_AND_FUEL","2026-06-30 14:06:00"],["2026-07-01 00:05:00","NSW1","B1",-20,"REGION_AND_FUEL","2026-06-30 14:07:00"]],"then":[["2026-07-01 00:05:00","NSW1",80,2,0,"2026-06-30 14:07:00"]]},
+  {"name":"unknown and partial attribution remain visible", "given":[["2026-07-01 00:05:00","UNKNOWN","U1",12,"UNMATCHED",null],["2026-07-01 00:05:00","NSW1","G1",30,"REGION_ONLY","2026-06-30 14:06:00"]],"then":[["2026-07-01 00:05:00","NSW1",30,1,1,"2026-06-30 14:06:00"],["2026-07-01 00:05:00","UNKNOWN",12,1,1,null]]},
+  {"name":"region and interval are independent keys", "given":[["2026-07-01 00:05:00","NSW1","G1",10,"REGION_AND_FUEL",null],["2026-07-01 00:10:00","NSW1","G1",20,"REGION_AND_FUEL",null],["2026-07-01 00:05:00","VIC1","G2",30,"REGION_AND_FUEL",null]],"then":[["2026-07-01 00:05:00","NSW1",10,1,0,null],["2026-07-01 00:05:00","VIC1",30,1,0,null],["2026-07-01 00:10:00","NSW1",20,1,0,null]]},
+  {"name":"no observations is missing data not zero", "given":[],"then":[]},
+  {"name":"observed zero remains an observation", "given":[["2026-07-01 00:05:00","NSW1","G1",0,"REGION_AND_FUEL",null]],"then":[["2026-07-01 00:05:00","NSW1",0,1,0,null]]},
+  {"name":"correction replaces the existing unit value on reevaluation", "given":[["2026-07-01 00:05:00","NSW1","G1",100,"REGION_AND_FUEL",null]],"then":[["2026-07-01 00:05:00","NSW1",100,1,0,null]],"correction":{"duid":"G1","mw":115},"then_corrected":[["2026-07-01 00:05:00","NSW1",115,1,0,null]]}
+]
