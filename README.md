@@ -1,5 +1,9 @@
 # Agentic Energy on Databricks
 
+On this workshop branch, start with the [initial-supply exercise](workshop/initial-supply/README.md)
+and [facilitator runbook](workshop/RUNBOOK.md). The shared baseline remains on `main`;
+learner and solution checkpoints are separate branches.
+
 A shared NEMWEB baseline for energy application labs:
 
 **NEMWEB → Lakeflow → Delta serving tables → Lakebase synced tables → App**
