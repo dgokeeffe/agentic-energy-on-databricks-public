@@ -1,0 +1,11 @@
+resources:
+  schemas:
+    app_serving:
+      name: ${var.app_serving_schema}
+      catalog_name: ${var.catalog}
+      comment: Regular Delta source tables published for the operations app
+      grants:
+      - principal: ${var.volume_writer_principal}
+        privileges:
+        - USE_SCHEMA
+        - CREATE_TABLE

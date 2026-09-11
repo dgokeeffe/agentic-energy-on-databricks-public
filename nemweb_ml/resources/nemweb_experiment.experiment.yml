@@ -1,7 +1,0 @@
-resources:
-  experiments:
-    nemweb:
-      name: /Users/${workspace.current_user.userName}/agentic-energy-workshop
-      tags:
-        - key: mlflow.note.content
-          value: NEMWEB price-model experiment created by the nemweb-ml bundle

@@ -1,0 +1,50 @@
+name: Deploy baseline
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        type: choice
+        required: true
+        options: [dev, lab]
+      step:
+        type: choice
+        required: true
+        options: [deploy, refresh, publish, app-deploy]
+permissions:
+  contents: read
+concurrency:
+  group: baseline-${{ inputs.target }}
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.target }}
+    env:
+      BUNDLE_VAR_catalog: ${{ vars.CATALOG }}
+      BUNDLE_VAR_deployment_id: ${{ vars.DEPLOYMENT_ID }}
+      BUNDLE_VAR_schema_suffix: ${{ vars.SCHEMA_SUFFIX }}
+      BUNDLE_VAR_lakebase_project_id: ${{ vars.LAKEBASE_PROJECT_ID }}
+      BUNDLE_VAR_postgres_branch_id: ${{ vars.POSTGRES_BRANCH_ID }}
+      BUNDLE_VAR_runtime_service_principal: ${{ vars.RUNTIME_SERVICE_PRINCIPAL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: databricks/setup-cli@main
+        with:
+          version: v1.16.1
+      - run: python3 scripts/ci-profile.py
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_CLIENT_ID: ${{ secrets.DATABRICKS_CLIENT_ID }}
+          DATABRICKS_CLIENT_SECRET: ${{ secrets.DATABRICKS_CLIENT_SECRET }}
+      - run: make setup && make check
+      - run: make validate PROFILE=ci TARGET="$TARGET"
+        env:
+          TARGET: ${{ inputs.target }}
+      - run: make "$STEP" PROFILE=ci TARGET="$TARGET"
+        env:
+          TARGET: ${{ inputs.target }}
+          STEP: ${{ inputs.step }}

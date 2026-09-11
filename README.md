@@ -1,115 +1,48 @@
-# Governed NEMWEB analytics on Databricks
+# Agentic Energy on Databricks
 
-This repository contains a governed Australian Energy Market Operator (AEMO)
-NEMWEB workflow, an AppKit operations application, a leakage-safe ML starter,
-and Lakebase contracts.
+A shared NEMWEB baseline for energy application labs:
 
-The primary runtime is a parameterised Databricks Asset Bundle:
+**NEMWEB → Lakeflow → Delta serving tables → Lakebase synced tables → App**
 
-```text
-restricted Current/MMSDM landing Volume
-  → Lakeflow Bronze (append-only source versions)
-  → correction-aware Silver
-  → five-minute Gold
-  → metric views → Genie → AI/BI dashboard
-```
+One root bundle deploys the same source to `dev` and `lab`. The baseline includes regional price and demand, constraints and interconnectors, SCADA generation, registration enrichment, fuel charts, a generator map, and native investigation notes. Initial supply, ML, Genie, and lab solutions are subsequent work.
 
-Curated Gold subjects include regional dispatch price and demand, unit and
-facility output, SCADA generation by region and fuel, binding dispatch
-constraints, and interconnector flows. AEMO Current does not publish
-five-minute unit availability. Near-real-time unit output is therefore SCADA
-`actual_generation_mw`; authoritative target and availability come from the
-daily Next_Day_Dispatch product at T+1.
+## Local setup
 
-## Repository layout
+Install Python 3.10+, uv, Node.js 22+, and Databricks CLI 1.16.1 or newer.
 
-```text
-nemweb_foundation/   governed NEMWEB implementation, contracts, and tests
-nemweb_app/          AppKit regional-operations application
-nemweb_ml/           leakage-safe ML and MLflow starter
-workshop/lakebase/   Lakebase CDF and migration contracts
-scripts/             local utility scripts
-miniwiki/            optional Markdown notes
-```
-
-## Setup
-
-Requires Python 3.10+, `uv`, Node.js, and npm.
-
-```bash
+```sh
 make setup
+make check
+npm --prefix app run test:smoke
 ```
 
-Authentication is not automated. Configure the Databricks CLI separately when
-workspace validation is required.
+Browser smoke tests use installed Google Chrome locally. CI installs Chromium. For a fixture-only preview, run `VITE_DATA_MODE=mock npm --prefix app run build:client`, then `cd app && npx vite preview --config client/vite.config.ts`. The prepared fixture is explicitly non-live. Native writes require the deployed Lakebase application.
 
-## Local development
+## Layout
 
-Fast workspace-free checks:
+- `databricks.yml`, `resources/`: deployment configuration and Lakebase sync templates.
+- `src/agentic_energy/`: ingestion, Bronze, Silver, Gold, common helpers, and serving SQL.
+- `app/`: React/Node application and its unit/browser tests.
+- `tests/`: Python unit tests, integration contracts, and immutable fixtures.
+- `scripts/`: setup, validation, landing entrypoint, and sync inspection.
+- `docs/`: [architecture](docs/architecture.md), [data contracts](docs/data-contracts.md), and [operations](docs/operations.md).
 
-```bash
-make validate-fast
+## Deploy an isolated baseline
+
+Choose a CLI profile explicitly. Configure private values in `.databricks/bundle/<target>/variable-overrides.json` or `BUNDLE_VAR_*` environment variables, as described in [operations](docs/operations.md).
+
+```sh
+make provision PROFILE=<chosen-profile> CATALOG=<existing-catalog> DEPLOYMENT_ID=<unique-id> TARGET=dev
+make validate PROFILE=<chosen-profile> TARGET=dev
+make deploy PROFILE=<chosen-profile> TARGET=dev
+make refresh PROFILE=<chosen-profile> TARGET=dev
+make publish PROFILE=<chosen-profile> TARGET=dev
+# Create/refresh and verify the three Lakebase syncs, then deploy the app:
+make app-deploy PROFILE=<chosen-profile> TARGET=dev
 ```
 
-The complete local build and application smoke-test gate is available when
-needed:
+Both targets deploy with paused schedules. `lab` uses production deployment mode and requires an explicit runtime service principal. The warehouse serves publication jobs; the app reads only Lakebase. Existing deployments are separate from the new bundle state and are not deleted by this refactor.
 
-```bash
-make validate-local
-```
+The accepted baseline is released only after isolated workspace rehearsal and review. Merging does not deploy lab environments automatically. See [operations](docs/operations.md) for the release gate.
 
-Useful focused commands:
-
-```bash
-make test
-make foundation-test
-make ml-test
-make lakebase-test
-make app-install
-make app-test
-```
-
-The app can run locally against mock data:
-
-```bash
-make app-dev-mock
-```
-
-## Databricks validation
-
-Workspace commands require an explicitly named CLI profile. Choose a bundle
-target; there is no `.env`. `dev` and `live_evidence` create the SQL warehouse,
-UC schemas, MLflow experiment and registered model from the authenticated
-identity. The app still needs `--var attendee_slug=...` and
-`--var lakebase_project_id=...`.
-
-```bash
-make bundle-validate PROFILE=<your-profile>
-```
-
-The bundles contain paused schedules. Do not enable schedules or live NEMWEB
-access without confirming the target, identity, configuration, and required
-approval. Snapshot data is prepared evidence and must not be represented as live
-evidence.
-
-The authoritative NEMWEB scripts are under
-`nemweb_foundation/scripts/`, including snapshot, evidence, landing, Genie, and
-live-cycle validation utilities. They are ordinary executable programs; no
-agent skill or prompt pack is required to use them.
-
-## Data contracts
-
-- Market intervals use fixed AEST (UTC+10, without daylight saving).
-- Processing, publication, landing, and lineage timestamps are UTC instants.
-- Bronze retains source corrections; Silver selects the latest valid correction.
-- Gold retains intervention rows and ordinary analysis uses `is_effective_run`.
-- Snapshot and prepared fixtures are non-live evidence.
-- AEMO data attribution and adapted-source notices are in
-  [`DATA_LICENSES.md`](DATA_LICENSES.md) and [`NOTICE.md`](NOTICE.md).
-
-## Validation scripts
-
-The implementation is tested with pytest, the AppKit test/typecheck/build
-commands, and the focused NEMWEB snapshot and API checks. Keep credentials,
-private workspace URLs, tenant identifiers, and generated deployment state out
-of Git.
+Original code is MIT licensed; adapted material has additional terms. Source attribution and data conditions are in [NOTICE.md](NOTICE.md) and [DATA_LICENSES.md](DATA_LICENSES.md).

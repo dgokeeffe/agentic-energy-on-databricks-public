@@ -1,77 +1,35 @@
-PYTHON ?= python3
-PROFILE ?=
-
-.PHONY: setup test foundation-test foundation-snapshot modern-apis build app-install app-typegen app-test app-dev-mock ticket-verify ml-test lakebase-test bundle-validate bundle-validate-live-evidence facilitator-lakebase-preflight facilitator-lakebase-smoke validate-fast validate-local validate-readonly
-
+TARGET ?= dev
+.PHONY: setup test app-check check validate deploy refresh publish app-deploy require-profile
 setup:
 	bash scripts/setup-dev.sh
-
 test:
-	uv run --extra test $(PYTHON) -m pytest
+	uv run --frozen pytest
+app-check:
+	npm --prefix app run typecheck
+	npm --prefix app run lint
+	npm --prefix app test
+	npm --prefix app run build
+check: test app-check
+require-profile:
+	@test -n "$(PROFILE)" || (echo 'Set PROFILE to an explicitly chosen Databricks CLI profile.' >&2; exit 1)
+	@case "$(TARGET)" in dev|lab) ;; *) echo 'TARGET must be dev or lab' >&2; exit 1;; esac
+validate: require-profile
+	python3 scripts/validate-config.py --target $(TARGET)
+	databricks bundle validate --strict --target $(TARGET) --profile "$(PROFILE)"
+deploy: validate
+	npm --prefix app run build
+	databricks bundle deploy --target $(TARGET) --profile "$(PROFILE)"
+	python3 scripts/grant-runtime-source.py --profile "$(PROFILE)" --target $(TARGET)
+refresh: require-profile
+	databricks bundle run nemweb_refresh --target $(TARGET) --profile "$(PROFILE)"
+publish: require-profile
+	databricks bundle run nemweb_app_serving --target $(TARGET) --profile "$(PROFILE)"
+	python3 scripts/grant-sync-source.py --profile "$(PROFILE)" --target $(TARGET)
+app-deploy: validate
+	npm --prefix app run build
+	databricks bundle sync --full --target $(TARGET) --profile "$(PROFILE)"
+	databricks bundle run app --target $(TARGET) --profile "$(PROFILE)"
 
-foundation-test:
-	uv run --project nemweb_foundation --extra test $(PYTHON) -m pytest
-
-foundation-snapshot:
-	uv run --project nemweb_foundation $(PYTHON) nemweb_foundation/scripts/validate_nemweb_snapshot.py
-
-modern-apis:
-	$(PYTHON) nemweb_foundation/scripts/check_modern_pipeline_apis.py
-
-build:
-	rm -rf dist nemweb_foundation/dist nemweb_ml/dist
-	uv build --wheel --out-dir dist
-	uv build --project nemweb_foundation --wheel --out-dir nemweb_foundation/dist
-	uv build --project nemweb_ml --wheel --out-dir nemweb_ml/dist
-
-app-install:
-	cd nemweb_app && npm ci --include=dev
-
-app-typegen:
-	cd nemweb_app && npm run typegen
-
-app-test:
-	cd nemweb_app && npm run typegen && npm run typecheck && npm run lint && npm run lint:ast-grep && npm run test -- --run && npm run build && npm run smoke:install && npm run test:smoke
-
-app-dev-mock:
-	cd nemweb_app && VITE_DATA_MODE=mock npx vite --config client/vite.config.ts --host 127.0.0.1
-
-ticket-verify:
-	@test -n "$(ISSUE)" || (echo 'ISSUE=<number> is required' >&2; exit 2)
-	$(MAKE) test app-test ml-test lakebase-test
-
-ml-test:
-	uv run --project nemweb_ml --extra test $(PYTHON) -m pytest nemweb_ml/tests -q
-
-lakebase-test:
-	uv run --extra test $(PYTHON) -m pytest workshop/lakebase/tests -q
-
-# Targets carry their own defaults. No .env.
-bundle-validate:
-	@test -n "$(PROFILE)" || (echo 'PROFILE=<name> is required' >&2; exit 2)
-	(cd nemweb_foundation && databricks bundle validate --strict -t dev --profile $(PROFILE))
-	(cd nemweb_ml && databricks bundle validate --strict -t dev --profile $(PROFILE))
-
-bundle-validate-live-evidence:
-	@test -n "$(PROFILE)" || (echo 'PROFILE=<name> is required' >&2; exit 2)
-	(cd nemweb_foundation && databricks bundle validate --strict -t live_evidence --profile $(PROFILE))
-
-# Fast, workspace-free checks for normal development. The full local gate below
-# remains available before a handoff or workshop rehearsal.
-validate-fast: test foundation-snapshot modern-apis
-
-validate-local: validate-fast build app-test
-
-facilitator-lakebase-preflight:
-	@test -n "$(PROFILE)" || (echo 'PROFILE=<name> is required' >&2; exit 2)
-	PROFILE=$(PROFILE) bash workshop/lakebase/scripts/discover.sh
-
-facilitator-lakebase-smoke:
-	@test -n "$(PROFILE)" || (echo 'PROFILE=<name> is required' >&2; exit 2)
-	uv run --extra test $(PYTHON) -m pytest workshop/lakebase/tests -q
-
-validate-readonly:
-	@test -n "$(PROFILE)" || (echo 'PROFILE=<name> is required' >&2; exit 2)
-	$(MAKE) validate-local
-	$(MAKE) bundle-validate PROFILE=$(PROFILE)
-	cd nemweb_app && databricks apps validate --profile $(PROFILE)
+provision: require-profile
+	@test -n "$(CATALOG)" -a -n "$(DEPLOYMENT_ID)" || (echo 'Set CATALOG and DEPLOYMENT_ID.' >&2; exit 1)
+	python3 scripts/provision-lakebase.py --profile "$(PROFILE)" --catalog "$(CATALOG)" --deployment-id "$(DEPLOYMENT_ID)" --target $(TARGET)

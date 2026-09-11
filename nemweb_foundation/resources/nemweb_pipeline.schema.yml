@@ -1,6 +1,0 @@
-resources:
-  schemas:
-    pipeline:
-      name: ${var.schema}
-      catalog_name: ${var.catalog}
-      comment: NEMWEB medallion schema created by the foundation bundle

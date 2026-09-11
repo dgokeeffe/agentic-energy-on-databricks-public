@@ -1,0 +1,20 @@
+import { defineConfig } from 'vitest/config';
+import path from 'node:path';
+
+export default defineConfig({
+  test: {
+    passWithNoTests: false,
+    globals: true,
+    environment: 'node',
+    exclude: ['**/node_modules/**', '**/dist/**', '**/.databricks/**', '**/tests/*.spec.ts'],
+  },
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './client/src'),
+      'echarts-for-react/esm/core': 'echarts-for-react/esm/core.js',
+    },
+  },
+  ssr: {
+    noExternal: ['@databricks/appkit-ui', 'echarts-for-react'],
+  },
+});

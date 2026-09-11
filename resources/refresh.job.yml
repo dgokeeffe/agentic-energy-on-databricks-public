@@ -1,0 +1,59 @@
+resources:
+  jobs:
+    nemweb_refresh:
+      name: ${var.resource_prefix}-refresh
+      max_concurrent_runs: 1
+      queue:
+        enabled: true
+      permissions:
+      - level: CAN_MANAGE_RUN
+        group_name: ${var.participant_group}
+      - level: CAN_MANAGE
+        group_name: ${var.facilitator_group}
+      tasks:
+      - task_key: land_registration
+        timeout_seconds: 1200
+        run_job_task:
+          job_id: ${resources.jobs.nemweb_lander.id}
+          job_parameters:
+            mode: ${var.nemweb_mode}
+            scope: context
+            critical_lookback_hours: ${var.critical_lookback_hours}
+            context_lookback_days: ${var.context_lookback_days}
+      - task_key: land_regional
+        timeout_seconds: 1200
+        run_job_task:
+          job_id: ${resources.jobs.nemweb_lander.id}
+          job_parameters:
+            mode: ${var.nemweb_mode}
+            scope: regional
+            critical_lookback_hours: ${var.critical_lookback_hours}
+            context_lookback_days: ${var.context_lookback_days}
+        depends_on:
+        - task_key: land_registration
+      - task_key: land_current
+        timeout_seconds: 1200
+        run_job_task:
+          job_id: ${resources.jobs.nemweb_lander.id}
+          job_parameters:
+            mode: ${var.nemweb_mode}
+            scope: critical
+            critical_lookback_hours: ${var.critical_lookback_hours}
+            context_lookback_days: ${var.context_lookback_days}
+        depends_on:
+        - task_key: land_regional
+      - task_key: publish_medallion
+        depends_on:
+        - task_key: land_current
+        max_retries: 0
+        pipeline_task:
+          pipeline_id: ${resources.pipelines.nemweb.id}
+          full_refresh: false
+      tags:
+        cadence: five_minutes
+        data_source: nemweb
+        source_provider: aemo
+      schedule:
+        pause_status: PAUSED
+        quartz_cron_expression: 0 0/5 * * * ?
+        timezone_id: Australia/Brisbane

@@ -1,0 +1,40 @@
+resources:
+  jobs:
+    nemweb_context_refresh:
+      name: ${var.resource_prefix}-context
+      max_concurrent_runs: 1
+      queue:
+        enabled: true
+      schedule:
+        quartz_cron_expression: 0 0 2 * * ?
+        timezone_id: Australia/Brisbane
+        pause_status: PAUSED
+      permissions:
+      - level: CAN_MANAGE_RUN
+        group_name: ${var.participant_group}
+      - level: CAN_MANAGE
+        group_name: ${var.facilitator_group}
+      tasks:
+      - task_key: land_context
+        run_job_task:
+          job_id: ${resources.jobs.nemweb_lander.id}
+          job_parameters:
+            mode: ${var.nemweb_mode}
+            scope: context
+            critical_lookback_hours: ${var.critical_lookback_hours}
+            context_lookback_days: ${var.context_lookback_days}
+      - task_key: publish_context
+        depends_on:
+        - task_key: land_context
+        max_retries: 0
+        pipeline_task:
+          pipeline_id: ${resources.pipelines.nemweb.id}
+          full_refresh: false
+          refresh_selection:
+          - bronze_nem_dudetail
+          - bronze_nem_dualloc
+          - bronze_nem_genunits
+      tags:
+        cadence: daily
+        data_source: nemweb
+        source_provider: aemo

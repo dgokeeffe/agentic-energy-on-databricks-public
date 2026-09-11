@@ -1,0 +1,12 @@
+resources:
+  schemas:
+    pipeline:
+      name: ${var.schema}
+      catalog_name: ${var.catalog}
+      comment: NEMWEB medallion schema created by the baseline bundle
+      grants:
+      - principal: ${var.volume_writer_principal}
+        privileges:
+        - USE_SCHEMA
+        - CREATE_TABLE
+        - CREATE_MATERIALIZED_VIEW

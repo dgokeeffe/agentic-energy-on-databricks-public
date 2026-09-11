@@ -1,0 +1,5 @@
+[
+  {"source": "gold_nem_app_region_status", "target": "nem_region_status_synced", "keys": ["serving_key"]},
+  {"source": "gold_nem_scada_generation_5min", "target": "nem_fuel_generation_synced", "keys": ["interval_end", "region_id", "fuel_type"]},
+  {"source": "gold_nem_unit_dispatch_5min", "target": "nem_unit_dispatch_synced", "keys": ["interval_end", "duid"]}
+]

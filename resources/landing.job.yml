@@ -1,0 +1,65 @@
+resources:
+  jobs:
+    nemweb_lander:
+      name: ${var.resource_prefix}-lander
+      max_concurrent_runs: 4
+      queue:
+        enabled: true
+      permissions:
+      - level: CAN_VIEW
+        group_name: ${var.participant_group}
+      - level: CAN_MANAGE
+        group_name: ${var.facilitator_group}
+      parameters:
+      - name: mode
+        default: ${var.nemweb_mode}
+      - name: scope
+        default: critical
+      - name: critical_lookback_hours
+        default: ${var.critical_lookback_hours}
+      - name: context_lookback_days
+        default: ${var.context_lookback_days}
+      tasks:
+      - task_key: land_nemweb_files
+        environment_key: default
+        max_retries: 0
+        timeout_seconds: 3600
+        spark_python_task:
+          python_file: ../scripts/land_nemweb_delta.py
+          parameters:
+          - --mode
+          - '{{job.parameters.mode}}'
+          - --scope
+          - '{{job.parameters.scope}}'
+          - --catalog
+          - ${var.catalog}
+          - --schema
+          - ${var.schema}
+          - --volume-path
+          - ${var.landing_path}
+          - --critical-lookback-hours
+          - '{{job.parameters.critical_lookback_hours}}'
+          - --context-lookback-days
+          - '{{job.parameters.context_lookback_days}}'
+          - --max-files
+          - ${var.max_files_per_cycle}
+          - --network-timeout-seconds
+          - ${var.network_timeout_seconds}
+          - --network-retry-count
+          - ${var.network_retry_count}
+          - --cycle-id
+          - '{{job.run_id}}-{{task.run_id}}-{{task.execution_count}}'
+          - --allow-live
+          - ${var.allow_live_nemweb}
+          - --snapshot-version
+          - ${var.snapshot_version}
+      environments:
+      - environment_key: default
+        spec:
+          environment_version: '4'
+          dependencies:
+          - ../dist/*.whl
+      tags:
+        data_source: nemweb
+        source_provider: aemo
+        source_mode: ${var.nemweb_mode}

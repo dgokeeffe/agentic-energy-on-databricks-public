@@ -1,0 +1,118 @@
+{
+  "artifacts": [
+    {
+      "classification": "synthetic minimal mutation based on documented/current NEMWEB section headers; not live evidence; synthetic dates aligned with SCADA for application joins",
+      "derived_from_sha256": "5237f3725f6355b6cf2ca0a2e701d6531d42e720d27bf55fdefd738fefdedf62",
+      "path": "raw/dispatchis/PUBLIC_DISPATCHIS_202607010005_SYNTHETIC.zip",
+      "publication": "202607010005",
+      "report_family": "dispatchis",
+      "report_versions": [
+        "PRICE.v5",
+        "REGIONSUM.v9",
+        "CONSTRAINT.v5",
+        "INTERCONNECTORRES.v3"
+      ],
+      "retrieved_at": "2026-09-02T11:30:00+10:00",
+      "sha256": "a99e556527ee0d17f776896d90281e00178a0b183ac1bb220e0ba43b344bccec",
+      "source_filename": "PUBLIC_DISPATCHIS_202607010005_SYNTHETIC.zip",
+      "source_url": "https://www.nemweb.com.au/REPORTS/CURRENT/DispatchIS_Reports/",
+      "synthetic": true
+    },
+    {
+      "classification": "second consecutive synthetic five-minute cycle using the same documented/current NEMWEB section headers; not live evidence; synthetic dates aligned with SCADA for application joins",
+      "derived_from_sha256": "66b7a03dabddb6c98f36b2b1a3f95a844441f93a2d6248217abef7d98508b20b",
+      "path": "raw/dispatchis/PUBLIC_DISPATCHIS_202607010010_SYNTHETIC.zip",
+      "publication": "202607010010",
+      "report_family": "dispatchis",
+      "report_versions": [
+        "PRICE.v5",
+        "REGIONSUM.v9",
+        "CONSTRAINT.v5",
+        "INTERCONNECTORRES.v3"
+      ],
+      "retrieved_at": "2026-09-02T11:30:00+10:00",
+      "sha256": "76803e05290832e76de89bfebc882472590050e82872f90de45c0a48b869ada6",
+      "source_filename": "PUBLIC_DISPATCHIS_202607010010_SYNTHETIC.zip",
+      "source_url": "https://www.nemweb.com.au/REPORTS/CURRENT/DispatchIS_Reports/",
+      "synthetic": true
+    },
+    {
+      "classification": "synthetic SCADA values using real MMSDM DUID identities for deterministic enrichment tests; not live evidence",
+      "derived_from_sha256": "f3ce6bfd05e76d995f70f47141e0ac64c389f596849e938c2300dd82b8f87315",
+      "path": "raw/dispatch_scada/PUBLIC_DISPATCHSCADA_202607010005_SYNTHETIC.zip",
+      "publication": "202607010005",
+      "report_family": "dispatch_scada",
+      "report_versions": [
+        "UNIT_SCADA.v1"
+      ],
+      "retrieved_at": "2026-09-02T11:30:00+10:00",
+      "sha256": "f3ce6bfd05e76d995f70f47141e0ac64c389f596849e938c2300dd82b8f87315",
+      "source_filename": "PUBLIC_DISPATCHSCADA_202607010005_SYNTHETIC.zip",
+      "source_url": "https://www.nemweb.com.au/REPORTS/CURRENT/Dispatch_SCADA/",
+      "synthetic": true
+    },
+    {
+      "classification": "second consecutive synthetic five-minute SCADA cycle using the same real MMSDM DUID identities; not live evidence",
+      "derived_from_sha256": "7478688dfafdb4f4de90f8ba961362248d505461136d6b9bc08a84b4470abe36",
+      "path": "raw/dispatch_scada/PUBLIC_DISPATCHSCADA_202607010010_SYNTHETIC.zip",
+      "publication": "202607010010",
+      "report_family": "dispatch_scada",
+      "report_versions": [
+        "UNIT_SCADA.v1"
+      ],
+      "retrieved_at": "2026-09-02T11:30:00+10:00",
+      "sha256": "7478688dfafdb4f4de90f8ba961362248d505461136d6b9bc08a84b4470abe36",
+      "source_filename": "PUBLIC_DISPATCHSCADA_202607010010_SYNTHETIC.zip",
+      "source_url": "https://www.nemweb.com.au/REPORTS/CURRENT/Dispatch_SCADA/",
+      "synthetic": true
+    },
+    {
+      "classification": "deterministic row excerpt from three unmodified AEMO MMSDM monthly archive CSVs; rows and headers unmodified, archive repackaged; original archive checksums recorded; not live evidence",
+      "derived_from_sha256": "d45166e366cd5cea5c44207b3f2082802a20e7c5a2513137f759c8071812edfa",
+      "original_archive_sha256": {
+        "DUALLOC": "7aa9fabcf18c9c5cb1e280bf7aa333b4384709e90a4c5a58ffa4bf8db7bee845",
+        "DUDETAILSUMMARY": "c87e888dbae6e65fba3b07aba89c04c1f3e3a17f38e811cfe0b1ee6833139b1e",
+        "GENUNITS": "847de568b04902b6472df16cff89c4abce643323566cd79f966848500a29cc03"
+      },
+      "path": "raw/registration/AEMO_MMSDM_REGISTRATION_EXCERPT_202607.zip",
+      "publication": "20260701",
+      "report_family": "registration",
+      "report_versions": [
+        "DUDETAILSUMMARY.v7",
+        "DUALLOC.v1",
+        "GENUNITS.v3"
+      ],
+      "retrieved_at": "2026-09-02T12:05:00+10:00",
+      "sha256": "d45166e366cd5cea5c44207b3f2082802a20e7c5a2513137f759c8071812edfa",
+      "source_filename": "AEMO_MMSDM_REGISTRATION_EXCERPT_202607.zip",
+      "source_url": "https://nemweb.com.au/Data_Archive/Wholesale_Electricity/MMSDM/2026/MMSDM_2026_07/MMSDM_Historical_Data_SQLLoader/DATA/",
+      "synthetic": false
+    }
+  ],
+  "attribution": "Contains a small row-preserving excerpt of AEMO MMSDM registration data plus clearly labelled synthetic NEMWEB-format dispatch examples. NEMWEB data/source formats \u00a9 Australian Energy Market Operator Limited (AEMO). Not live evidence. See DATA_LICENSES.md.",
+  "case_provenance": {
+    "retrieved_at": "2026-09-02T11:30:00+10:00",
+    "source_urls": {
+      "dispatch_scada": "https://www.nemweb.com.au/REPORTS/CURRENT/Dispatch_SCADA/",
+      "dispatchis": "https://www.nemweb.com.au/REPORTS/CURRENT/DispatchIS_Reports/"
+    },
+    "source_versions": [
+      "PRICE.v5",
+      "REGIONSUM.v9",
+      "CONSTRAINT.v5",
+      "INTERCONNECTORRES.v3",
+      "UNIT_SCADA.v1"
+    ],
+    "statement": "Every case is a named synthetic mutation of the versioned headers above, not an unmodified AEMO report and not live evidence."
+  },
+  "cases": [],
+  "frozen_landed_at": "2024-01-02T00:00:00+00:00",
+  "purpose": "Deterministic workshop and parser safety tests with minimum necessary rows.",
+  "required_families": [
+    "dispatchis",
+    "dispatch_scada",
+    "registration"
+  ],
+  "retrieved_on": "2026-09-02",
+  "snapshot_version": "v2"
+}

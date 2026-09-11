@@ -1,6 +1,0 @@
--- Render only during facilitator-approved provisioning.
--- :app_principal is a quoted PostgreSQL role supplied outside Git.
-GRANT USAGE ON SCHEMA app_read TO :app_principal;
-GRANT SELECT ON TABLE app_read.nem_region_status_synced TO :app_principal;
-REVOKE INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER
-  ON TABLE app_read.nem_region_status_synced FROM :app_principal;

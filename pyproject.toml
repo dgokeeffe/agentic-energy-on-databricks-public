@@ -3,20 +3,37 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "agentic-energy-workshop-validation"
+name = "agentic-energy-on-databricks"
 version = "0.1.0"
-description = "Root validation facade for the Agentic Energy workshop"
+description = "Reusable, metadata-driven energy data foundation for Databricks"
 license = {file = "LICENSE"}
 requires-python = ">=3.10"
-dependencies = []
+dependencies = ["tzdata; sys_platform == 'win32'"]
 
 [project.optional-dependencies]
+# pyyaml is test-only: the bundle contract tests parse databricks.yml so that a
+# change which breaks concurrent deploys fails offline instead of in a
+# workspace. It is not a runtime dependency of the wheel.
 test = ["pytest>=8.0", "pyyaml>=6.0"]
 
-[tool.pytest.ini_options]
-testpaths = ["tests", "nemweb_foundation/tests", "nemweb_ml/tests", "workshop/lakebase/tests"]
-pythonpath = ["nemweb_foundation", "nemweb_ml/src", "."]
-addopts = "-q --import-mode=importlib"
+[project.scripts]
+# Primary governed NEMWEB workflow.
+agentic-energy = "agentic_energy.cli:main"
+main = "agentic_energy.cli:main"
 
-[tool.setuptools]
-py-modules = []
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --import-mode=importlib"
+pythonpath = ["src"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["agentic_energy*"]
+
+[tool.setuptools.package-data]
+agentic_energy = [
+  "resources/nemweb_snapshot/**/*",
+]
+
+[tool.uv]
+package = true

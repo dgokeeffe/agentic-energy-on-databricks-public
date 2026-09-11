@@ -1,0 +1,46 @@
+name: Validate baseline
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  local:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - run: make setup
+      - run: make check
+      - run: npx playwright install --with-deps chromium
+        working-directory: app
+      - run: npm run test:smoke
+        working-directory: app
+        env:
+          CI: 'true'
+  bundle:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - uses: actions/checkout@v4
+      - uses: databricks/setup-cli@main
+        with:
+          version: v1.16.1
+      - run: python3 scripts/ci-profile.py
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_CLIENT_ID: ${{ secrets.DATABRICKS_CLIENT_ID }}
+          DATABRICKS_CLIENT_SECRET: ${{ secrets.DATABRICKS_CLIENT_SECRET }}
+      - run: make validate PROFILE=ci TARGET=dev
+        env:
+          BUNDLE_VAR_catalog: ${{ vars.CATALOG }}
+          BUNDLE_VAR_deployment_id: ${{ vars.DEPLOYMENT_ID }}
+          BUNDLE_VAR_schema_suffix: ${{ vars.SCHEMA_SUFFIX }}
+          BUNDLE_VAR_lakebase_project_id: ${{ vars.LAKEBASE_PROJECT_ID }}
+          BUNDLE_VAR_postgres_branch_id: ${{ vars.POSTGRES_BRANCH_ID }}

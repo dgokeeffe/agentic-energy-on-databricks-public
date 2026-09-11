@@ -1,0 +1,62 @@
+resources:
+  pipelines:
+    nemweb:
+      name: ${var.resource_prefix}-pipeline
+      catalog: ${var.catalog}
+      schema: ${var.schema}
+      serverless: true
+      event_log:
+        catalog: ${var.catalog}
+        schema: ${var.schema}
+        name: nemweb_pipeline_event_log
+      photon: true
+      channel: CURRENT
+      root_path: ../src
+      libraries:
+      - file:
+          path: ../src/agentic_energy/bronze/parsed_records.py
+      - file:
+          path: ../src/agentic_energy/bronze/bronze_dispatchis.py
+      - file:
+          path: ../src/agentic_energy/bronze/bronze_scada.py
+      - file:
+          path: ../src/agentic_energy/bronze/bronze_registration.py
+      - file:
+          path: ../src/agentic_energy/silver/silver_region_dispatch.py
+      - file:
+          path: ../src/agentic_energy/silver/silver_scada.py
+      - file:
+          path: ../src/agentic_energy/silver/silver_constraints.py
+      - file:
+          path: ../src/agentic_energy/silver/silver_interconnectors.py
+      - file:
+          path: ../src/agentic_energy/silver/silver_facilities.py
+      - file:
+          path: ../src/agentic_energy/gold/gold_region_dispatch.py
+      - file:
+          path: ../src/agentic_energy/gold/gold_unit_dispatch.py
+      - file:
+          path: ../src/agentic_energy/gold/gold_scada_generation.py
+      - file:
+          path: ../src/agentic_energy/gold/gold_constraints.py
+      - file:
+          path: ../src/agentic_energy/gold/gold_interconnectors.py
+      - file:
+          path: ../src/agentic_energy/gold/gold_app_region_status.py
+      configuration:
+        spark.sql.session.timeZone: Australia/Brisbane
+        nemweb.source_mode: ${var.nemweb_mode}
+        nemweb.landing_path: ${var.landing_path}
+        nemweb.landing_catalog: ${var.catalog}
+        nemweb.landing_schema: ${var.schema}
+        nemweb.market_timezone: Australia/Brisbane
+        nemweb.critical_lookback_hours: ${var.critical_lookback_hours}
+        nemweb.context_lookback_days: ${var.context_lookback_days}
+      permissions:
+      - level: CAN_RUN
+        group_name: ${var.participant_group}
+      - level: CAN_MANAGE
+        group_name: ${var.facilitator_group}
+      tags:
+        data_source: nemweb
+        source_provider: aemo
