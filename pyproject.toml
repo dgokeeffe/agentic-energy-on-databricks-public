@@ -37,3 +37,7 @@ agentic_energy = [
 
 [tool.uv]
 package = true
+
+[[tool.uv.index]]
+url = "https://pypi.org/simple"
+default = true
