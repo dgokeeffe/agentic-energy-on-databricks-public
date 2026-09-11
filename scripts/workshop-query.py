@@ -35,7 +35,10 @@ def rows(response):
     if response.get("manifest", {}).get("truncated") or response.get("result", {}).get("next_chunk_index") is not None:
         raise ValueError("Result truncated; reduce the window instead of accepting partial evidence")
     columns = [c["name"] for c in response["manifest"]["schema"]["columns"]]
-    return [dict(zip(columns, row)) for row in response.get("result", {}).get("data_array", [])]
+    data = response.get("result", {}).get("data_array", [])
+    if len(set(columns)) != len(columns) or any(len(row) != len(columns) for row in data):
+        raise ValueError("Result columns are duplicate or incomplete")
+    return [dict(zip(columns, row)) for row in data]
 
 
 def main():
@@ -53,7 +56,14 @@ def main():
         parser.error("Use one SELECT/WITH statement without a trailing semicolon")
     if output.exists() and not args.resume:
         parser.error("Evidence already exists; choose a new output or resume the saved statement ID")
+    context = {"profile": args.profile, "warehouse_id": args.warehouse_id,
+               "catalog": args.catalog, "schema": args.schema, "sql": sql}
     if args.resume:
+        if not output.exists():
+            parser.error("Resume requires the saved evidence file")
+        saved = json.loads(output.read_text())
+        if saved.get("statement_id") != args.resume or saved.get("_workshop_context") != context:
+            parser.error("Resume must match the saved statement and original query context")
         response = cli(args.profile, "api", "get", "/api/2.0/sql/statements/" + args.resume)
     else:
         response = cli(args.profile, "api", "post", "/api/2.0/sql/statements", body={
@@ -61,6 +71,7 @@ def main():
             "statement": sql, "wait_timeout": "10s", "on_wait_timeout": "CONTINUE",
             "disposition": "INLINE", "format": "JSON_ARRAY", "row_limit": 1000,
         })
+    response["_workshop_context"] = context
     output.write_text(json.dumps(response, indent=2) + "\n")
     statement_id = response["statement_id"]
     print("Statement:", statement_id, flush=True)
@@ -70,6 +81,7 @@ def main():
             raise TimeoutError("Still pending; resume statement " + statement_id)
         time.sleep(5)
         response = cli(args.profile, "api", "get", "/api/2.0/sql/statements/" + statement_id)
+        response["_workshop_context"] = context
         output.write_text(json.dumps(response, indent=2) + "\n")
     result = rows(response)
     print(json.dumps(result, indent=2))
