@@ -16,7 +16,7 @@ exercise's explicitly provisional definition of supply.
 |---|---|---|---|
 | What actual signed output was observed in each region at 00:05 and 00:10 AEST on 1 July 2026? | `gold_nem_initial_supply_5min` | `sql/01_observed_supply.sql` | MW, observed DUID count, attribution gaps; not total market supply |
 | What corrected effective prices and demand are available for those intervals? | `gold_nem_region_dispatch_5min` | `sql/02_effective_prices.sql` | Filter `is_effective_run`; retain run numbers; state NSW-only price coverage |
-| Which fuel observations include negative output or incomplete registration attribution? | `gold_nem_scada_generation_5min` | `sql/03_signed_fuel.sql` | Preserve signed MW and UNKNOWN; distinguish missing registration coverage from zero |
+| What signed fuel output and registration coverage were observed in those intervals? | `gold_nem_scada_generation_5min` | `sql/03_signed_fuel.sql` | Preserve signed MW and UNKNOWN; distinguish missing registration coverage from zero |
 | How much capacity was available or curtailed? | Unsupported | No SQL | Explain that these SCADA observations and registered capacities do not establish five-minute availability or curtailment |
 
 The third reference returns all fuel rows in the two intervals so reviewers can

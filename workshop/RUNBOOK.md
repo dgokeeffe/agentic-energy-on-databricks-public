@@ -109,6 +109,9 @@ when idle. Permanent teardown needs a separately reviewed deletion list; neither
 Delete only the approved workshop resources after retaining needed investigation
 records and evidence. Existing baseline resources are never teardown targets.
 
+Permanent retirement commands and inventory checks are in [TEARDOWN.md](TEARDOWN.md).
+They are separate from the rehearsed non-destructive reset.
+
 ## Review record
 
 Retain Git SHA, CLI version/profile name, isolated identifiers, validation output
