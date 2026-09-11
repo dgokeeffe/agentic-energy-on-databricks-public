@@ -9,6 +9,8 @@ states what has actually been tested.
 
 Use `lab/initial-supply` and follow `workshop/initial-supply/README.md`. The six
 exercise scenarios intentionally fail at the stub; baseline checks must pass.
+`make lab-start-check` verifies the failure count, scenario names and exact
+missing-implementation error, so unrelated failures cannot pass this gate.
 Participants implement the helper and submit their diff and test output for
 review. Their local SQLite tests are not a Spark execution claim.
 
@@ -41,13 +43,62 @@ continue the explicit publication, three Postgres CLI syncs, full-column parity,
 least-privilege grants and app deployment in `docs/operations.md`. Never infer
 Lakebase readiness from a pipeline pass.
 
+## Verify the data and prepare analyst questions
+
+Wait for the exact refresh job run to report SUCCESS. Never run bundle commands
+concurrently against the same target state, including `bundle summary` during a
+deploy. Get resource identifiers only after deployment finishes:
+
+```sh
+databricks bundle summary --target lab --profile <profile> -o json
+python3 scripts/workshop-query.py --profile <profile> --warehouse-id <warehouse-id> \
+  --catalog <catalog> --schema <isolated-schema> \
+  --sql-file workshop/initial-supply/verify.sql \
+  --output .databricks/workshop/verify-first.json
+```
+
+Every returned `violations` count must be zero. The verifier exits nonzero for a
+failed check or incomplete result. It reconciles all snapshot rows to the
+independent fuel product and checks keys, publication metadata and effective
+intervention. Run the three reference queries in `workshop/genie/README.md` and
+retain their results. They validate data preparation, not Genie response quality.
+
+After explicit publication and sync setup from `docs/operations.md`, verify all
+three full-column exports (requires the Databricks `psql` command and local psql):
+
+```sh
+python3 scripts/workshop-parity.py --profile <profile> --target lab \
+  --deployment-id <new-id> --catalog <catalog> --warehouse-id <warehouse-id> \
+  --output-dir .databricks/workshop/parity-first
+make app-deploy PROFILE=<profile> TARGET=lab
+python3 scripts/workshop-app-check.py --profile <profile> \
+  --app energy-lab-<new-id> --deployment-id <new-id> --exercise-writes \
+  --output .databricks/workshop/app-first.json
+```
+
+The app check creates one uniquely named temporary investigation, verifies its
+list/update/version-conflict behavior, and deletes only that record. It retains
+a cleanup ID if interrupted. This is authenticated API verification, not browser
+or workspace UI verification. The browser command `npm --prefix app run test:smoke`
+uses prepared API responses and requires a free local port 8000.
+
 ## Reset and teardown
 
 For learner code reset, preserve work with a commit or patch, then create a new
 checkout from the learner branch. Do not deploy the stub. To reset the data
 exercise without destroying archival history, redeploy the reviewed solution and
 run the normal refresh in the same isolated snapshot environment; re-run the
-verification. This re-evaluates the MV from corrected baseline products.
+verification with a fresh output filename:
+
+```sh
+make refresh PROFILE=<profile> TARGET=lab
+python3 scripts/workshop-query.py --profile <profile> --warehouse-id <warehouse-id> \
+  --catalog <catalog> --schema <isolated-schema> \
+  --sql-file workshop/initial-supply/verify.sql \
+  --output .databricks/workshop/verify-reset.json
+```
+
+This re-evaluates the MV from corrected baseline products.
 Do not full-refresh Bronze or truncate landing records.
 
 To retire an environment, first record its exact bundle resource inventory,

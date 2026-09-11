@@ -17,6 +17,15 @@ jobs:
           cache-dependency-path: app/package-lock.json
       - run: make setup
       - run: make check
+      - name: Verify workshop checkpoint
+        env:
+          CHECKPOINT_BRANCH: ${{ github.head_ref || github.ref_name }}
+        run: |
+          if [ "$CHECKPOINT_BRANCH" = "lab/initial-supply" ]; then
+            make lab-start-check
+          else
+            make lab-test
+          fi
       - run: npx playwright install --with-deps chromium
         working-directory: app
       - run: npm run test:smoke

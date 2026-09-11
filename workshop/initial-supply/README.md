@@ -31,6 +31,8 @@ cd energy-learner
 make setup
 make check
 make lab-test
+# Verify all six failures are the intended missing-implementation failures:
+make lab-start-check
 ```
 
 ## Work the exercise

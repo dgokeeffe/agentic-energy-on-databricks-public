@@ -37,3 +37,7 @@ provision: require-profile
 .PHONY: lab-test
 lab-test:
 	uv run --frozen pytest workshop/initial-supply/test_behaviour.py
+
+.PHONY: lab-start-check
+lab-start-check:
+	python3 scripts/check-learner-start.py
