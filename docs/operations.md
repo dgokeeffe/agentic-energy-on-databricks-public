@@ -82,7 +82,7 @@ PRs run Python tests and app typecheck, lint, unit tests, build, and browser smo
 
 No merge triggers fleet deployment. Before merging this refactor into `main`, review the diff and rehearse the full path in one isolated lab: validate both configured targets, run refresh and repeat publication, verify stable keys and additive history, confirm all three syncs and API/client contracts, and test native investigation ownership and version conflicts. Record job/update IDs, sync status, bounded parity results, app revision, and any limitations.
 
-Only after that review and rehearsal should a maintainer merge the accepted revision and create the agreed release tag. No baseline tag has been assigned by this repository change. Labs start from that accepted revision; solutions remain separate branches. Existing deployed resources are neither deleted nor adopted by this new bundle.
+Only after that review and rehearsal should a maintainer merge the accepted revision and create the release tag. The accepted starting point is `baseline-v1`. Labs start from that tag; solutions remain separate branches. Existing deployed resources are neither deleted nor adopted by this new bundle.
 
 ## Workspace authoring and deployment
 

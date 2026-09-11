@@ -43,6 +43,12 @@ make app-deploy PROFILE=<chosen-profile> TARGET=dev
 
 Both targets deploy with paused schedules. `lab` uses production deployment mode and requires an explicit runtime service principal. The warehouse serves publication jobs; the app reads only Lakebase. Existing deployments are separate from the new bundle state and are not deleted by this refactor.
 
-The accepted baseline is released only after isolated workspace rehearsal and review. Merging does not deploy lab environments automatically. See [operations](docs/operations.md) for the release gate.
+The accepted baseline is tagged `baseline-v1` after isolated workspace rehearsal and review. Start each lab from that tag, keeping solutions on separate branches:
+
+```sh
+git switch -c lab/<lab-name> baseline-v1
+```
+
+Merging baseline maintenance does not deploy lab environments automatically. See [operations](docs/operations.md) for verification results and the release gate.
 
 Original code is MIT licensed; adapted material has additional terms. Source attribution and data conditions are in [NOTICE.md](NOTICE.md) and [DATA_LICENSES.md](DATA_LICENSES.md).
